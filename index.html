@@ -582,6 +582,8 @@
   .sk-info-body p{margin:0 0 6px} .sk-info-body p:last-child{margin-bottom:0}
   .sk-info-body b{color:var(--gold)}
   .sk-info-body .sk-safety{color:var(--ember);font-style:italic}
+  .sk-info-body .sk-prep b{color:var(--jade)}
+  .sk-info-body .sk-recover b{color:var(--violet)}
   /* Today / dashboard */
   .td-grid{display:grid;grid-template-columns:1fr 1fr;gap:11px}
   @media(max-width:640px){.td-grid{grid-template-columns:1fr}}
@@ -840,6 +842,13 @@
   .wk-body ul{margin:0 0 4px;padding-left:20px}
   .wk-body li{margin-bottom:5px}
   .wk-target{color:var(--ink-faint);font-style:italic;font-size:13px;margin:2px 0 6px}
+  .week-tbl{width:100%;border-collapse:collapse;margin:8px 0 12px;font-size:13px}
+  .week-tbl th{text-align:left;color:var(--gold);font-size:11px;text-transform:uppercase;letter-spacing:.06em;padding:4px 8px;border-bottom:1px solid var(--line)}
+  .week-tbl td{padding:7px 8px;border-bottom:1px solid rgba(255,255,255,.05);color:var(--ink-dim);vertical-align:top}
+  .week-tbl td:first-child{color:var(--ink);font-weight:600;white-space:nowrap}
+  .i-hard{color:var(--blood);font-weight:600} .i-mod{color:var(--ember);font-weight:600} .i-easy{color:var(--jade);font-weight:600}
+  .gl-h{color:var(--gold);font-weight:700;font-size:13px;margin:14px 0 4px;text-transform:uppercase;letter-spacing:.04em}
+  ul.gl{margin:0 0 4px;padding-left:18px} ul.gl li{margin-bottom:8px;line-height:1.55} ul.gl b{color:var(--ink)}
   .foot a{color:var(--ink-dim);cursor:pointer;text-decoration:underline}
   @media (prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
 </style>
@@ -1231,11 +1240,30 @@
     <div id="recoveryAdvisory"></div>
     <div id="adaptiveTargets"></div>
     <div class="plan-intro">
-      Built to max your <b>AFT</b> (Deadlift · Hand-Release Push-up · Sprint-Drag-Carry · Plank · 2-Mile Run) and rebuild strength + endurance after your break. Runs <b>on top of ROTC PT</b>: on weeks you have PT, count it as one session and do the rest. Aim for <b>4 sessions/week</b>, never two hard days back-to-back.
+      Built to max your <b>AFT</b> (Deadlift · Hand-Release Push-up · Sprint-Drag-Carry · Plank · 2-Mile Run) and rebuild strength + endurance after your break. Runs <b>on top of ROTC PT</b>: on weeks you have PT, count it as one session and do the rest. Aim for <b>4 hard sessions/week</b> (never two hard days back-to-back) plus the <b>Mobility + Balance day</b> on an easy/rest day — it adds recovery, not fatigue.
     </div>
     <div class="phase" style="background:rgba(127,174,107,.08);border-color:#3c5230">🌱 <b style="color:var(--jade)">Lean &amp; bodyweight focus.</b> This plan builds relative strength and lean muscle — the kind that helps your run and push-up scores, not bulk that slows them. The trick: get stronger by making bodyweight moves <i>harder</i> (tougher leverage, slower tempo, more reps, less rest), not by adding mass. External load stays minimal and only where the AFT demands it (deadlift + carries).</div>
 
     <div class="phase">🎯 <b>Your priorities (from your AFT history):</b> Your <b>deadlift</b> is your lowest event (70 pts, stuck at 200 lbs) and the closest to the 60-pt floor — it's your standing risk, so load it up. Your <b>Sprint-Drag-Carry</b> has slipped four tests running (79→74→69→65) — attack it with the AFT circuit. Push-ups, plank, and run are solid; maintain them. Banking those two weak events is your path from ~385 to 450+.</div>
+
+    <details class="wk" open><summary><span class="wk-day">📅 Week</span> Your 7-day plan · something every day, no overload</summary>
+      <div class="wk-body">
+        <p class="wk-target">The rule that prevents overload: <b>never two hard days on the same muscles back-to-back.</b> Hard days alternate upper / lower / full so each muscle group gets ~48h to recover, and the in-between days are easy on purpose (mobility, an easy run, a walk). You move every day, but only 4 days are truly hard.</p>
+        <table class="week-tbl">
+          <tr><th>Day</th><th>Focus</th><th>Intensity</th></tr>
+          <tr><td><b>Mon</b></td><td>Session 1 — Lower + Push (legs, chest, deadlift)</td><td><span class="i-hard">Hard</span></td></tr>
+          <tr><td><b>Tue</b></td><td>Session 2 — Run (easy/tempo, not all-out)</td><td><span class="i-mod">Moderate</span></td></tr>
+          <tr><td><b>Wed</b></td><td>Session 3 — Upper + Core (pull, push, core)</td><td><span class="i-hard">Hard</span></td></tr>
+          <tr><td><b>Thu</b></td><td>Session 5 — Mobility + Balance</td><td><span class="i-easy">Easy / recovery</span></td></tr>
+          <tr><td><b>Fri</b></td><td>Session 4 — AFT Circuit (your weak events)</td><td><span class="i-hard">Hard</span></td></tr>
+          <tr><td><b>Sat</b></td><td>Session 2 — Run (intervals OR long easy run)</td><td><span class="i-hard">Hard</span></td></tr>
+          <tr><td><b>Sun</b></td><td>Active recovery — 20–40 min easy walk + Session 5 stretch block</td><td><span class="i-easy">Easy / recovery</span></td></tr>
+        </table>
+        <p class="wk-target"><b>Why this won't overload you:</b> Mon (lower/push) and Wed (upper/pull) hit different muscles, so neither is worked two days running. Tue's run is kept easy so it doesn't tax your legs before Wed. Thu and Sun are deliberately light — recovery is when you actually get stronger. If you have ROTC PT that day, count it as that day's session and don't double up.</p>
+        <p class="wk-target"><b>If you're sore, sick, or wrecked:</b> swap any hard day for the Thu mobility/balance day or a walk. Missing one day won't hurt; grinding through real fatigue will. The 7th day is rest by design — taking it is part of the plan, not a failure.</p>
+        <p class="wk-target"><b>How hard is "hard"?</b> Leave 1–2 reps in the tank on strength moves (you could do 1–2 more with good form). "Easy" run = you can hold a conversation. That margin is what keeps this sustainable for months instead of burning out in three weeks.</p>
+      </div>
+    </details>
 
     <details class="wk" open><summary><span class="wk-day">Session 1</span> Strength A · Lower + Push</summary>
       <div class="wk-body">
@@ -1304,7 +1332,100 @@
       </div>
     </details>
 
-    <div class="phase">📈 <b>Progression (the bodyweight way):</b> when a movement gets easy, don't add weight — make it <i>harder</i>. More reps, slower tempo, less rest, or a tougher variation (e.g. push-up → decline → pike → pseudo-planche). That's how you build lean strength without bulk. If a session feels easy, level it up. If you're wrecked, take the rest day — recovery is training.</div>
+    <details class="wk"><summary><span class="wk-day">Session 5</span> Mobility + Balance · Recovery day</summary>
+      <div class="wk-body">
+        <p class="wk-target">A real, low-intensity session — not a throwaway. Flexibility and balance are trainable skills, and this day pays off in every other lift, your run economy, and injury resistance. Slot it on a rest/easy day; it won't add fatigue.</p>
+
+        <b>🤸 Flexibility block (~15 min)</b>
+        <p>Warm up first — <b>never static-stretch cold muscles</b>. Then hold each stretch <b>30 seconds, 2 rounds per side</b>, to mild tension and never sharp pain. Breathe out as you ease deeper.</p>
+        <ul>
+          <li>5-min easy cardio (jog/jumping jacks/bike) to warm up</li>
+          <li>World's-greatest-stretch — 5 slow reps/side (full-body opener)</li>
+          <li>Hamstrings — 30s ×2/side</li>
+          <li>Hip flexors (kneeling lunge) — 30s ×2/side <span class="wk-target">(key for posture & deadlift)</span></li>
+          <li>Figure-4 glutes — 30s ×2/side</li>
+          <li>Quads — 30s ×2/side</li>
+          <li>Calves, straight + bent knee — 30s/side <span class="wk-target">(run & ankle health)</span></li>
+          <li>Doorway chest/shoulder — 30s ×2 <span class="wk-target">(undoes push-up & desk hunch)</span></li>
+          <li>Thoracic rotations + cat-cow — 8–10 slow reps</li>
+        </ul>
+        <p class="wk-target">Consistency beats intensity: 3–4× a week moves your flexibility far more than one hard session. Progress = a little more range, or holding the same depth more comfortably.</p>
+
+        <b>⚖️ Balance block (~10 min)</b>
+        <p>Balance improves fast because it's mostly neural. Train it <b>progressively</b> — only advance a level when you can hold the current one steadily. Do it barefoot, near a wall or sturdy chair so you can catch yourself. Work each leg; your weaker side will lag — give it an extra set.</p>
+        <ul>
+          <li><b>Level 1</b> — Single-leg stand, <b>eyes open</b>: build to 45s/leg, steady.</li>
+          <li><b>Level 2</b> — Single-leg stand, <b>eyes closed</b>: 15→30s/leg (removing vision is a big jump — expect to wobble).</li>
+          <li><b>Level 3</b> — Single-leg stand on a <b>cushion/pillow</b> (unstable surface): 20–30s/leg.</li>
+          <li><b>Level 4</b> — <b>Single-leg RDL reach</b>: hinge forward on one leg, reach hands toward the floor, stand back tall — 8–10/leg. Add a light weight once smooth.</li>
+          <li><b>Level 5</b> — <b>Y-balance reach</b>: stand on one leg, reach the free foot as far as you can to the front, side, and back without touching down — 5 reaches/direction/leg.</li>
+          <li><b>Carryover</b> — Tandem (heel-to-toe) walk 10–20 steps; try it eyes-closed once solid.</li>
+        </ul>
+        <p class="wk-target">Why it matters for you: better single-leg stability transfers directly to lunges, the Sprint-Drag-Carry, rucking on uneven ground, and land nav — and it's a documented way to cut ankle/knee injury risk.</p>
+        <p class="wk-target">⚠️ Always within reach of something to grab. If you have an injury or dizziness, keep eyes open and skip the unstable-surface levels.</p>
+      </div>
+    </details>
+
+    <details class="wk"><summary><span class="wk-day">📖 Glossary</span> How to perform every exercise (by session)</summary>
+      <div class="wk-body">
+        <p class="wk-target">Don't know a name? Find the session it's in below and read the plain-language how-to. "Reps" = repetitions (one full movement). "Each side/leg" = do the full count on one side, then the other. Warm up before, stretch after (see each strength skill's "Why & how" for movement-specific stretches).</p>
+
+        <p class="gl-h">Session 1 — Lower + Push</p>
+        <ul class="gl">
+          <li><b>Bulgarian split squat:</b> Stand a couple feet in front of a bench/chair, rest the top of one foot behind you on it. Bend your front leg to lower straight down until your front thigh is about parallel to the floor, then push back up through the front heel. Keep your chest tall. Finish all reps, switch legs.</li>
+          <li><b>Single-leg RDL (Romanian deadlift):</b> Stand on one leg, slight bend in that knee. Hinge at the hip — push your butt back and let your torso tip forward while the free leg lifts straight behind you, like a seesaw. Lower until you feel your hamstring, then squeeze back up to standing. Keep your back flat. Add a light weight in the opposite hand once steady.</li>
+          <li><b>Hand-release push-ups:</b> A normal push-up, but at the bottom you lower all the way to the floor and lift your hands off the ground for a moment, then place them and press back up. This is the AFT version — it stops you bouncing out of the bottom.</li>
+          <li><b>Pike push-ups:</b> Start in a push-up position, then walk your feet in and raise your hips high so your body makes an upside-down V. Bend your elbows to lower the top of your head toward the floor between your hands, then press back up. It trains the overhead/shoulder press with bodyweight.</li>
+          <li><b>Pistol squat progression:</b> Working toward a one-legged squat. Start by sitting back onto a box/chair on one leg and standing up from it; lower the box height as you get stronger. Hold something for balance at first. The goal is eventually a full squat on one leg, other leg held out front.</li>
+          <li><b>Hollow-body hold:</b> Lie on your back, press your lower back into the floor, and lift your shoulders and legs a few inches off the ground so your body makes a shallow banana shape. Hold and breathe. If it's too hard, bend the knees or keep arms by your sides.</li>
+          <li><b>Trap-bar / barbell deadlift:</b> Lifting a loaded bar from the floor. Stand with the bar over your mid-foot, hinge down with a flat back and grab it, then stand tall by driving your feet into the floor and pushing your hips forward. Keep the bar close to your body; never round your lower back. A trap-bar (hexagon you stand inside) is the easier, back-friendly version.</li>
+        </ul>
+
+        <p class="gl-h">Session 2 — Run</p>
+        <ul class="gl">
+          <li><b>Intervals (400m reps):</b> Short, fast efforts with rest between. E.g. run 400m (one lap of a track) hard, then walk/jog ~90 seconds, and repeat 4–6 times. Builds your top-end speed.</li>
+          <li><b>Tempo run:</b> A sustained "comfortably hard" pace — faster than easy jogging but not a sprint, held for 15–25 min. You should be able to say only a few words at a time. Builds your ability to hold a fast pace.</li>
+          <li><b>Long easy run:</b> A slow, conversational-pace run, longer than usual (e.g. 30–50 min). Builds your aerobic base — the engine behind the 2-mile.</li>
+          <li><b>Timed 2-mile:</b> Run 2 miles as fast as you can sustain and record the time — this is the AFT run, used as a test, not every week.</li>
+        </ul>
+
+        <p class="gl-h">Session 3 — Upper + Core</p>
+        <ul class="gl">
+          <li><b>Pull-ups:</b> Hang from a bar with palms facing away, arms straight, and pull until your chin clears the bar, then lower all the way. If you can't do one yet, use a band looped on the bar or jump up and lower slowly.</li>
+          <li><b>Inverted rows:</b> The "easier pull-up." Set a bar about waist height (or use a sturdy table edge), lie under it, grab it, and pull your chest up to the bar keeping your body in a straight line. The more horizontal you are, the harder it is.</li>
+          <li><b>Decline push-ups:</b> Push-ups with your feet up on a bench/step so you're angled head-down. Shifts more load to the upper chest and shoulders.</li>
+          <li><b>Diamond push-ups:</b> Push-ups with your hands close together under your chest, thumbs and index fingers touching to form a diamond. Hits the triceps hard.</li>
+          <li><b>Plank:</b> Forearms on the floor under your shoulders, body in a straight line from head to heels, abs and glutes tight. Hold without letting your hips sag or pike up.</li>
+          <li><b>Side plank:</b> On one forearm, body turned sideways in a straight line, hips lifted off the floor and stacked. Hold, then switch sides. Trains the obliques (side core).</li>
+          <li><b>Superman / back extension:</b> Lie face-down, arms extended ahead. Lift your arms, chest, and legs off the floor at the same time (like flying), hold a moment, lower. Strengthens the lower back.</li>
+          <li><b>Ruck / farmer's carry:</b> <b>Ruck</b> = walk while wearing a weighted backpack. <b>Farmer's carry</b> = hold a heavy weight in each hand and walk a set distance, tall and braced. Both build grip, core, and carrying strength.</li>
+        </ul>
+
+        <p class="gl-h">Session 4 — AFT Circuit</p>
+        <ul class="gl">
+          <li><b>Sprint-Drag-Carry sim:</b> A practice of the AFT event. Sprint 50m, come back dragging a weight (a loaded sled, or bear-crawl as a substitute) 50m, then carry weight (two heavy objects, one per hand) 50m, then sprint 50m. Fast and lung-burning.</li>
+          <li><b>Squat jumps:</b> Drop into a squat, then explode straight up off the floor, land softly with bent knees, and immediately go into the next one. Builds explosive leg power.</li>
+          <li><b>200m run:</b> A half-lap of a track at a hard pace — a short conditioning burst within the circuit.</li>
+        </ul>
+
+        <p class="gl-h">Session 5 — Mobility + Balance</p>
+        <ul class="gl">
+          <li><b>World's-greatest-stretch:</b> Step into a deep forward lunge. Place both hands inside your front foot, then rotate your torso and reach the inside arm up toward the ceiling, following it with your eyes. Return, switch legs. Opens hips, back, and shoulders at once.</li>
+          <li><b>Hamstring stretch:</b> Standing, put one heel out in front with the leg straight, toes up; hinge forward at the hips with a flat back until you feel the back of the thigh. Hold 30s, switch.</li>
+          <li><b>Hip-flexor stretch (kneeling lunge):</b> Kneel on one knee with the other foot flat in front (like proposing). Tuck your hips under and gently push them forward until you feel a stretch in the front of the kneeling-leg hip. Hold 30s, switch.</li>
+          <li><b>Figure-4 glute stretch:</b> Lie on your back, cross one ankle over the opposite knee (making a "4"), then pull that opposite thigh toward your chest until you feel the glute of the crossed leg stretch. Hold 30s, switch.</li>
+          <li><b>Quad stretch:</b> Standing (hold a wall), grab one ankle behind you and pull your heel toward your butt, knees together, hips forward. Feel the front of the thigh. Hold 30s, switch.</li>
+          <li><b>Calf stretch:</b> Hands on a wall, one foot back with the leg straight and heel pressed down — feel the upper calf. Then slightly bend that back knee to shift the stretch lower toward the Achilles. Hold each, switch.</li>
+          <li><b>Doorway chest/shoulder stretch:</b> Put your forearm on a door frame, elbow about shoulder height, and step through gently until you feel a stretch across the chest/front shoulder. Hold 30s, switch arms.</li>
+          <li><b>Thoracic rotations + cat-cow:</b> <b>Cat-cow:</b> on hands and knees, slowly arch your back up (cat) then let it sag and lift your head (cow), flowing between them. <b>Thoracic rotation:</b> on hands and knees, hand behind your head, rotate that elbow down toward the opposite arm then open it up to the ceiling. Loosens the mid-back.</li>
+          <li><b>Single-leg stand:</b> Stand on one leg near a wall. Progress: eyes open → eyes closed → standing on a pillow/cushion. Hold for time, switch legs.</li>
+          <li><b>Single-leg RDL reach (balance version):</b> The seesaw hinge from Session 1, done slowly for balance — hinge forward on one leg reaching toward the floor, then stand tall. Control beats speed here.</li>
+          <li><b>Tandem (heel-to-toe) walk:</b> Walk a straight line placing the heel of each step directly against the toe of the other foot, like a tightrope. Arms out for balance. Try it eyes-closed once it's easy.</li>
+          <li><b>Y-balance reach:</b> Stand on one leg. With the free foot, reach as far as you can to the front, then the side, then behind you (tracing a Y on the floor) without touching down or losing balance. Return to center between reaches.</li>
+        </ul>
+        <p class="wk-target">⚠️ These are descriptions to get you started — for the loaded lifts (deadlift, squat, pistol) have a coach or cadre check your form before going heavy. Text can't see your back rounding.</p>
+      </div>
+    </details>
 
     <div class="plan-intro" style="margin-top:14px">
       <b>How to use this with the app:</b> Each morning, your "Today's training session" daily points here — just do whichever session is next in the rotation. Check it off to earn XP, build your streak, and chip away at the AFT objective. The streak is your accountability when there's no one running PT next to you.
@@ -1637,6 +1758,25 @@ const SESSIONS = {
     {n:"Plank", t:"time"},
     {n:"200m run", t:"time"},
   ]},
+  s5:{name:"Session 5 · Mobility + Balance", ex:[
+    // --- Flexibility block (held static stretches, after a light warm-up) ---
+    {n:"5-min easy cardio warm-up (don't stretch cold)", t:"time"},
+    {n:"World's-greatest-stretch (each side)", t:"reps"},
+    {n:"Standing hamstring stretch (hold 30s ×2/side)", t:"time"},
+    {n:"Kneeling hip-flexor stretch (hold 30s ×2/side)", t:"time"},
+    {n:"Figure-4 glute stretch (hold 30s ×2/side)", t:"time"},
+    {n:"Quad stretch (hold 30s ×2/side)", t:"time"},
+    {n:"Calf stretch, straight + bent knee (hold 30s/side)", t:"time"},
+    {n:"Doorway chest/shoulder stretch (hold 30s ×2)", t:"time"},
+    {n:"Thoracic rotations + cat-cow (slow reps)", t:"reps"},
+    // --- Balance block (progressive, near a wall to catch yourself) ---
+    {n:"Single-leg stand, eyes OPEN (hold 30–45s/leg)", t:"time"},
+    {n:"Single-leg stand, eyes CLOSED (hold 15–30s/leg)", t:"time"},
+    {n:"Single-leg stand on cushion/pillow (hold 20–30s/leg)", t:"time"},
+    {n:"Single-leg Romanian deadlift reach (balance, reps/leg)", t:"reps", w:true},
+    {n:"Tandem (heel-to-toe) walk, 10–20 steps", t:"reps"},
+    {n:"Y-balance reach: stand on one leg, reach foot front/side/back", t:"reps"},
+  ]},
   other:{name:"Other / Custom", ex:[
     {n:"Custom exercise", t:"reps", w:true, custom:true},
   ]},
@@ -1647,6 +1787,7 @@ const SESSION_AREAS = {
   s2:["cardio","legs"],         // Run
   s3:["pull","push","core"],    // Upper + Core
   s4:["legs","push","core","cardio"], // AFT circuit (full)
+  s5:["mobility","balance"],    // Mobility + Balance (recovery-oriented, low fatigue)
   other:[],
 };
 // The areas the cadet can tag a PT session with.
@@ -4845,6 +4986,8 @@ const SEED_SKILLS=[
   {name:"Push-ups", parent:"Strength", cat:"physical", fadeDays:30, auto:"ex:pushups",
     why:"Upper-body pushing endurance — an AFT event and the base for most pressing strength.",
     howTo:"Hands under shoulders, body a straight line head to heels. Lower until your chest touches; for hand-release, lift your hands off the floor at the bottom, then press back up. Keep your hips from sagging or piking.",
+    prep:"Dynamic (no holding): arm circles forward & back, shoulder rolls, 10 scapular push-ups (just shrug shoulder blades together/apart in plank), wrist circles and gentle wrist rocks, a set of 5–8 slow easy push-ups to groove the movement.",
+    recover:"Held 20–30s each: doorway chest/pec stretch (forearm on frame, step through), triceps overhead stretch each arm, child's pose for the shoulders, kneeling wrist flexor stretch (palms down, lean back gently).",
     safety:"This describes the movement — have a coach or cadre watch your form, since text can't see your hips dropping or elbows flaring.",
     levels:[
     "Do 10 hand-release push-ups unbroken",
@@ -4856,6 +4999,8 @@ const SEED_SKILLS=[
   {name:"Deadlift", parent:"Strength", cat:"physical", fadeDays:45, auto:"ex:deadlift",
     why:"Total-body strength — it carries directly to lifting anything heavy safely, and it's an AFT event (3-rep max).",
     howTo:"Bar over mid-foot. Hinge at the hips with a flat back and grip the bar. Drive the floor away and stand tall, keeping the bar close to your legs. Never round your lower back. Lower under control.",
+    prep:"Dynamic: 5 min easy cardio to raise temperature, then leg swings (front-back & side-side), bodyweight hip hinges, glute bridges, cat-cow for the spine, walking lunges, and 2–3 warm-up sets ramping up to your working weight.",
+    recover:"Held 20–30s each: standing or seated hamstring stretch, kneeling hip-flexor lunge stretch each side, figure-4 glute stretch, child's pose and a gentle supine knees-to-chest for the lower back.",
     safety:"Heavy lifting with a rounded back injures the spine. Learn this with a coach watching before going heavy — the app tracks your numbers, it can't correct your form.",
     levels:[
     "Deadlift with correct form (bodyweight)",
@@ -4867,6 +5012,8 @@ const SEED_SKILLS=[
   {name:"Pull-ups", parent:"Strength", cat:"physical", fadeDays:30, auto:"ex:pullups",
     why:"Pulling strength — hard to fake, and a strong marker of relative strength (strength vs. bodyweight).",
     howTo:"Hang from a bar with a full grip, arms straight. Pull until your chin clears the bar, keeping the movement controlled (no big kipping swing for strict reps). Lower all the way down each rep.",
+    prep:"Dynamic: arm circles, band pull-aparts, scapular pulls (dead hang and just shrug your shoulder blades down, no arm bend), 10 slow ring/bar rows or a few easy assisted reps to prime the lats and grip.",
+    recover:"Held 20–30s each: a relaxed dead hang to decompress, lat stretch (reach overhead and lean to each side), doorway/biceps stretch each arm, forearm & wrist flexor stretch, cross-body shoulder stretch.",
     safety:"Build up gradually — jumping into high volume strains elbows and shoulders. A coach can check your shoulder position.",
     levels:[
     "Do 1 strict dead-hang pull-up",
@@ -4878,6 +5025,8 @@ const SEED_SKILLS=[
   {name:"Squat", parent:"Strength", cat:"physical", fadeDays:45, auto:"ex:squat",
     why:"Leg strength and the base for almost all athletic movement, rucking, and load carriage.",
     howTo:"Feet about shoulder-width. Sit your hips back and down like into a chair, knees tracking over your toes, chest up and back flat. Go to at least parallel, then stand tall. Keep your heels down.",
+    prep:"Dynamic: 5 min easy cardio, leg swings, walking lunges with a twist, bodyweight squats, ankle rocks (drive knee over toes), hip-opener stretches like the world's-greatest-stretch, then ramping warm-up sets.",
+    recover:"Held 20–30s each: standing quad stretch each leg, hamstring stretch, deep kneeling hip-flexor stretch, calf stretch against a wall, and a relaxed deep-squat hold (heels down) to open the hips and ankles.",
     safety:"Knees caving in or a rounding back under load causes injury. Learn with a coach before loading heavy.",
     levels:[
     "Bodyweight squat with full depth & form",
@@ -4890,6 +5039,8 @@ const SEED_SKILLS=[
   {name:"Run (2-mile)", parent:"Endurance", cat:"physical", fadeDays:30, auto:"ex:run",
     why:"Aerobic endurance — the AFT 2-mile run, and the engine behind rucking and recovery.",
     howTo:"Build a base with easy-paced runs first, then add one faster session a week (intervals). Don't increase weekly mileage by more than ~10% at a time. Land midfoot under your hips, relaxed and tall.",
+    prep:"Dynamic only before running — never static-stretch cold: 3–5 min brisk walk or easy jog, then leg swings, high knees, butt kicks, walking lunges, A-skips, and a few 20–30m gradual strides to bring the pace up.",
+    recover:"After, walk a few minutes to bring the heart rate down, then held 20–30s each: calf stretch (both straight-leg and bent-knee), standing quad stretch, hamstring stretch, hip-flexor lunge, and figure-4 glute/IT-band stretch.",
     safety:"Ramp mileage slowly — shin splints and knee pain come from doing too much too soon.",
     levels:[
     "Run 2 miles without stopping",
@@ -4915,6 +5066,8 @@ const SEED_SKILLS=[
   {name:"Plank", parent:"Core", cat:"physical", fadeDays:30, auto:"ex:plank",
     why:"Trunk and core stability — it protects your spine under load and is an AFT event.",
     howTo:"Forearms on the ground under your shoulders, body in a straight line from head to heels. Squeeze your glutes and brace your abs. Don't let your hips sag down or pike up. Breathe normally and hold.",
+    prep:"Dynamic: cat-cow, bird-dogs, dead bugs, a few glute bridges, and 2–3 short 10–15s plank holds to wake up the brace before your working hold.",
+    recover:"Held 20–30s each: child's pose, a gentle cobra/backbend to extend the spine the other way, kneeling hip-flexor stretch, and a standing side bend for the obliques.",
     safety:"If your lower back sags you'll feel it there instead of your abs — drop to your knees and rebuild rather than holding a bad position.",
     levels:[
     "Hold a plank 1:00",
@@ -4952,13 +5105,15 @@ const SEED_SKILLS=[
   // -- Balance (physiological-style but lives under physical for training) --
   {name:"Balance training", parent:"Core", cat:"physical", fadeDays:30,
     why:"Balance (proprioception — your sense of where your body is) underlies agility, injury prevention for ankles and knees, and carrying loads over rough ground. It trains fast and fades fast.",
-    howTo:"Single-leg stand, building up: (1) 30s eyes open, (2) eyes closed, (3) on an unstable surface like a pillow, (4) with a load or while reaching. Do it barefoot, near a wall to catch yourself.",
-    safety:"Practice near something you can grab. The eyes-closed and loaded versions are genuinely harder — progress only when the prior step is solid.",
+    howTo:"Progressive single-leg work, barefoot, near a wall: (1) eyes open to 45s, (2) eyes closed 15–30s, (3) on an unstable surface (pillow), (4) single-leg RDL reach, (5) Y-balance reaches (free foot front/side/back). Advance a level only when the current one is steady; train both legs, give the weaker side an extra set. Full routine is on the FM 'Mobility + Balance' day.",
+    whatYouDo:"3–4 short sessions a week beat one long one — balance is mostly neural and responds fast. Test yourself with the timed single-leg holds and move up the ladder as you get steady.",
+    safety:"Practice near something you can grab. The eyes-closed and unstable-surface versions are genuinely harder — progress only when the prior step is solid. Skip the unstable levels if injured or dizzy.",
     levels:[
-    "Single-leg stand 30 seconds each leg",
-    "Eyes-closed single-leg 20 seconds",
-    "Single-leg on an unstable surface",
-    "Single-leg, eyes closed, with a load"]},
+    "Single-leg stand 45 seconds each leg (eyes open)",
+    "Eyes-closed single-leg 20–30 seconds each leg",
+    "Single-leg stand on an unstable surface (pillow) 20–30s",
+    "Single-leg RDL reach, 8–10 controlled reps each leg",
+    "Y-balance reaches (front/side/back) steady on each leg"]},
 
   // ================= CLOSE-QUARTERS COMBAT (concept-tracking only) =================
   {name:"Close-Quarters Combat", cat:"physical", group:true, fadeDays:30},
@@ -5200,7 +5355,7 @@ function seedSkillsIfEmpty(){
   S.lifeSkills=SEED_SKILLS.map(s=>({
     id:id(), name:s.name, cat:s.cat, parent:s.parent||null, group:!!s.group,
     fadeDays:s.fadeDays, auto:s.auto||null,
-    why:s.why||null, whatYouDo:s.whatYouDo||null, howTo:s.howTo||null, safety:s.safety||null,
+    why:s.why||null, whatYouDo:s.whatYouDo||null, howTo:s.howTo||null, prep:s.prep||null, recover:s.recover||null, safety:s.safety||null,
     currentLevel:0, lastQuestTs:Date.now(), peakLevel:0,
     levels:(s.levels||[]).map((ability,i)=>({n:i+1,ability})), history:[], seeded:true
   }));
@@ -5222,12 +5377,12 @@ function mergeNewSeedSkills(){
       S.lifeSkills.push({
         id:id(), name:s.name, cat:s.cat, parent:s.parent||null, group:!!s.group,
         fadeDays:s.fadeDays, auto:s.auto||null,
-        why:s.why||null, whatYouDo:s.whatYouDo||null, howTo:s.howTo||null, safety:s.safety||null,
+        why:s.why||null, whatYouDo:s.whatYouDo||null, howTo:s.howTo||null, prep:s.prep||null, recover:s.recover||null, safety:s.safety||null,
         currentLevel:0, lastQuestTs:Date.now(), peakLevel:0,
         levels:(s.levels||[]).map((ability,i)=>({n:i+1,ability})), history:[], seeded:true
       });
       changed=true;
-    } else if(s.why||s.whatYouDo||s.howTo||s.safety){
+    } else if(s.why||s.whatYouDo||s.howTo||s.safety||s.prep||s.recover){
       // backfill transparency copy onto an existing skill that lacks it
       const ex=S.lifeSkills.find(x=>x.name===s.name);
       if(ex){
@@ -5235,6 +5390,8 @@ function mergeNewSeedSkills(){
         if((ex.whatYouDo==null) && s.whatYouDo){ ex.whatYouDo=s.whatYouDo; changed=true; }
         if((ex.howTo==null) && s.howTo){ ex.howTo=s.howTo; changed=true; }
         if((ex.safety==null) && s.safety){ ex.safety=s.safety; changed=true; }
+        if((ex.prep==null) && s.prep){ ex.prep=s.prep; changed=true; }
+        if((ex.recover==null) && s.recover){ ex.recover=s.recover; changed=true; }
       }
     }
   });
@@ -5512,7 +5669,7 @@ function renderSkillsTab(){
       <div class="sk-ladder">${ladder}</div>
       ${fadeNote}
       ${reclaimNote}
-      ${(sk.why||sk.whatYouDo||sk.howTo||sk.safety)?`<details class="sk-info"><summary>ℹ️ Why &amp; how</summary><div class="sk-info-body">${sk.why?`<p><b>Why:</b> ${esc(sk.why)}</p>`:''}${sk.whatYouDo?`<p><b>What you do:</b> ${esc(sk.whatYouDo)}</p>`:''}${sk.howTo?`<p><b>How:</b> ${esc(sk.howTo)}</p>`:''}${sk.safety?`<p class="sk-safety">⚠️ ${esc(sk.safety)}</p>`:''}</div></details>`:''}
+      ${(sk.why||sk.whatYouDo||sk.howTo||sk.prep||sk.recover||sk.safety)?`<details class="sk-info"><summary>ℹ️ Why &amp; how</summary><div class="sk-info-body">${sk.why?`<p><b>Why:</b> ${esc(sk.why)}</p>`:''}${sk.whatYouDo?`<p><b>What you do:</b> ${esc(sk.whatYouDo)}</p>`:''}${sk.howTo?`<p><b>How:</b> ${esc(sk.howTo)}</p>`:''}${sk.prep?`<p class="sk-prep"><b>🤸 Warm-up before:</b> ${esc(sk.prep)}</p>`:''}${sk.recover?`<p class="sk-recover"><b>🧘 Stretch after:</b> ${esc(sk.recover)}</p>`:''}${sk.safety?`<p class="sk-safety">⚠️ ${esc(sk.safety)}</p>`:''}</div></details>`:''}
       <button class="sk-work" data-skwork="${sk.id}">▶ Work on this</button>
       <div class="sk-work-panel" id="skwork-${sk.id}"></div>
     </div>`;

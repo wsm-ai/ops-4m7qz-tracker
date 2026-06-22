@@ -33,7 +33,9 @@ A set of tabs, each a tool:
 - **Log** — a workout logger (reps/weight, time, distance) with per-exercise progress
   and stall detection, plus a **monthly baseline** test that re-anchors targets.
 - **FM** — an adaptive training plan whose next-session targets are auto-calculated
-  from the log and the monthly baseline.
+  from the log and the monthly baseline. Logging **cadre PT** (tag the muscle groups
+  it worked + intensity) makes the plan recovery-aware: it eases off recently-worked
+  areas for the rest of the week so you don't overload them. PT doesn't affect streak.
 - **Quiz** — 16 banks (~124 questions) on Army knowledge, sourced from real ROTC
   advance sheets and TCs; each question cites its source. *Study aid — verify against
   the originals and cadre before graded use.*

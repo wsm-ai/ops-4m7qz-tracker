@@ -1425,6 +1425,17 @@
       <button class="hb-starter-btn" data-export="volunteer">Volunteer hours</button>
       <button class="hb-starter-btn" data-export="counseling">Counseling log</button>
     </div>
+
+    <div class="sec-h" style="margin-top:20px"><h2>Export / Import a Section</h2><span class="hint">just one part</span></div>
+    <div class="plan-intro">Export a single section as its own JSON file — e.g. just The Wall — to share or move to another device without your whole dataset. Importing a section file <b>replaces only that section</b>; everything else is left alone.</div>
+    <div class="adder">
+      <select id="sectionPick" style="width:100%;background:#0e0f09;border:1px solid var(--line);color:var(--ink);padding:10px;border-radius:8px;font-family:inherit;font-size:14px"></select>
+      <div class="row" style="gap:8px;margin-top:9px">
+        <button class="btn-add" id="sectionExport" style="flex:1;margin:0">Export section</button>
+        <button class="btn-add" id="sectionImportBtn" style="flex:1;margin:0;background:transparent;border:1px solid var(--line);color:var(--ink-dim)">Import section</button>
+      </div>
+      <input type="file" id="sectionImportFile" accept="application/json" style="display:none">
+    </div>
   </section>
 
   <section class="view" id="view-weight">
@@ -1839,6 +1850,7 @@ function render(){
   if(typeof renderHistory==="function") renderHistory();
   if(typeof renderCounsel==="function") renderCounsel();
   if(typeof renderChecklists==="function") renderChecklists();
+  if(typeof renderSectionPicker==="function") renderSectionPicker();
   if(typeof renderPT==="function") renderPT();
   if(typeof renderSkillBalance==="function") renderSkillBalance();
   if(typeof renderRecoveryAdvisory==="function") renderRecoveryAdvisory();
@@ -1924,7 +1936,7 @@ function renderShop(){
       <button class="del" data-dr="${r.id}">✕</button>
     </li>`).join("");
 }
-function esc(s){return s.replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]))}
+function esc(s){return String(s==null?"":s).replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]))}
 
 /* ---------------- Events ---------------- */
 document.querySelectorAll("nav.tabs button[data-tab]").forEach(b=>b.onclick=()=>{
@@ -3042,7 +3054,7 @@ function renderAwards(){
     });
     const card=a=>{
       const meta=[a.year?String(a.year):null, a.org?("from "+esc(a.org)):null].filter(Boolean).join(" · ");
-      return `<div class="aw-card"><button class="aw-del" data-daw="${a.id}">✕</button><button class="aw-edit" data-awedit="${a.id}">✎</button><div class="aw-ic">${AW_IC[a.kind]||"🏆"}</div><div class="aw-title">${esc(a.title)}</div>${meta?`<div class="aw-meta">${meta}</div>`:""}${a.note?`<div class="aw-note">${esc(a.note)}</div>`:""}<div class="aw-date">added ${esc(a.date)}</div></div>`;
+      return `<div class="aw-card"><button class="aw-del" data-daw="${a.id}">✕</button><button class="aw-edit" data-awedit="${a.id}">✎</button><div class="aw-ic">${AW_IC[a.kind]||"🏆"}</div><div class="aw-title">${esc(a.title)}</div>${meta?`<div class="aw-meta">${meta}</div>`:""}${a.note?`<div class="aw-note">${esc(a.note)}</div>`:""}<div class="aw-date">added ${esc(a.date||"")}</div></div>`;
     };
     el.innerHTML=years.map(yg=>`<div class="wall-year-hd">${yg.yr}</div>`+
       yg.orgs.map(og=>(og.org?`<div class="wall-org-hd">${esc(og.org)}</div>`:"")+`<div class="wall-grid">${og.items.map(card).join("")}</div>`).join("")
@@ -4081,6 +4093,49 @@ function exportData(kind){
   toast("📄 CSV exported");
 }
 
+// ===== Section-specific JSON export / import =====
+// Each section maps to one or more top-level state keys. Importing replaces only those keys.
+const SECTIONS={
+  wall:        {label:"The Wall (awards, memberships, events, volunteer)", keys:["awards","memberships","events","volunteer"]},
+  skills:      {label:"Skills (full skill tree + progress)", keys:["lifeSkills"]},
+  aft:         {label:"AFT history", keys:["aft"]},
+  profile:     {label:"Profile, lifts & vitals", keys:["profile","lifts","vitals","donations","weightLog","healthImport"]},
+  habits:      {label:"Habits", keys:["habits"]},
+  tests:       {label:"Cognitive test results", keys:["tests"]},
+  memory:      {label:"Memory (SRS decks + palaces)", keys:["srsDecks","palaces"]},
+  study:       {label:"Study plans", keys:["studyPlans"]},
+  counseling:  {label:"Counseling log", keys:["counseling"]},
+  checklists:  {label:"Packing / gear checklists", keys:["checklists"]},
+  quizzes:     {label:"Quiz progress", keys:["quizzes"]},
+  missions:    {label:"Missions, daily orders & objectives", keys:["quests","dailies","bosses"]},
+  workouts:    {label:"Workout & PT logs", keys:["workouts","ptLog"]},
+};
+function exportSection(secId){
+  const sec=SECTIONS[secId]; if(!sec) return;
+  const payload={ _opsSection:secId, _exported:new Date().toISOString(), data:{} };
+  sec.keys.forEach(k=>{ payload.data[k]=S[k]!==undefined?S[k]:null; });
+  const blob=new Blob([JSON.stringify(payload,null,2)],{type:"application/json"});
+  const a=document.createElement("a"); a.href=URL.createObjectURL(blob);
+  a.download="operations-"+secId+"-"+new Date().toISOString().slice(0,10)+".json"; a.click(); URL.revokeObjectURL(a.href);
+  toast("📦 Exported: "+sec.label.split(" (")[0]);
+}
+function importSection(text){
+  let payload; try{ payload=JSON.parse(text); }catch(_){ toast("Couldn't read that file"); return; }
+  if(!payload || !payload._opsSection || !payload.data){ toast("That's not a section file"); return; }
+  const sec=SECTIONS[payload._opsSection];
+  if(!sec){ toast("Unknown section in file"); return; }
+  if(!confirm(`Import "${sec.label.split(" (")[0]}"? This replaces your current ${payload._opsSection} data and leaves everything else untouched.`)) return;
+  sec.keys.forEach(k=>{ if(payload.data[k]!==undefined && payload.data[k]!==null) S[k]=payload.data[k]; });
+  // re-run migrations so imported skills get peak/transparency backfill etc.
+  if(payload._opsSection==="skills" && typeof mergeNewSeedSkills==="function"){ S.lifeSkills.forEach(s=>{ s.peakLevel=Math.max(s.peakLevel||0,s.currentLevel||0); }); mergeNewSeedSkills(); }
+  save(); render();
+  toast("✅ Imported: "+sec.label.split(" (")[0]);
+}
+function renderSectionPicker(){
+  const sel=document.getElementById("sectionPick"); if(!sel || sel.options.length) return;
+  sel.innerHTML=Object.keys(SECTIONS).map(k=>`<option value="${k}">${esc(SECTIONS[k].label)}</option>`).join("");
+}
+
 
 // ===== Today / Dashboard — aggregates everything actionable today =====
 function renderToday(){
@@ -4195,6 +4250,19 @@ if(_clAdd) _clAdd.onclick=()=>{
   S.checklists.push({id:id(),name:n,items:[],template:false});
   document.getElementById("clName").value="";
   save(); render(); toast("✅ Checklist created");
+};
+// Section-specific export / import
+const _secExport=document.getElementById("sectionExport");
+if(_secExport) _secExport.onclick=()=>{ const sel=document.getElementById("sectionPick"); if(sel) exportSection(sel.value); };
+const _secImportBtn=document.getElementById("sectionImportBtn");
+if(_secImportBtn) _secImportBtn.onclick=()=>{ const f=document.getElementById("sectionImportFile"); if(f) f.click(); };
+const _secImportFile=document.getElementById("sectionImportFile");
+if(_secImportFile) _secImportFile.onchange=e=>{
+  const f=e.target.files[0]; if(!f) return;
+  const rd=new FileReader();
+  rd.onload=()=>{ importSection(rd.result); };
+  rd.readAsText(f);
+  e.target.value=""; // allow re-importing the same file
 };
 // checklist add-item on Enter
 document.addEventListener("keydown",e=>{

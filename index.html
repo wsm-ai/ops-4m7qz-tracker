@@ -4725,15 +4725,24 @@ const SEED_SKILLS=[
 
   // ================= PHYSICAL CONTROL (grappling/restraint — concept-tracking only) =================
   {name:"Physical Control", cat:"physical", group:true, fadeDays:30},
-  {name:"Controlled force & composure", parent:"Physical Control", cat:"physical", fadeDays:30,
-    why:"The foundation of every control skill: applying exactly as much force as a situation needs — and no more — while keeping your own composure. It's the difference between control and a fight, and it's what keeps the use of force lawful, defensible, and proportionate.",
-    howTo:"Train the judgment, not just the grip. Learn the force continuum (presence → verbal → control holds → defensive force, escalating only as needed and de-escalating the moment you can). Practice staying calm under provocation — controlled breathing, a steady voice, no anger driving the response. Apply the minimum effective pressure to control, then ease off. The skill is restraint as much as strength.",
+  {name:"Graded force", parent:"Physical Control", cat:"physical", fadeDays:30,
+    why:"Applying exactly as much force as a situation needs — and no more. It's the difference between control and a fight, and it's what keeps the use of force lawful, defensible, and proportionate.",
+    howTo:"Learn the force continuum (presence → verbal → control holds → defensive force) and escalate only as needed, de-escalating the moment you can. In a hold, apply the minimum effective pressure to control, then ease off — never crank past what's required. The skill is using the least force that works, not the most you can.",
     safety:"Concept-tracking only. Use of force is governed by law, ROE, and policy — the right amount of force is a legal and ethical judgment, not just a physical one. Learn the continuum and these techniques hands-on from qualified instructors and your chain of command.",
     levels:[
-      "Stay composed under verbal provocation (no anger-driven response)",
-      "Explain the force continuum and choose the lowest appropriate level",
+      "Explain the force continuum and its levels",
+      "Choose the lowest appropriate level for a scenario",
       "Apply minimum-effective pressure to control a compliant partner, then ease off",
-      "De-escalate and control under realistic, supervised pressure"]},
+      "Escalate and de-escalate force appropriately under supervised pressure"]},
+  {name:"Composure & de-escalation", parent:"Physical Control", cat:"physical", fadeDays:30,
+    why:"Keeping your own composure under provocation — so your response is a decision, not a reaction. Most situations are won or avoided here, before any hands-on control is needed.",
+    howTo:"Train the mental side: controlled breathing to stay calm, a steady voice, and no anger driving the response. Practice verbal de-escalation — create space, give clear commands, offer an off-ramp. The goal is to lower the temperature so force is never needed; staying composed is what makes graded force possible.",
+    safety:"Concept-tracking only. De-escalation and the decision to use (or not use) force are governed by law, ROE, and policy — learn these hands-on from qualified instructors and your chain of command.",
+    levels:[
+      "Stay composed under verbal provocation (no anger-driven response)",
+      "Use controlled breathing and a steady voice on demand",
+      "Verbally de-escalate a tense scenario in practice",
+      "De-escalate under realistic, supervised pressure"]},
   {name:"Clinch / control position", parent:"Physical Control", cat:"physical", fadeDays:30,
     why:"Controlling someone up close without striking — the start of most control and restraint.",
     howTo:"Close the distance and establish a grip on the head/neck and arm (or body lock), keeping your posture and hips in. The goal is to control their posture so they can't strike or escape easily.",
@@ -4936,6 +4945,12 @@ function seedSkillsIfEmpty(){
 // onto existing seeded skills. Never touches level/history/peak.
 function mergeNewSeedSkills(){
   let changed=false;
+  // retire the old combined skill (v37) now that it's split into two. Only remove it if
+  // it was never leveled, so we never silently delete real progress.
+  const oldCombined=S.lifeSkills.find(s=>s.name==="Controlled force & composure");
+  if(oldCombined && (oldCombined.currentLevel||0)<=0 && (oldCombined.peakLevel||0)<=0){
+    S.lifeSkills=S.lifeSkills.filter(s=>s!==oldCombined); changed=true;
+  }
   const have=new Set(S.lifeSkills.map(s=>s.name));
   SEED_SKILLS.forEach(s=>{
     if(!have.has(s.name)){

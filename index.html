@@ -3026,8 +3026,10 @@ const SEED_SKILLS=[
     "Drive a manual / larger vehicle"]},
 ];
 function seedSkillsIfEmpty(){
-  if(S.lifeSkills && S.lifeSkills.length) return;
-  if(S._seeded) return;
+  // If any hierarchical skills exist, leave them alone.
+  if(S.lifeSkills && S.lifeSkills.some(s=>s.group||s.parent!==undefined)) return;
+  // Old flat skills (no hierarchy fields) -> replace with the new tree.
+  // Empty list (even if _seeded was set by an old version) -> seed fresh.
   S.lifeSkills=SEED_SKILLS.map(s=>({
     id:id(), name:s.name, cat:s.cat, parent:s.parent||null, group:!!s.group,
     fadeDays:s.fadeDays, auto:s.auto||null,

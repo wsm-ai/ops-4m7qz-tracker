@@ -1,0 +1,100 @@
+OPERATIONS — ROTC Mission Tracker · Install Guide
+=================================================
+A military-themed life tracker built around your ROTC progression.
+Installs on Windows, Samsung, and iPhone with its own icon — no app store,
+no fees. Data is saved privately on each device.
+
+WHAT'S INSIDE
+-------------
+• RANK & POSITION (you control it): your MS year, rank, and leadership role
+  are a badge you edit yourself (starts at "MS2 Cadet / No leadership role").
+  Update it when you pick up S1 or any other position. XP does NOT change it.
+• FOUR SKILL TRACKS: Fitness, Tactics, Knowledge, Discipline — each levels
+  up independently from the tasks you complete.
+• MISSIONS (one-off tasks) & DAILY ORDERS (recurring habits), pre-loaded with
+  meditation, training, quiz study, deep work, and more.
+• AFT SCORECARD: input your 5 event scores after each test. It flags your
+  weakest event, tells you which training sessions to prioritize, and tracks
+  your score history.
+• QUIZ TAB: 7 officer/enlisted knowledge banks (ranks & insignia, troop
+  leading procedures, general knowledge, land nav, weapons, customs &
+  courtesies, leadership). Pass one (>=80%) to earn merit points + Knowledge
+  XP; it then becomes a daily review order so it sticks. Passing all of them
+  secures the Knowledge objective.
+• WORKOUT LOG (Log tab): after each session, pick which workout you did,
+  enter duration, and log sets — reps×weight for lifts, hold time for planks,
+  distance+time for runs. It auto-tracks your best per exercise and flags
+  when something is improving vs. slipping, so you can spot stalls (like a
+  deadlift that isn't moving) before the next AFT.
+• MOMENTUM SYSTEM: clearing all daily orders triggers a "Perfect Day" bonus
+  (merit + XP that grows with your streak), with milestone celebrations at 3,
+  7, 14, 30, 60, and 100 days. A readiness bar up top shows how close you are
+  to a perfect day, and warns you when a streak is AT RISK so you push to keep
+  it. Best Streak is tracked so breaking a run actually stings.
+• QUIZZES (16 banks, sourced from YOUR advance sheets & TCs): Army Values, The US Army, Customs & Courtesies, Leadership, Army Profession, Land Nav & Maps, First Aid, Tactics/Battle Drills, OPORDs/Mission Command, Cyber Branch, Weapons (M4/M9-M17/M249), Warfighting Functions, Communication Process, American Military History, Know Your Branches, and Regulations & Policy. ~124 questions, each citing its source. VERIFY against the originals.
+• BRANCH & BOARD PREP (Board tab): Cyber Branch (17-series) reference facts
+  pulled from your branch orientation material, plus a Talent-Based Branching
+  checklist (accessions file, résumé, branch interviews, OML inputs, BrADSO,
+  TS/SCI clearance, etc.). Completing tasks earns Knowledge XP + merit.
+• MONTHLY BASELINE (Log tab): at the start (now) and the start of each month,
+  the app prompts you to run a max-effort baseline test on key movements
+  (push-ups, plank, deadlift, pull-ups, squats, 2-mile, SDC). The ADAPTIVE
+  TARGETS then blend two signals — your session-to-session trend AND your
+  monthly baseline — so a single bad day won't trigger a false "hold," and a
+  fresh baseline that shows you got stronger re-anchors your targets upward.
+• ADAPTIVE TARGETS: the FM tab shows auto-calculated next-session targets for
+  every exercise you log — it bumps the target when you're progressing and
+  tells you to HOLD (and why) when you've stalled, so you train smart, not
+  just hard.
+• FM TAB: your lean, bodyweight-first AFT training plan.
+• R&R: spend merit points on real downtime (reading chapters, gaming, rest).
+
+  ** IMPORTANT: The quiz content and AFT scoring are STUDY AIDS I generated.
+     Verify every quiz answer against your real ROTC materials (FMs, TC
+     3-21.5, AR 600-25) and your cadre, and check AFT points on the official
+     score chart, before trusting them for anything graded. **
+
+EDIT / EXPAND THE QUIZZES
+-------------------------
+Open quizbank.js in any text editor. Each question is a simple block:
+  {q:"question?", a:["opt0","opt1","opt2","opt3"], c:1, e:"explanation"}
+  - c is the index (0-3) of the correct answer.
+Copy a block to add a question; copy a topic section to add a whole new quiz.
+
+------------------------------------------------------------
+INSTALL (all 3 devices) — free hosting, ~60 seconds
+------------------------------------------------------------
+1. Go to https://app.netlify.com/drop
+2. Drag this entire folder onto the page (keep all files together —
+   index.html, quizbank.js, sw.js, manifest.json, and the icons).
+3. You get a link like https://your-name.netlify.app
+4. Open that link on each device and install:
+
+WINDOWS LAPTOP (Chrome/Edge): install icon in address bar, or menu ->
+  "Install Operations".
+SAMSUNG TABLET (Chrome/Samsung Internet): menu -> "Add to Home screen".
+IPHONE (must use Safari): Share -> "Add to Home Screen" -> tap the icon.
+
+NOTE: Because the app now uses multiple files, the "double-click index.html"
+shortcut may block quizbank.js in some browsers. The Netlify link above is
+the reliable way to run it. (Chrome users can also run it locally fine.)
+
+MOVING PROGRESS BETWEEN DEVICES
+-------------------------------
+Data is per-device. Tap "export backup" at the bottom on one device, then
+"import backup" on another.
+
+• THE WALL (Awards tab): your 'I Love Me' wall — add awards, ribbons, coins,
+  badges/tabs, certs, milestones, and memorabilia; they accumulate as cards.
+• THE WEIGHT (Weight tab): a READ-ONLY MIRROR of your standalone Weight app — your jars (Open/Standing/Kept/Dead), keystone, memorial lantern, and ledger, shown here but not edited here. Binding/keeping/breaking still happen in the real Weight app (where the rituals live). Tap 'Open the Weight app' to jump there; export your ledger from it and tap 'Update mirror' to refresh this view. Operations is the portal; the Weight app stays the source of truth. The link is pre-set to your hosted Weight app. A daily 'good morning' nudge reminds you to refresh the mirror with one tap when it's a new day (the app can't auto-read your OneDrive on a schedule — that needs a login + server a static offline app can't do — so the nudge is the private, free way to stay current).
+
+• CLOUD FILE SYNC (footer: 'link cloud file'): on laptop/tablet (Chrome/Edge),
+  tap it and pick or create an operations-data.json inside your OneDrive folder.
+  The app then auto-saves your data to that file on every change, and OneDrive
+  syncs it across your linked devices. Open the app on another linked device and
+  it reads the latest. NOTE: this does NOT work on iPhone/iPad (Safari lacks the
+  needed file API) — on iPhone keep using export/import. The browser may ask you
+  to re-grant file permission periodically (a security feature). Last-write-wins
+  if two devices save at once.
+
+Drive on.

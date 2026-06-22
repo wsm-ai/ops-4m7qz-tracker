@@ -1,0 +1,2098 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<meta name="theme-color" content="#14160f">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Operations">
+<title>OPORD — Mission Tracker</title>
+<link rel="manifest" href="manifest.json">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Oswald:wght@400;500;600;700&family=Roboto+Condensed:wght@400;700&display=swap" rel="stylesheet">
+<link rel="apple-touch-icon" href="icon-192.png">
+<style>
+  :root{
+    --bg:#14160f;
+    --panel:#1c1f15;
+    --panel-2:#252a1c;
+    --ink:#e8ead9;
+    --ink-dim:#a4ab8e;
+    --ink-faint:#6e7459;
+    --gold:#b8a06a;        /* coyote tan accent */
+    --gold-bright:#d9c48a; /* light tan */
+    --ember:#c8772e;       /* signal amber */
+    --jade:#6f9e54;        /* OD green */
+    --blood:#9c4a34;       /* brick red */
+    --violet:#7c93a8;      /* slate blue */
+    --line:#343a26;
+    --shadow:0 8px 30px rgba(0,0,0,.6);
+  }
+  *{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
+  html,body{height:100%}
+  body{
+    background:
+      radial-gradient(circle at 20% -10%, rgba(184,160,106,.06), transparent 45%),
+      radial-gradient(circle at 90% 110%, rgba(111,158,84,.05), transparent 45%),
+      var(--bg);
+    color:var(--ink);
+    font-family:"Oswald","Bebas Neue","Roboto Condensed","Arial Narrow",system-ui,sans-serif;
+    line-height:1.5;
+    padding:env(safe-area-inset-top) env(safe-area-inset-right) env(safe-area-inset-bottom) env(safe-area-inset-left);
+    overscroll-behavior:none;
+  }
+  .wrap{max-width:760px;margin:0 auto;padding:18px 16px 120px}
+
+  /* ---- Hero / character header ---- */
+  header.hero{
+    background:linear-gradient(180deg,var(--panel-2),var(--panel));
+    border:1px solid var(--line);
+    border-radius:14px;
+    padding:18px 18px 16px;
+    box-shadow:var(--shadow);
+    position:relative;
+    overflow:hidden;
+  }
+  header.hero::before{
+    content:"";position:absolute;inset:0;
+    background:repeating-linear-gradient(135deg,rgba(255,255,255,.012) 0 2px,transparent 2px 8px);
+    pointer-events:none;
+  }
+  .crest{display:flex;align-items:center;gap:14px}
+  .sigil{
+    width:54px;height:54px;flex:none;border-radius:8px;
+    background:linear-gradient(160deg,#2a2e1d,#1a1d12);
+    border:1px solid var(--gold);
+    display:grid;place-items:center;
+    font-size:15px;font-weight:700;letter-spacing:.08em;color:var(--gold-bright);
+    box-shadow:inset 0 1px 0 rgba(255,255,255,.06),0 4px 12px rgba(0,0,0,.4);
+  }
+  .who{flex:1;min-width:0}
+  .lvl-line{display:flex;align-items:baseline;gap:8px;flex-wrap:wrap}
+  .lvl-num{font-size:13px;letter-spacing:.18em;text-transform:uppercase;color:var(--gold)}
+  .title-name{font-size:20px;font-weight:700;letter-spacing:.01em}
+  .editname{background:none;border:none;color:var(--ink-faint);cursor:pointer;font-size:12px;padding:2px 4px}
+  .editname:hover{color:var(--gold)}
+  .rankrow{display:flex;align-items:center;gap:7px;margin-top:6px;flex-wrap:wrap}
+  .rank-badge{font-size:12px;letter-spacing:.06em;text-transform:uppercase;color:#14160f;background:var(--gold);padding:3px 9px;border-radius:5px;font-weight:700}
+  .pos-badge{font-size:12px;color:var(--ink-dim);letter-spacing:.04em}
+
+  /* ---- Skill tracks ---- */
+  .skills{display:grid;grid-template-columns:1fr 1fr;gap:10px 14px;margin-top:16px}
+  .skill-top{display:flex;justify-content:space-between;align-items:baseline;margin-bottom:4px}
+  .skill-name{font-size:12px;letter-spacing:.04em;color:var(--ink-dim);font-weight:600}
+  .skill-lvl{font-size:11px;color:var(--ink-faint);letter-spacing:.06em;text-transform:uppercase}
+  .skbar{height:8px;border-radius:5px;background:#0e0f09;border:1px solid var(--line);overflow:hidden}
+  .skfill{height:100%;width:0;transition:width .6s cubic-bezier(.2,.8,.2,1)}
+
+  .stats{display:flex;gap:10px;margin-top:16px}
+  /* ---- Readiness (loss-aversion) bar ---- */
+  .readiness{margin-top:16px;background:#13150d;border:1px solid var(--line);border-radius:10px;padding:11px 13px}
+  .rd-top{display:flex;justify-content:space-between;align-items:baseline;margin-bottom:7px}
+  .rd-label{font-size:12px;font-weight:700;letter-spacing:.1em}
+  .rd-pct{font-size:11.5px;color:var(--ink-faint);letter-spacing:.04em}
+  .rd-track{height:9px;border-radius:5px;background:#0a0b06;overflow:hidden}
+  .rd-fill{height:100%;width:0;transition:width .5s cubic-bezier(.2,.8,.2,1)}
+  .rd-warn{font-size:12px;margin-top:8px;line-height:1.4;display:none}
+  .rd-warn.show{display:block}
+  .stat{flex:1;background:#171008;border:1px solid var(--line);border-radius:10px;padding:9px 6px;text-align:center}
+  .stat .v{font-size:19px;font-weight:700;color:var(--gold-bright);line-height:1.1}
+  .stat .l{font-size:10px;letter-spacing:.14em;text-transform:uppercase;color:var(--ink-faint);margin-top:3px}
+  .stat.streak .v{color:var(--ember)}
+  .stat.gold .v{color:var(--gold)}
+
+  /* ---- Tabs ---- */
+  nav.tabs{display:flex;gap:5px;margin:18px 0 14px;position:sticky;top:0;z-index:5;
+    background:linear-gradient(180deg,var(--bg) 70%,transparent);padding:6px 0;
+    overflow-x:auto;-webkit-overflow-scrolling:touch;scrollbar-width:none}
+  nav.tabs::-webkit-scrollbar{display:none}
+  nav.tabs button{
+    flex:1 0 auto;min-width:62px;background:var(--panel);border:1px solid var(--line);color:var(--ink-dim);
+    padding:9px 8px;border-radius:9px;font-family:inherit;font-size:12px;letter-spacing:.03em;
+    cursor:pointer;transition:.15s;font-weight:600;
+  }
+  nav.tabs button .ic{display:block;font-size:16px;margin-bottom:2px}
+  nav.tabs button.on{background:linear-gradient(180deg,var(--gold),#b3801f);color:#1a1208;border-color:var(--gold-bright);box-shadow:0 3px 10px rgba(184,160,106,.25)}
+
+  .view{display:none;animation:fade .25s ease}
+  .view.on{display:block}
+  @keyframes fade{from{opacity:0;transform:translateY(4px)}to{opacity:1}}
+
+  .sec-h{display:flex;align-items:center;justify-content:space-between;margin:4px 2px 10px}
+  .sec-h h2{font-size:14px;letter-spacing:.14em;text-transform:uppercase;color:var(--gold);font-weight:700;padding-left:10px;border-left:3px solid var(--gold)}
+  .sec-h .hint{font-size:11.5px;color:var(--ink-faint)}
+
+  /* ---- Cards (quests/dailies) ---- */
+  ul.list{list-style:none;display:flex;flex-direction:column;gap:9px}
+  li.card{
+    background:linear-gradient(180deg,var(--panel-2),var(--panel));
+    border:1px solid var(--line);border-radius:11px;padding:13px 14px;
+    display:flex;align-items:center;gap:13px;position:relative;overflow:hidden;
+    transition:transform .12s,border-color .2s;
+  }
+  li.card.done{opacity:.5}
+  li.card.done .c-name{text-decoration:line-through;color:var(--ink-faint)}
+  .check{
+    width:30px;height:30px;flex:none;border-radius:8px;border:2px solid var(--ink-faint);
+    background:#120d07;cursor:pointer;display:grid;place-items:center;font-size:17px;color:transparent;
+    transition:.15s;
+  }
+  .check:hover{border-color:var(--gold)}
+  li.card.done .check{background:linear-gradient(180deg,var(--jade),#557a44);border-color:var(--jade);color:#fff}
+  .c-body{flex:1;min-width:0}
+  .c-name{font-size:15.5px;font-weight:600;word-wrap:break-word}
+  .c-meta{display:flex;gap:7px;align-items:center;margin-top:4px;flex-wrap:wrap}
+  .tag{font-size:10.5px;letter-spacing:.08em;text-transform:uppercase;padding:2px 7px;border-radius:20px;border:1px solid}
+  .tag.xp{color:var(--gold);border-color:#5e4715;background:rgba(224,169,59,.08)}
+  .tag.diff-easy{color:var(--jade);border-color:#3c5230}
+  .tag.diff-med{color:var(--gold);border-color:#5e4715}
+  .tag.diff-hard{color:var(--ember);border-color:#5e2f1c}
+  .tag.streakt{color:var(--ember);border-color:#5e2f1c;background:rgba(212,102,58,.08)}
+  .del{background:none;border:none;color:var(--ink-faint);cursor:pointer;font-size:18px;padding:4px 6px;flex:none}
+  .del:hover{color:var(--blood)}
+
+  /* ---- Boss ---- */
+  li.boss{flex-direction:column;align-items:stretch;gap:10px;border-color:#5e2f1c;
+    background:linear-gradient(180deg,#2e1c14,#241710)}
+  .boss-top{display:flex;align-items:center;gap:12px}
+  .boss-skull{font-size:26px;flex:none}
+  .boss-name{font-size:16.5px;font-weight:700;flex:1;color:var(--ink)}
+  .hpbar{height:15px;border-radius:8px;background:#120808;border:1px solid #5e2f1c;overflow:hidden;position:relative}
+  .hpfill{height:100%;background:linear-gradient(90deg,var(--blood),var(--ember));transition:width .6s cubic-bezier(.2,.8,.2,1)}
+  .hp-meta{display:flex;justify-content:space-between;font-size:11.5px;color:var(--ink-dim);margin-top:5px}
+  .boss-actions{display:flex;gap:8px}
+  .boss-actions button{flex:1;background:var(--panel-2);border:1px solid var(--line);color:var(--ink);
+    padding:9px;border-radius:8px;font-family:inherit;font-size:13px;cursor:pointer;font-weight:600}
+  .boss-actions button.hit{background:linear-gradient(180deg,var(--blood),#6e2823);border-color:var(--ember)}
+  .boss-actions button:hover{filter:brightness(1.15)}
+
+  /* ---- Empty states ---- */
+  .empty{text-align:center;padding:34px 20px;color:var(--ink-faint);
+    border:1px dashed var(--line);border-radius:12px;font-size:14px}
+  .empty .big{font-size:30px;display:block;margin-bottom:8px;opacity:.7}
+
+  /* ---- Add forms ---- */
+  .adder{background:var(--panel);border:1px solid var(--line);border-radius:11px;padding:13px;margin-bottom:14px}
+  .adder input,.adder select{
+    width:100%;background:#120d07;border:1px solid var(--line);color:var(--ink);
+    padding:11px 12px;border-radius:8px;font-family:inherit;font-size:15px;margin-bottom:9px;
+  }
+  .adder input:focus,.adder select:focus{outline:none;border-color:var(--gold)}
+  .adder .row{display:flex;gap:9px}
+  .adder .row>*{margin-bottom:0}
+  .btn-add{width:100%;background:linear-gradient(180deg,var(--gold),#b3801f);color:#1a1208;
+    border:none;padding:12px;border-radius:8px;font-family:inherit;font-weight:700;font-size:14px;
+    letter-spacing:.04em;cursor:pointer;margin-top:9px}
+  .btn-add:hover{filter:brightness(1.08)}
+
+  /* ---- Rewards shop ---- */
+  .reward{display:flex;align-items:center;gap:13px}
+  .reward .cost{font-size:14px;font-weight:700;color:var(--gold);flex:none}
+  .btn-buy{background:linear-gradient(180deg,var(--jade),#557a44);color:#0f1409;border:none;
+    padding:8px 14px;border-radius:8px;font-family:inherit;font-weight:700;cursor:pointer;font-size:13px;flex:none}
+  .btn-buy:disabled{opacity:.4;cursor:not-allowed;filter:grayscale(.6)}
+
+  /* ---- Toast / level up ---- */
+  #toast{position:fixed;left:50%;bottom:24px;transform:translateX(-50%) translateY(120px);
+    background:linear-gradient(180deg,var(--panel-2),var(--panel));border:1px solid var(--gold);
+    color:var(--ink);padding:13px 20px;border-radius:11px;box-shadow:var(--shadow);z-index:50;
+    font-size:14px;font-weight:600;transition:transform .35s cubic-bezier(.2,1.3,.4,1);text-align:center;max-width:90vw}
+  #toast.show{transform:translateX(-50%) translateY(0)}
+  #toast .t-xp{color:var(--gold-bright)}
+
+  #levelup{position:fixed;inset:0;background:rgba(10,7,4,.82);z-index:60;display:none;
+    place-items:center;backdrop-filter:blur(3px);animation:fade .3s}
+  #levelup.show{display:grid}
+  .lu-card{text-align:center;padding:30px}
+  .lu-burst{font-size:64px;animation:pop .6s cubic-bezier(.2,1.6,.4,1)}
+  @keyframes pop{0%{transform:scale(0) rotate(-30deg)}100%{transform:scale(1) rotate(0)}}
+  .lu-card h2{font-size:30px;color:var(--gold-bright);margin:10px 0 4px;letter-spacing:.05em}
+  .lu-card p{color:var(--ink-dim);font-size:15px}
+  .lu-card button{margin-top:22px;background:linear-gradient(180deg,var(--gold),#b3801f);color:#1a1208;
+    border:none;padding:12px 30px;border-radius:9px;font-family:inherit;font-weight:700;font-size:15px;cursor:pointer}
+
+  .foot{text-align:center;color:var(--ink-faint);font-size:11px;margin-top:26px;line-height:1.7}
+  .foot a{cursor:pointer}
+  #footStatus.linked{color:var(--jade)}
+  .cloud-hint{margin-top:8px;font-size:11px;line-height:1.5;max-width:440px;margin-left:auto;margin-right:auto}
+  .cloud-hint.warn{color:var(--ember)}
+
+  /* ---- Plan tab ---- */
+  .plan-intro{background:var(--panel);border:1px solid var(--line);border-radius:11px;padding:14px;font-size:14px;color:var(--ink-dim);margin-bottom:12px;line-height:1.6}
+
+  /* ---- Quiz ---- */
+  .quiz-card{background:linear-gradient(180deg,var(--panel-2),var(--panel));border:1px solid var(--line);border-radius:11px;padding:14px;margin-bottom:10px}
+  .quiz-card.passed{border-color:var(--jade)}
+  .quiz-head{display:flex;align-items:center;gap:11px}
+  .quiz-ic{font-size:24px;flex:none}
+  .quiz-meta{flex:1;min-width:0}
+  .quiz-title{font-size:15.5px;font-weight:600}
+  .quiz-sub{font-size:12px;color:var(--ink-faint);margin-top:2px}
+  .quiz-badge{font-size:10.5px;letter-spacing:.08em;text-transform:uppercase;padding:3px 8px;border-radius:20px;border:1px solid;flex:none}
+  .quiz-badge.pass{color:var(--jade);border-color:#3c5230;background:rgba(111,158,84,.1)}
+  .quiz-badge.todo{color:var(--ink-faint);border-color:var(--line)}
+  .quiz-btn{margin-top:11px;width:100%;background:var(--panel-2);border:1px solid var(--gold);color:var(--gold);padding:10px;border-radius:8px;font-family:inherit;font-weight:600;font-size:13.5px;cursor:pointer}
+  .quiz-btn:hover{background:var(--gold);color:#14160f}
+  /* quiz runner */
+  #quizModal{position:fixed;inset:0;background:rgba(10,11,7,.94);z-index:70;display:none;flex-direction:column;padding:env(safe-area-inset-top) 0 0}
+  #quizModal.show{display:flex}
+  .qm-bar{display:flex;align-items:center;gap:12px;padding:16px;border-bottom:1px solid var(--line)}
+  .qm-bar h3{font-size:15px;flex:1;letter-spacing:.04em}
+  .qm-close{background:none;border:none;color:var(--ink-dim);font-size:24px;cursor:pointer}
+  .qm-prog{height:5px;background:#0e0f09}
+  .qm-progfill{height:100%;background:var(--gold);transition:width .3s}
+  .qm-body{flex:1;overflow-y:auto;padding:22px 18px;max-width:760px;margin:0 auto;width:100%}
+  .qm-qnum{font-size:12px;letter-spacing:.1em;text-transform:uppercase;color:var(--ink-faint)}
+  .qm-q{font-size:19px;font-weight:600;margin:8px 0 20px;line-height:1.4}
+  .qm-opt{display:block;width:100%;text-align:left;background:var(--panel);border:1px solid var(--line);color:var(--ink);padding:14px 16px;border-radius:10px;margin-bottom:10px;font-family:inherit;font-size:15px;cursor:pointer;transition:.12s}
+  .qm-opt:hover{border-color:var(--gold)}
+  .qm-opt.correct{background:rgba(111,158,84,.18);border-color:var(--jade)}
+  .qm-opt.wrong{background:rgba(156,74,52,.18);border-color:var(--blood)}
+  .qm-opt:disabled{cursor:default}
+  .qm-exp{background:var(--panel-2);border-left:3px solid var(--gold);padding:12px 14px;border-radius:8px;font-size:13.5px;color:var(--ink-dim);margin:4px 0 16px;line-height:1.5}
+  .qm-next{width:100%;background:linear-gradient(180deg,var(--gold),#b3801f);color:#14160f;border:none;padding:13px;border-radius:9px;font-family:inherit;font-weight:700;font-size:15px;cursor:pointer}
+  .qm-result{text-align:center;padding:30px 10px}
+  .qm-result .big{font-size:54px}
+  .qm-result h2{font-size:26px;margin:8px 0;letter-spacing:.03em}
+  .qm-result .score{font-size:40px;font-weight:700;margin:10px 0}
+
+  /* ---- AFT ---- */
+  .aft-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:6px}
+  .aft-grid label{display:flex;flex-direction:column;font-size:11.5px;color:var(--ink-faint);letter-spacing:.04em;gap:5px}
+  .aft-grid input{background:#120d07;border:1px solid var(--line);color:var(--ink);padding:10px;border-radius:8px;font-family:inherit;font-size:15px}
+  .aft-grid input:focus{outline:none;border-color:var(--gold)}
+  .aft-result-card{background:linear-gradient(180deg,var(--panel-2),var(--panel));border:1px solid var(--gold);border-radius:11px;padding:15px;margin-top:6px}
+  .aft-result-card h3{font-size:15px;color:var(--gold);margin-bottom:10px;letter-spacing:.04em}
+  .aft-event{display:flex;justify-content:space-between;align-items:center;padding:7px 0;border-bottom:1px solid var(--line);font-size:14px}
+  .aft-event:last-child{border-bottom:none}
+  .aft-event .ev-score{font-weight:700}
+  .aft-event.weak{color:var(--ember)}
+  .aft-event.weak .ev-score{color:var(--ember)}
+  .aft-focus{background:rgba(200,119,46,.1);border:1px solid #6e4520;border-radius:9px;padding:12px;margin-top:12px;font-size:13.5px;color:var(--ink-dim);line-height:1.5}
+  .aft-focus b{color:var(--ember)}
+  .aft-hist-row{display:flex;justify-content:space-between;background:var(--panel);border:1px solid var(--line);border-radius:9px;padding:11px 13px;margin-bottom:7px;font-size:13.5px}
+  .aft-hist-row .ttl{font-weight:700;color:var(--gold)}
+
+  /* ---- Workout Log ---- */
+  .lg-label{font-size:11.5px;color:var(--ink-faint);letter-spacing:.04em;display:flex;flex-direction:column;gap:5px;margin-bottom:4px}
+  #lgSession{width:100%;background:#120d07;border:1px solid var(--line);color:var(--ink);padding:11px 12px;border-radius:8px;font-family:inherit;font-size:15px}
+  #lgSession:focus{outline:none;border-color:var(--gold)}
+  .lg-ex{background:#171008;border:1px solid var(--line);border-radius:9px;padding:11px;margin-bottom:9px}
+  .lg-ex-name{font-size:13.5px;font-weight:600;color:var(--ink);margin-bottom:8px;display:flex;align-items:center;gap:6px}
+  .lg-ex-name .typ{font-size:10px;letter-spacing:.06em;text-transform:uppercase;color:var(--ink-faint);font-weight:400}
+  .lg-set{display:flex;gap:7px;align-items:center;margin-bottom:6px}
+  .lg-set input{flex:1;min-width:0;background:#0e0f09;border:1px solid var(--line);color:var(--ink);padding:8px 9px;border-radius:7px;font-family:inherit;font-size:14px}
+  .lg-set input:focus{outline:none;border-color:var(--gold)}
+  .lg-set .setn{font-size:11px;color:var(--ink-faint);width:30px;flex:none}
+  .lg-set .rmset{background:none;border:none;color:var(--ink-faint);cursor:pointer;font-size:16px;flex:none;padding:0 4px}
+  .lg-set .rmset:hover{color:var(--blood)}
+  .lg-addset{background:none;border:1px dashed var(--line);color:var(--ink-dim);padding:6px;border-radius:7px;font-family:inherit;font-size:12.5px;cursor:pointer;width:100%}
+  .lg-addset:hover{border-color:var(--gold);color:var(--gold)}
+  .lg-custom-name{width:100%;background:#0e0f09;border:1px solid var(--line);color:var(--ink);padding:8px 9px;border-radius:7px;font-family:inherit;font-size:14px;margin-bottom:7px}
+  .lg-prog-row{background:var(--panel);border:1px solid var(--line);border-radius:9px;padding:11px 13px;margin-bottom:7px}
+  .lg-prog-top{display:flex;justify-content:space-between;align-items:baseline}
+  .lg-prog-name{font-size:13.5px;font-weight:600}
+  .lg-prog-best{font-size:13px;color:var(--gold);font-weight:700}
+  .lg-prog-trend{font-size:12px;margin-top:3px}
+  .lg-hist{background:var(--panel);border:1px solid var(--line);border-radius:9px;padding:12px 13px;margin-bottom:8px}
+  .lg-hist-top{display:flex;justify-content:space-between;font-size:13.5px;margin-bottom:6px}
+  .lg-hist-top .dt{font-weight:700;color:var(--gold)}
+  .lg-hist-ex{font-size:12.5px;color:var(--ink-dim);padding:2px 0;line-height:1.5}
+  .lg-hist .del-w{background:none;border:none;color:var(--ink-faint);cursor:pointer;font-size:15px;float:right}
+  .lg-hist .del-w:hover{color:var(--blood)}
+
+  /* ---- Adaptive targets (FM auto-rewrite) ---- */
+  .adapt-card{background:linear-gradient(180deg,#1d2416,#171c11);border:1px solid var(--jade);border-radius:11px;padding:14px;margin-bottom:12px}
+  .adapt-card h3{font-size:14px;color:var(--jade);letter-spacing:.05em;margin-bottom:4px;display:flex;align-items:center;gap:7px}
+  .adapt-sub{font-size:12px;color:var(--ink-faint);margin-bottom:11px;line-height:1.5}
+  .adapt-row{display:flex;justify-content:space-between;align-items:center;padding:8px 0;border-bottom:1px solid var(--line);font-size:13.5px;gap:10px}
+  .adapt-row:last-child{border-bottom:none}
+  .adapt-ex{flex:1;min-width:0}
+  .adapt-ex .nm{font-weight:600}
+  .adapt-ex .note{font-size:11.5px;color:var(--ink-faint);margin-top:2px}
+  .adapt-tgt{font-weight:700;color:var(--gold-bright);flex:none;text-align:right;font-size:14px}
+  .adapt-tgt.hold{color:var(--ember)}
+  .adapt-empty{font-size:13px;color:var(--ink-faint);padding:4px 0}
+  .cy-fact{font-size:13px;color:var(--ink-dim);padding:6px 0;border-bottom:1px solid var(--line);line-height:1.5}
+  .cy-fact:last-child{border-bottom:none}
+  .cy-fact b{color:var(--violet)}
+  .board-item{display:flex;align-items:flex-start;gap:11px}
+  .board-item.done .c-name{text-decoration:line-through;color:var(--ink-faint)}
+
+  /* ---- Awards / The Wall ---- */
+  #awallGrid{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+  @media(max-width:380px){#awallGrid{grid-template-columns:1fr}}
+  .aw-card{background:linear-gradient(180deg,var(--panel-2),var(--panel));border:1px solid var(--line);border-radius:11px;padding:13px;position:relative;overflow:hidden}
+  .aw-card::before{content:"";position:absolute;inset:0;background:repeating-linear-gradient(135deg,rgba(255,255,255,.015) 0 2px,transparent 2px 9px);pointer-events:none}
+  .aw-ic{font-size:26px;line-height:1}
+  .aw-title{font-size:14px;font-weight:700;margin-top:7px;line-height:1.3}
+  .aw-note{font-size:12px;color:var(--ink-faint);margin-top:4px;line-height:1.45}
+  .aw-date{font-size:10.5px;color:var(--ink-faint);letter-spacing:.06em;text-transform:uppercase;margin-top:7px}
+  .aw-del{position:absolute;top:8px;right:9px;background:none;border:none;color:var(--ink-faint);cursor:pointer;font-size:15px;z-index:2}
+  .aw-del:hover{color:var(--blood)}
+  .aw-empty{grid-column:1/-1;text-align:center;padding:34px 20px;color:var(--ink-faint);border:1px dashed var(--line);border-radius:12px;font-size:14px}
+  .aw-empty .big{font-size:30px;display:block;margin-bottom:8px;opacity:.7}
+
+  /* ---- THE WEIGHT (solemn, set apart) ---- */
+  #view-weight{font-family:"Iowan Old Style","Palatino Linotype",Palatino,Georgia,serif}
+  .weight-head{text-align:center;padding:14px 8px 6px}
+  .weight-title{font-size:15px;letter-spacing:.42em;color:var(--ink-dim);font-weight:600;padding-left:.42em}
+  .weight-sub{font-size:13px;color:var(--ink-faint);margin-top:10px;line-height:1.6;max-width:460px;margin-left:auto;margin-right:auto;font-style:italic}
+  .weight-carry{font-size:13px;color:#c9a06a;margin-top:12px;letter-spacing:.04em}
+  .weight-keystone{margin:8px 0 4px}
+  .ks-card{background:linear-gradient(180deg,rgba(201,162,75,.08),transparent);border:1px solid rgba(201,162,75,.4);border-left:3px solid #c9a06a;border-radius:10px;padding:13px 15px}
+  .ks-tag{font-size:10px;letter-spacing:.16em;text-transform:uppercase;color:#c9a06a}
+  .ks-vow{font-size:14px;color:var(--ink);margin-top:5px;line-height:1.5;font-style:italic}
+  .ks-bind{margin-top:9px}
+  .ks-bind button{background:rgba(201,162,75,.12);border:1px solid #c9a06a;color:#d8b06a;padding:8px 14px;border-radius:8px;font-family:inherit;font-size:13px;cursor:pointer}
+  .ks-bind button:hover{background:rgba(201,162,75,.22)}
+
+  .weight-jars{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin:16px 0 6px}
+  @media(max-width:560px){.weight-jars{grid-template-columns:repeat(2,1fr);gap:16px}}
+  .wjar{text-align:center;cursor:pointer;border:1px solid transparent;border-radius:12px;padding:8px 4px;transition:.2s}
+  .wjar:hover{border-color:var(--line)}
+  .wjar .jar-vessel{width:100%;height:120px;display:block}
+  .wjar-name{font-size:12px;letter-spacing:.1em;text-transform:uppercase;margin-top:6px}
+  .wjar-count{font-size:20px;font-weight:600;margin-top:2px;color:var(--ink)}
+  .wjar.open .wjar-name{color:#d8b06a}
+  .wjar.standing .wjar-name{color:#b3a0cf}
+  .wjar.kept .wjar-name{color:#9fc59a}
+  .wjar.broken .wjar-name{color:#b06a5f}
+
+  .weight-section-label{text-align:center;font-size:11px;letter-spacing:.2em;text-transform:uppercase;color:var(--ink-faint);margin:18px 0 8px}
+  .weight-memorial{display:flex;justify-content:center}
+  .weight-memorial .jar-vessel{width:110px;height:150px}
+  .mem-flame{animation:memflicker 4s ease-in-out infinite}
+  @keyframes memflicker{0%,100%{opacity:.85}50%{opacity:1}}
+
+  .weight-bind{background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:15px;margin-top:18px}
+  .weight-mirror{background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:15px;margin-top:18px;text-align:center}
+  .wm-row{display:flex;gap:9px}
+  .wm-btn{flex:1;background:rgba(201,162,75,.14);border:1px solid #c9a06a;color:#d8b06a;padding:12px;border-radius:8px;font-family:inherit;font-weight:600;font-size:13.5px;letter-spacing:.03em;cursor:pointer}
+  .wm-btn:hover{background:rgba(201,162,75,.24)}
+  .wm-btn.ghost{background:transparent;border-color:var(--line);color:var(--ink-dim)}
+  .wm-btn.ghost:hover{border-color:#c9a06a;color:#d8b06a}
+  .wm-edit{display:inline-block;margin-top:10px;font-size:12px;color:var(--ink-faint);text-decoration:underline;cursor:pointer}
+  .wm-edit:hover{color:#d8b06a}
+  .wm-nudge{display:none}
+  .wm-nudge.show{display:block;background:rgba(201,162,75,.1);border:1px solid #c9a06a;border-radius:9px;padding:11px 13px;margin-bottom:12px;font-size:13px;color:#d8b06a;line-height:1.5}
+  .wm-nudge .wm-nudge-btn{display:inline-block;margin-top:8px;background:rgba(201,162,75,.18);border:1px solid #c9a06a;color:#e6c87f;padding:7px 14px;border-radius:7px;font-family:inherit;font-size:13px;cursor:pointer}
+  .wm-nudge .wm-nudge-btn:hover{background:rgba(201,162,75,.3)}
+  .wb-title{font-size:13px;letter-spacing:.08em;text-transform:uppercase;color:var(--ink-dim);margin-bottom:10px}
+  .weight-bind input,.weight-bind select{width:100%;background:#0e0f09;border:1px solid var(--line);color:var(--ink);padding:11px;border-radius:8px;font-family:inherit;font-size:15px}
+  .weight-bind input:focus,.weight-bind select:focus{outline:none;border-color:#c9a06a}
+  .wb-btn{width:100%;background:rgba(201,162,75,.14);border:1px solid #c9a06a;color:#d8b06a;padding:12px;border-radius:8px;font-family:inherit;font-weight:600;font-size:14px;letter-spacing:.04em;cursor:pointer;margin-top:10px}
+  .wb-btn:hover{background:rgba(201,162,75,.24)}
+  .wb-note{font-size:12px;color:var(--ink-faint);margin-top:9px;line-height:1.5;font-style:italic}
+
+  .weight-ledger{margin-top:18px}
+  .wl-entry{background:var(--panel);border:1px solid var(--line);border-radius:9px;padding:11px 13px;margin-bottom:7px;display:flex;align-items:center;gap:11px}
+  .wl-entry.keystone{border-color:rgba(201,162,75,.5);border-left:3px solid #c9a06a}
+  .wl-disc{font-family:ui-monospace,monospace;font-size:11px;color:var(--ink-faint);flex:none}
+  .wl-body{flex:1;min-width:0}
+  .wl-text{font-size:14px;line-height:1.4}
+  .wl-meta{font-size:11px;color:var(--ink-faint);margin-top:3px;letter-spacing:.04em}
+  .wl-status{font-size:10px;letter-spacing:.1em;text-transform:uppercase;padding:2px 8px;border-radius:20px;border:1px solid;flex:none}
+  .wl-status.open{color:#d8b06a;border-color:#7a5e2a}
+  .wl-status.standing{color:#b3a0cf;border-color:#5a4d72}
+  .wl-status.kept{color:#9fc59a;border-color:#3c5230}
+  .wl-status.broken{color:#b06a5f;border-color:#6e3a34}
+
+  /* ---- Baseline test ---- */
+  .bl-prompt{background:rgba(200,119,46,.12);border:1px solid var(--ember);border-radius:10px;padding:13px;margin-bottom:14px;font-size:13.5px;color:var(--ink-dim);line-height:1.5}
+  .bl-prompt b{color:var(--ember)}
+  .bl-card{background:linear-gradient(180deg,var(--panel-2),var(--panel));border:1px solid var(--line);border-radius:11px;padding:14px}
+  .bl-card.due{border-color:var(--ember)}
+  .bl-ex{display:flex;align-items:center;gap:9px;padding:9px 0;border-bottom:1px solid var(--line)}
+  .bl-ex:last-of-type{border-bottom:none}
+  .bl-ex-name{flex:1;font-size:13.5px;min-width:0}
+  .bl-ex-name .prev{font-size:11.5px;color:var(--ink-faint);margin-top:2px}
+  .bl-ex input{width:78px;flex:none;background:#0e0f09;border:1px solid var(--line);color:var(--ink);padding:8px;border-radius:7px;font-family:inherit;font-size:14px;text-align:center}
+  .bl-ex input.wide{width:92px}
+  .bl-ex input:focus{outline:none;border-color:var(--gold)}
+  .bl-ex .units{display:flex;gap:5px}
+  .bl-latest{background:#13150d;border:1px solid var(--line);border-radius:10px;padding:12px 13px;margin-bottom:11px}
+  .bl-latest h4{font-size:12px;color:var(--gold);letter-spacing:.06em;margin-bottom:8px;text-transform:uppercase}
+  .bl-latest-row{display:flex;justify-content:space-between;font-size:13px;padding:4px 0}
+  .bl-latest-row .delta{font-size:12px}
+  .plan-intro b{color:var(--ink)}
+  .phase{background:rgba(212,102,58,.08);border:1px solid #5e2f1c;border-radius:10px;padding:12px 14px;font-size:13.5px;color:var(--ink-dim);margin-bottom:12px;line-height:1.55}
+  .phase b{color:var(--ember)}
+  details.wk{background:linear-gradient(180deg,var(--panel-2),var(--panel));border:1px solid var(--line);border-radius:11px;margin-bottom:9px;overflow:hidden}
+  details.wk summary{padding:14px;cursor:pointer;font-weight:600;font-size:15px;list-style:none;display:flex;align-items:center;gap:10px}
+  details.wk summary::-webkit-details-marker{display:none}
+  details.wk summary::after{content:"▸";margin-left:auto;color:var(--gold);transition:.2s}
+  details.wk[open] summary::after{transform:rotate(90deg)}
+  .wk-day{font-size:11px;letter-spacing:.1em;text-transform:uppercase;color:#1a1208;background:linear-gradient(180deg,var(--gold),#b3801f);padding:3px 9px;border-radius:20px;flex:none}
+  .wk-body{padding:0 16px 16px;font-size:14px;color:var(--ink-dim);line-height:1.6}
+  .wk-body b{color:var(--gold);display:block;margin:10px 0 4px;font-size:12.5px;letter-spacing:.04em;text-transform:uppercase}
+  .wk-body ul{margin:0 0 4px;padding-left:20px}
+  .wk-body li{margin-bottom:5px}
+  .wk-target{color:var(--ink-faint);font-style:italic;font-size:13px;margin:2px 0 6px}
+  .foot a{color:var(--ink-dim);cursor:pointer;text-decoration:underline}
+  @media (prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <header class="hero">
+    <div class="crest">
+      <div class="sigil" id="sigil">CDT</div>
+      <div class="who">
+        <div class="lvl-line">
+          <span class="title-name" id="heroName">Cadet</span>
+          <button class="editname" id="renameBtn">edit</button>
+        </div>
+        <div class="rankrow">
+          <span class="rank-badge" id="rankLine">MS2 Cadet</span>
+          <span class="pos-badge" id="posLine">No leadership role</span>
+          <button class="editname" id="editRankBtn">edit</button>
+        </div>
+      </div>
+    </div>
+    <div class="skills" id="skillBars"></div>
+    <div class="readiness" id="readinessBar">
+      <div class="rd-top"><span class="rd-label" id="rdLabel">READY</span><span class="rd-pct" id="rdPct">0/0 orders</span></div>
+      <div class="rd-track"><div class="rd-fill" id="rdFill"></div></div>
+      <div class="rd-warn" id="rdWarn"></div>
+    </div>
+    <div class="stats">
+      <div class="stat gold"><div class="v" id="sGold">0</div><div class="l">Merit Pts</div></div>
+      <div class="stat streak"><div class="v" id="sStreak">0</div><div class="l">Day Streak</div></div>
+      <div class="stat"><div class="v" id="sBest">0</div><div class="l">Best Streak</div></div>
+    </div>
+  </header>
+
+  <nav class="tabs">
+    <button data-tab="quests" class="on"><span class="ic">🎯</span>Missions</button>
+    <button data-tab="dailies"><span class="ic">📋</span>Orders</button>
+    <button data-tab="quizzes"><span class="ic">📚</span>Quiz</button>
+    <button data-tab="aft"><span class="ic">💪</span>AFT</button>
+    <button data-tab="log"><span class="ic">🏋️</span>Log</button>
+    <button data-tab="bosses"><span class="ic">⭐</span>Obj</button>
+    <button data-tab="board"><span class="ic">📈</span>Board</button>
+    <button data-tab="shop"><span class="ic">🏅</span>R&amp;R</button>
+    <button data-tab="plan"><span class="ic">📕</span>FM</button>
+    <button data-tab="awards"><span class="ic">🏆</span>Awards</button>
+    <button data-tab="weight"><span class="ic">⚖️</span>Weight</button>
+  </nav>
+
+  <!-- MISSIONS -->
+  <section class="view on" id="view-quests">
+    <div class="adder">
+      <input id="qName" placeholder="New mission — e.g. Finish history essay" maxlength="80">
+      <div class="row">
+        <select id="qDiff">
+          <option value="easy">Routine · 15 XP · 5 pts</option>
+          <option value="med" selected>Priority · 35 XP · 12 pts</option>
+          <option value="hard">High-Risk · 70 XP · 28 pts</option>
+        </select>
+      </div>
+      <button class="btn-add" id="qAdd">Assign Mission</button>
+    </div>
+    <div class="sec-h"><h2>Active Missions</h2><span class="hint">one-off tasks</span></div>
+    <ul class="list" id="qList"></ul>
+  </section>
+
+  <!-- ORDERS -->
+  <section class="view" id="view-dailies">
+    <div class="adder">
+      <input id="dName" placeholder="New daily order — e.g. 30 min workout" maxlength="80">
+      <div class="row">
+        <select id="dDiff">
+          <option value="easy">Routine · 10 XP · 4 pts</option>
+          <option value="med" selected>Priority · 20 XP · 8 pts</option>
+          <option value="hard">High-Risk · 40 XP · 16 pts</option>
+        </select>
+      </div>
+      <button class="btn-add" id="dAdd">Add Order</button>
+    </div>
+    <div class="sec-h"><h2>Daily Orders</h2><span class="hint">resets at 0600 daily</span></div>
+    <ul class="list" id="dList"></ul>
+  </section>
+
+  <!-- OBJECTIVES -->
+  <section class="view" id="view-bosses">
+    <div class="adder">
+      <input id="bName" placeholder="New objective — e.g. Pass the certification exam" maxlength="80">
+      <div class="row">
+        <input id="bHp" type="number" min="2" max="200" value="10" placeholder="Steps to secure">
+      </div>
+      <button class="btn-add" id="bAdd">Set Objective</button>
+    </div>
+    <div class="sec-h"><h2>Major Objectives</h2><span class="hint">big multi-step goals</span></div>
+    <ul class="list" id="bList"></ul>
+  </section>
+
+  <!-- BOARD / BRANCH PREP -->
+  <section class="view" id="view-board">
+    <div class="sec-h"><h2>Branch &amp; Board Prep</h2><span class="hint" id="branchGoalHint">goal: Cyber</span></div>
+
+    <div class="adapt-card" style="border-color:var(--violet);background:linear-gradient(180deg,#1b1d28,#15171f)">
+      <h3 style="color:var(--violet)">💻 Cyber Branch (17-series) — Your Target</h3>
+      <div class="adapt-sub">From your branch orientation material. Verify specifics with your cadre & the latest DA PAM 600-3.</div>
+      <div class="cy-fact"><b>Mission:</b> Plans, integrates, and executes cyberspace operations (CO) &amp; electromagnetic warfare (EW).</div>
+      <div class="cy-fact"><b>CO missions:</b> Defensive (DCO), Offensive (OCO), and DODIN operations.</div>
+      <div class="cy-fact"><b>AOCs:</b> 17A Cyber Warfare Officer · 17B Cyber Electromagnetic Warfare Officer · 17D Cyber Capabilities Development Officer.</div>
+      <div class="cy-fact"><b>Lieutenant pipeline:</b> Cyber Basic Officer Leader Course (CyBOLC); must first qualify 17A.</div>
+      <div class="cy-fact"><b>Requirements:</b> U.S. citizen (no dual citizenship), must obtain &amp; hold TS/SCI + favorable special background investigation; some positions require a CI polygraph.</div>
+      <div class="cy-fact"><b>Proponent:</b> U.S. Army Cyber School, Fort Gordon (Cyber CoE), GA.</div>
+      <div class="cy-fact" style="color:var(--ink-faint);border:none">Want to take the Cyber quiz? It's in the Quiz tab.</div>
+    </div>
+
+    <div class="plan-intro" style="border-color:var(--gold)">
+      <b>The path runs through the Order of Merit List (OML).</b> Talent-Based Branching mostly happens in your MS3 year: you build an accessions file, interview with branches, and rank preferences for the branching board. Branches rate cadets Most&nbsp;Preferred / Preferred / Least&nbsp;Preferred. Your OML — driven by GPA, AFT, and leadership evaluations — is the biggest lever you control. Knock these out:
+    </div>
+
+    <div class="sec-h" style="margin-top:6px"><h2>Branching &amp; Board Checklist</h2><span class="hint" id="boardProg"></span></div>
+    <ul class="list" id="boardList"></ul>
+    <div class="adder" style="margin-top:10px">
+      <input id="btName" placeholder="Add your own board-prep task" maxlength="90">
+      <button class="btn-add" id="btAdd">Add Task</button>
+    </div>
+    <div class="plan-intro" style="margin-top:12px;font-size:12.5px;color:var(--ink-faint)">
+      ⚠️ Branching policy, OML weighting, and Cyber requirements change. Treat this as a prep aid and confirm current procedures with your cadre, the Talent-Based Branching handbook, and HRC.
+    </div>
+  </section>
+
+  <!-- R&R -->
+  <section class="view" id="view-shop">
+    <div class="adder">
+      <input id="rName" placeholder="New R&R — e.g. 1 episode of my show" maxlength="60">
+      <div class="row">
+        <input id="rCost" type="number" min="1" max="9999" value="30" placeholder="Merit point cost">
+      </div>
+      <button class="btn-add" id="rAdd">Add R&amp;R</button>
+    </div>
+    <div class="sec-h"><h2>R&amp;R — Earned Downtime</h2><span class="hint">spend merit points, no guilt</span></div>
+    <ul class="list" id="rList"></ul>
+  </section>
+
+  <!-- QUIZZES -->
+  <section class="view" id="view-quizzes">
+    <div class="sec-h"><h2>Officer Knowledge Quizzes</h2><span class="hint">study, then test</span></div>
+    <div class="plan-intro" id="quizIntro">Pass a quiz to earn merit points and convert it into a daily review order — that's how knowledge sticks. Passing all of them secures the Knowledge objective.
+      <br><span style="color:var(--ember);font-size:12.5px">⚠️ Study aid only — verify every answer against your own ROTC materials and cadre before trusting it.</span></div>
+    <div id="quizList"></div>
+  </section>
+
+  <!-- AFT -->
+  <section class="view" id="view-aft">
+    <div class="sec-h"><h2>AFT Scorecard</h2><span class="hint">input scores, auto-tune plan</span></div>
+    <div class="adder">
+      <p style="font-size:13px;color:var(--ink-dim);margin-bottom:10px">Enter your latest AFT raw results. The plan re-weights to attack your weakest event.</p>
+      <div class="aft-grid">
+        <label>Deadlift (lbs)<input id="aDl" type="number" min="0" max="500" placeholder="e.g. 240"></label>
+        <label>Push-ups (reps)<input id="aHrp" type="number" min="0" max="120" placeholder="e.g. 45"></label>
+        <label>Sprint-Drag-Carry (m:ss)<input id="aSdc" type="text" placeholder="e.g. 1:55"></label>
+        <label>Plank (m:ss)<input id="aPlank" type="text" placeholder="e.g. 3:10"></label>
+        <label>2-Mile Run (mm:ss)<input id="aRun" type="text" placeholder="e.g. 15:30"></label>
+      </div>
+      <button class="btn-add" id="aftSave">Log AFT Scores</button>
+    </div>
+    <div id="aftResult"></div>
+    <div class="sec-h" style="margin-top:18px"><h2>Score History</h2></div>
+    <div id="aftHistory"></div>
+  </section>
+
+  <!-- WORKOUT LOG -->
+  <section class="view" id="view-log">
+    <div id="baselinePrompt"></div>
+    <div class="sec-h"><h2>Monthly Baseline</h2><span class="hint">max-effort test</span></div>
+    <div id="baselineArea"></div>
+
+    <div class="sec-h" style="margin-top:18px"><h2>Workout Log</h2><span class="hint">track real sets</span></div>
+    <div class="adder">
+      <label class="lg-label">Which session?</label>
+      <select id="lgSession"></select>
+      <div class="row" style="margin-top:9px">
+        <label class="lg-label" style="flex:1">Duration (min)<input id="lgDur" type="number" min="1" max="300" placeholder="e.g. 45"></label>
+      </div>
+      <div id="lgExercises" style="margin-top:12px"></div>
+      <button class="btn-add" id="lgSave" style="margin-top:12px">Save Workout</button>
+    </div>
+    <div class="sec-h" style="margin-top:18px"><h2>Progress by Exercise</h2><span class="hint">spot stalls</span></div>
+    <div id="lgProgress"></div>
+    <div class="sec-h" style="margin-top:18px"><h2>Recent Workouts</h2></div>
+    <div id="lgHistory"></div>
+  </section>
+
+  <!-- PLAN -->
+  <section class="view" id="view-plan">
+    <div class="sec-h"><h2>FM — Training</h2><span class="hint">AFT field manual</span></div>
+    <div id="adaptiveTargets"></div>
+    <div class="plan-intro">
+      Built to max your <b>AFT</b> (Deadlift · Hand-Release Push-up · Sprint-Drag-Carry · Plank · 2-Mile Run) and rebuild strength + endurance after your break. Runs <b>on top of ROTC PT</b>: on weeks you have PT, count it as one session and do the rest. Aim for <b>4 sessions/week</b>, never two hard days back-to-back.
+    </div>
+    <div class="phase" style="background:rgba(127,174,107,.08);border-color:#3c5230">🌱 <b style="color:var(--jade)">Lean &amp; bodyweight focus.</b> This plan builds relative strength and lean muscle — the kind that helps your run and push-up scores, not bulk that slows them. The trick: get stronger by making bodyweight moves <i>harder</i> (tougher leverage, slower tempo, more reps, less rest), not by adding mass. External load stays minimal and only where the AFT demands it (deadlift + carries).</div>
+
+    <div class="phase">🎯 <b>Your priorities (from your AFT history):</b> Your <b>deadlift</b> is your lowest event (70 pts, stuck at 200 lbs) and the closest to the 60-pt floor — it's your standing risk, so load it up. Your <b>Sprint-Drag-Carry</b> has slipped four tests running (79→74→69→65) — attack it with the AFT circuit. Push-ups, plank, and run are solid; maintain them. Banking those two weak events is your path from ~385 to 450+.</div>
+
+    <details class="wk" open><summary><span class="wk-day">Session 1</span> Strength A · Lower + Push</summary>
+      <div class="wk-body">
+        <p class="wk-target">Targets: Lower-body strength, Hand-Release Push-up · bodyweight-first</p>
+        <b>Primary (bodyweight):</b>
+        <ul>
+          <li>Bulgarian split squat — 4×10/leg (slow 3-sec lower; harder than it looks)</li>
+          <li>Single-leg Romanian deadlift — 3×10/leg (balance + posterior chain)</li>
+          <li>Hand-release push-ups — 4× max, 75s rest (count total reps, beat it weekly)</li>
+          <li>Pike push-ups → progress toward pseudo-planche — 3×8</li>
+          <li>Pistol squat progression (box/assisted) — 3×5/leg</li>
+          <li>Hollow-body hold — 3×30s</li>
+        </ul>
+        <b>If you have equipment (AFT deadlift prep — keep it lean):</b>
+        <ul>
+          <li>Trap-bar / barbell deadlift — 4×6 moderate, crisp reps (strength, not max bulk)</li>
+          <li>Then do the bodyweight block above for volume</li>
+        </ul>
+      </div>
+    </details>
+
+    <details class="wk"><summary><span class="wk-day">Session 2</span> Conditioning · Run</summary>
+      <div class="wk-body">
+        <p class="wk-target">Targets: 2-Mile Run (your weak spot — this is the priority)</p>
+        <b>Alternate each week between:</b>
+        <ul>
+          <li><b>Intervals:</b> warm up 5 min → 6× 400m hard / 90s walk → cool down. (Builds speed.)</li>
+          <li><b>Tempo:</b> 1.5–2 mi at a "comfortably hard" pace you can barely talk through.</li>
+          <li><b>Long easy:</b> 3–4 mi conversational pace. Builds the aerobic base that makes 2 miles feel short.</li>
+        </ul>
+        <p class="wk-target">Bonus: running keeps you lean and directly trains the event. Every 2–3 weeks, run a timed 2-mile and log it as a quest.</p>
+      </div>
+    </details>
+
+    <details class="wk"><summary><span class="wk-day">Session 3</span> Strength B · Upper + Core</summary>
+      <div class="wk-body">
+        <p class="wk-target">Targets: Hand-Release Push-up, Pulling strength, Plank · bodyweight-first</p>
+        <b>Primary (bodyweight):</b>
+        <ul>
+          <li>Pull-ups or inverted rows (under a table/bar) — 4×8 (the missing piece of most BW plans)</li>
+          <li>Decline / pike push-ups — 4×10</li>
+          <li>Diamond push-ups — 3×12 (triceps + chest endurance)</li>
+          <li>Plank — 3× max hold, train past your AFT time</li>
+          <li>Side plank — 3×30s/side</li>
+          <li>Superman / back extensions — 3×15</li>
+        </ul>
+        <b>AFT carry prep (minimal load):</b>
+        <ul>
+          <li>Backpack/ruck or farmer's carry — 4× 40m (trains Sprint-Drag-Carry grip + core)</li>
+        </ul>
+      </div>
+    </details>
+
+    <details class="wk"><summary><span class="wk-day">Session 4</span> AFT Circuit · Test Sim</summary>
+      <div class="wk-body">
+        <p class="wk-target">The "group PT" energy — race the clock, simulate the real test</p>
+        <p>Do 3–4 rounds, rest 2 min between. Time yourself and try to beat it next week:</p>
+        <ul>
+          <li>Sprint-Drag-Carry sim: 50m sprint → 50m backward drag (or bear crawl) → 50m loaded carry → 50m sprint</li>
+          <li>20 hand-release push-ups</li>
+          <li>15 squat jumps</li>
+          <li>30–60s plank</li>
+          <li>200m run</li>
+        </ul>
+        <p class="wk-target">This is the one to lean on when motivation's low — it's fast, competitive against yourself, and feels like a mission.</p>
+      </div>
+    </details>
+
+    <div class="phase">📈 <b>Progression (the bodyweight way):</b> when a movement gets easy, don't add weight — make it <i>harder</i>. More reps, slower tempo, less rest, or a tougher variation (e.g. push-up → decline → pike → pseudo-planche). That's how you build lean strength without bulk. If a session feels easy, level it up. If you're wrecked, take the rest day — recovery is training.</div>
+
+    <div class="plan-intro" style="margin-top:14px">
+      <b>How to use this with the app:</b> Each morning, your "Today's training session" daily points here — just do whichever session is next in the rotation. Check it off to earn XP, build your streak, and chip away at the AFT objective. The streak is your accountability when there's no one running PT next to you.
+    </div>
+  </section>
+
+  <!-- AWARDS — the "I Love Me" wall -->
+  <section class="view" id="view-awards">
+    <div class="sec-h"><h2>The Wall</h2><span class="hint">awards & memorabilia</span></div>
+    <div class="plan-intro">Your "I Love Me" wall — the record of what you've earned and carried. Add awards, ribbons, coins, certifications, milestones, and memorabilia as they come. It fills up as your career and life build.</div>
+    <div class="adder">
+      <div class="row" style="gap:9px">
+        <select id="awKind" style="flex:0 0 42%">
+          <option value="award">🎖️ Award / Ribbon</option>
+          <option value="coin">🪙 Challenge Coin</option>
+          <option value="cert">📜 Certification</option>
+          <option value="badge">🏅 Badge / Tab</option>
+          <option value="milestone">⭐ Milestone</option>
+          <option value="memento">📦 Memorabilia</option>
+        </select>
+        <input id="awTitle" placeholder="Title — e.g. Air Assault Badge" maxlength="70" style="flex:1">
+      </div>
+      <input id="awNote" placeholder="Note / date earned / story (optional)" maxlength="140" style="margin-top:9px">
+      <button class="btn-add" id="awAdd">Add to the Wall</button>
+    </div>
+    <div id="awallGrid"></div>
+  </section>
+
+  <!-- THE WEIGHT — read-only mirror of the standalone Weight app -->
+  <section class="view" id="view-weight">
+    <div class="weight-head">
+      <div class="weight-title">THE WEIGHT</div>
+      <div class="weight-sub">A mirror of your ledger. Promises are bound, kept, and broken in the Weight app — this is the standing record, shown here.</div>
+      <div class="weight-carry" id="weightCarry"></div>
+    </div>
+    <div class="weight-keystone" id="weightKeystone"></div>
+
+    <div class="weight-jars" id="weightJars"></div>
+
+    <div class="weight-section-label">Memorial</div>
+    <div class="weight-memorial" id="weightMemorial"></div>
+
+    <div class="weight-mirror">
+      <div class="wm-nudge" id="wmNudge"></div>
+      <div class="wm-row">
+        <button class="wm-btn" id="wmOpen">⚖️ Open the Weight app</button>
+        <button class="wm-btn ghost" id="wmImport">↻ Update mirror</button>
+      </div>
+      <input type="file" id="wmFile" accept="application/json" style="display:none">
+      <a id="wmLinkEdit" class="wm-edit">set / change the Weight app link</a>
+      <div class="wb-note" id="wmStatus">This view is read-only. To refresh it, export your ledger from the Weight app and tap "Update mirror." Binding and keeping happen there, where the rituals live.</div>
+    </div>
+
+    <div class="weight-ledger" id="weightLedger"></div>
+  </section>
+
+  <div class="foot">
+    <span id="footStatus">OPERATIONS · all data lives only on this device</span><br>
+    <a id="cloudBtn">link cloud file</a> &nbsp;·&nbsp; <a id="exportBtn">export backup</a> &nbsp;·&nbsp; <a id="importBtn">import backup</a> &nbsp;·&nbsp; <a id="resetBtn">reset everything</a>
+    <input type="file" id="importFile" accept="application/json" style="display:none">
+    <div id="cloudHint" class="cloud-hint"></div>
+  </div>
+</div>
+
+<div id="toast"></div>
+<div id="levelup"><div class="lu-card">
+  <div class="lu-burst">🎖️</div>
+  <h2 id="luTitle">Promoted!</h2>
+  <p id="luSub"></p>
+  <button id="luClose">Press On</button>
+</div></div>
+
+<div id="quizModal">
+  <div class="qm-bar">
+    <h3 id="qmTitle">Quiz</h3>
+    <button class="qm-close" id="qmClose">✕</button>
+  </div>
+  <div class="qm-prog"><div class="qm-progfill" id="qmProg"></div></div>
+  <div class="qm-body" id="qmBody"></div>
+</div>
+
+<script src="quizbank.js"></script>
+<script>
+"use strict";
+/* ---------------- State ---------------- */
+const DEFAULT = {
+  name:"Cadet", rank:"MS2 Cadet", position:"No leadership role",
+  gold:0, streak:0, lastDaily:null, totalDone:0,
+  bestStreak:0, perfectDays:0, lastPerfect:null, missedYesterday:false,
+  skills:{ fitness:{xp:0}, tactics:{xp:0}, knowledge:{xp:0}, discipline:{xp:0} },
+  aft:[
+    {date:"Oct 1, 2025",  raw:{dl:160,hrp:37,sdc:114,plank:90,run:1090}, scores:{dl:63,hrp:80,sdc:79,plank:60,run:72}, total:354},
+    {date:"Nov 19, 2025", raw:{dl:200,hrp:51,sdc:119,plank:124,run:1051}, scores:{dl:70,hrp:94,sdc:74,plank:70,run:77}, total:385},
+    {date:"Feb 18, 2026", raw:{dl:200,hrp:48,sdc:124,plank:123,run:1149}, scores:{dl:70,hrp:92,sdc:69,plank:70,run:66}, total:367},
+    {date:"Apr 22, 2026", raw:{dl:200,hrp:46,sdc:129,plank:160,run:1043}, scores:{dl:70,hrp:90,sdc:65,plank:81,run:78}, total:384},
+  ],
+  quizzes:{},        // { topicKey: {passed:bool, bestPct, attempts} }
+  workouts:[],       // [{date, session, duration, exercises:[{name, type, sets:[{reps,weight} | {time} | {dist}]}], notes}]
+  baselines:[],      // [{date, ts, month:"2026-06", results:{exKey:{type, value:{...}}}}]
+  lastBaselineMonth:null,
+  branchGoal:"Cyber (17-series)",
+  weight:{ nextDisc:1, promises:[], memorial:[] },  // The Weight — read-only mirror of the standalone Weight app
+  weightAppUrl:"https://wsm-ai.github.io/tw-9f3kx-ledger/",   // hosted URL of the standalone Weight app (portal link)
+  lastMirrorUpdate:null,   // toDateString() of the last mirror refresh, for the daily nudge
+  awards:[],         // I-Love-Me wall: {id, ts, date, kind, title, note}
+  boardTasks:[
+    {id:id(), name:"Create / verify your CC IMS (Cadet Command) & TBB account", done:false},
+    {id:id(), name:"Build your Talent-Based Branching (TBB) accessions file", done:false},
+    {id:id(), name:"Write & polish your branch résumé", done:false},
+    {id:id(), name:"Draft 'Why Cyber?' talking points for branch interviews", done:false},
+    {id:id(), name:"Request branch interviews with Cyber", done:false},
+    {id:id(), name:"Enter & rank your branch preferences in TBB", done:false},
+    {id:id(), name:"Decide on BrADSO (Branch Active Duty Service Obligation) strategy", done:false},
+    {id:id(), name:"Max your OML inputs: GPA, AFT, leadership eval (CDT OER)", done:false},
+    {id:id(), name:"Knock out Cyber-relevant certs / coursework (security+, etc.)", done:false},
+    {id:id(), name:"Confirm clearance eligibility (Cyber requires TS/SCI)", done:false},
+  ],
+  quests:[
+    {id:id(), name:"Find your baseline: test 2-mile run time", diff:"med", track:"fitness", done:false},
+    {id:id(), name:"Find your baseline: max push-ups in 2 min", diff:"easy", track:"fitness", done:false},
+    {id:id(), name:"Find your baseline: max plank hold", diff:"easy", track:"fitness", done:false},
+    {id:id(), name:"Set a phone reminder for morning meditation", diff:"easy", track:"discipline", done:false},
+    {id:id(), name:"Pick a book for your reward shelf", diff:"easy", track:"discipline", done:false},
+  ],
+  dailies:[
+    {id:id(), name:"🧘 Meditate 20–30 min (morning)", diff:"med", track:"discipline", done:false, best:0},
+    {id:id(), name:"💪 Today's training session (see FM tab)", diff:"hard", track:"fitness", done:false, best:0},
+    {id:id(), name:"📚 Study for an officer-knowledge quiz", diff:"med", track:"knowledge", done:false, best:0},
+    {id:id(), name:"📋 Plan top 3 priorities for the day", diff:"easy", track:"discipline", done:false, best:0},
+    {id:id(), name:"🎯 Deep-work block: 60 min, no phone", diff:"med", track:"discipline", done:false, best:0},
+    {id:id(), name:"📵 Phone away 30 min before bed", diff:"easy", track:"discipline", done:false, best:0},
+    {id:id(), name:"💧 Hydrate + 7+ hrs sleep target", diff:"easy", track:"fitness", done:false, best:0},
+  ],
+  bosses:[
+    {id:id(), name:"Hit 450+ AFT (raise DL & SDC)", hp:20, maxhp:20, track:"fitness"},
+    {id:id(), name:"Pass all 16 officer-knowledge quizzes", hp:16, maxhp:16, track:"knowledge", auto:"quizzes"},
+  ],
+  rewards:[
+    {id:id(), name:"Read 1 chapter of your book", cost:15},
+    {id:id(), name:"Read 3 chapters (binge session)", cost:40},
+    {id:id(), name:"30 min guilt-free gaming", cost:25},
+    {id:id(), name:"Favorite coffee / treat", cost:20},
+    {id:id(), name:"One episode of your show", cost:30},
+    {id:id(), name:"Full rest/recovery day, no guilt", cost:60},
+  ]
+};
+const TRACKS = {
+  fitness:{name:"Fitness",icon:"💪",color:"var(--jade)"},
+  tactics:{name:"Tactics",icon:"🗺️",color:"var(--ember)"},
+  knowledge:{name:"Knowledge",icon:"📚",color:"var(--violet)"},
+  discipline:{name:"Discipline",icon:"🎯",color:"var(--gold)"},
+};
+const VALUES = {
+  quest:{easy:{xp:15,g:5},med:{xp:35,g:12},hard:{xp:70,g:28}},
+  daily:{easy:{xp:10,g:4},med:{xp:20,g:8},hard:{xp:40,g:16}},
+};
+// Exercise library — type drives which inputs show: "reps"=sets×reps(±weight), "time"=duration, "dist"=distance+time
+const SESSIONS = {
+  s1:{name:"Session 1 · Lower + Push", ex:[
+    {n:"Bulgarian split squat", t:"reps", w:true},
+    {n:"Single-leg RDL", t:"reps", w:true},
+    {n:"Hand-release push-ups", t:"reps"},
+    {n:"Pike push-ups", t:"reps"},
+    {n:"Pistol squat progression", t:"reps"},
+    {n:"Hollow-body hold", t:"time"},
+    {n:"Trap-bar / barbell deadlift", t:"reps", w:true},
+  ]},
+  s2:{name:"Session 2 · Run", ex:[
+    {n:"Intervals (400m reps)", t:"dist"},
+    {n:"Tempo run", t:"dist"},
+    {n:"Long easy run", t:"dist"},
+    {n:"Timed 2-mile", t:"dist"},
+  ]},
+  s3:{name:"Session 3 · Upper + Core", ex:[
+    {n:"Pull-ups / inverted rows", t:"reps", w:true},
+    {n:"Decline / pike push-ups", t:"reps"},
+    {n:"Diamond push-ups", t:"reps"},
+    {n:"Plank", t:"time"},
+    {n:"Side plank", t:"time"},
+    {n:"Superman / back extension", t:"reps"},
+    {n:"Ruck / farmer's carry", t:"dist", w:true},
+  ]},
+  s4:{name:"Session 4 · AFT Circuit", ex:[
+    {n:"Sprint-Drag-Carry sim", t:"time"},
+    {n:"Hand-release push-ups", t:"reps"},
+    {n:"Squat jumps", t:"reps"},
+    {n:"Plank", t:"time"},
+    {n:"200m run", t:"time"},
+  ]},
+  other:{name:"Other / Custom", ex:[
+    {n:"Custom exercise", t:"reps", w:true, custom:true},
+  ]},
+};
+// Monthly baseline = one max-effort set per key movement. These map to AFT
+// events + the plan's core lifts so the updater can re-anchor each month.
+const BASELINE_TEST = [
+  {key:"max_pushups", name:"Max hand-release push-ups (2 min)", type:"reps", aft:"hrp"},
+  {key:"max_plank",   name:"Max plank hold", type:"time", aft:"plank"},
+  {key:"max_deadlift",name:"3-rep max deadlift (lbs)", type:"reps", w:true, aft:"dl"},
+  {key:"max_pullups", name:"Max pull-ups (one set)", type:"reps"},
+  {key:"max_squat",   name:"Max bodyweight squats (2 min)", type:"reps"},
+  {key:"run_2mi",     name:"Timed 2-mile run", type:"dist", aft:"run", lowerBetter:true},
+  {key:"sdc_sim",     name:"Sprint-Drag-Carry sim (time)", type:"time", aft:"sdc", lowerBetter:true},
+];
+const KEY="operations_v2";
+let S = load();
+
+function id(){return Math.random().toString(36).slice(2,9)}
+function load(){
+  try{
+    const r=JSON.parse(localStorage.getItem(KEY));
+    if(!r) return structuredClone(DEFAULT);
+    const merged=Object.assign(structuredClone(DEFAULT),r);
+    // ensure nested structures exist after upgrades
+    merged.skills=Object.assign(structuredClone(DEFAULT.skills),r.skills||{});
+    merged.quizzes=r.quizzes||{};
+    merged.aft=r.aft||[];
+    merged.workouts=r.workouts||[];
+    merged.baselines=r.baselines||[];
+    merged.boardTasks=r.boardTasks||structuredClone(DEFAULT.boardTasks);
+    merged.branchGoal=r.branchGoal||DEFAULT.branchGoal;
+    merged.weight=r.weight||structuredClone(DEFAULT.weight);
+    if(!merged.weight.promises) merged.weight.promises=[];
+    if(!merged.weight.memorial) merged.weight.memorial=[];
+    merged.weightAppUrl=r.weightAppUrl||"https://wsm-ai.github.io/tw-9f3kx-ledger/";
+    merged.lastMirrorUpdate=r.lastMirrorUpdate||null;
+    merged.awards=r.awards||[];
+    return merged;
+  }catch(e){return structuredClone(DEFAULT)}
+}
+function save(){localStorage.setItem(KEY,JSON.stringify(S)); cloudWriteDebounced();}
+// skill level from xp: rising cost curve
+function skillLevel(xp){let lvl=1,need=80,acc=0;while(xp>=acc+need){acc+=need;lvl++;need+=40;}return{lvl,into:xp-acc,need};}
+
+/* ---------------- Daily reset & streak ---------------- */
+function today(){return new Date().toDateString()}
+function checkDailyReset(){
+  const t=today();
+  if(S.lastDaily===t) return;
+  if(S.lastDaily){
+    const diff=Math.round((new Date(t)-new Date(S.lastDaily))/864e5);
+    if(diff===1 && S._yesterdayComplete){ S.streak++; S.missedYesterday=false; }
+    else { if(S.streak>0) S.missedYesterday=true; S.streak=0; }
+  }
+  if(S.streak>S.bestStreak) S.bestStreak=S.streak;
+  S._yesterdayComplete = S.dailies.length>0 && S.dailies.every(d=>d.done);
+  S.dailies.forEach(d=>d.done=false);
+  S.lastDaily=t;
+  save();
+}
+// readiness status — degrades as undone dailies pile up; this is the "don't slip" signal
+function readiness(){
+  const total=S.dailies.length||1;
+  const done=S.dailies.filter(d=>d.done).length;
+  const pct=done/total;
+  if(pct>=1) return {label:"FULLY MISSION READY",color:"var(--jade)",pct};
+  if(pct>=0.66) return {label:"READY",color:"var(--gold)",pct};
+  if(pct>=0.34) return {label:"PARTIALLY READY",color:"var(--ember)",pct};
+  return {label:"NOT MISSION READY",color:"var(--blood)",pct};
+}
+
+/* ---------------- XP / rewards ---------------- */
+function grant(xp,gold,label,track){
+  S.gold+=gold; S.totalDone++;
+  track=track||"discipline";
+  if(!S.skills[track]) S.skills[track]={xp:0};
+  const before=skillLevel(S.skills[track].xp).lvl;
+  S.skills[track].xp+=xp;
+  const after=skillLevel(S.skills[track].xp).lvl;
+  save(); render();
+  if(after>before) showLevelUp(track,after);
+  else toast(`<span class="t-xp">+${xp} ${TRACKS[track].name} XP &nbsp;+${gold} pts</span> &nbsp;·&nbsp; ${label}`);
+}
+
+// Perfect day = all dailies cleared. Escalating dopamine + streak milestones.
+function onPerfectDay(){
+  const t=today();
+  if(S.lastPerfect===t) return; // only once per day
+  S.lastPerfect=t;
+  S.perfectDays=(S.perfectDays||0)+1;
+  // tomorrow's reset will bump the streak; the *pending* streak is streak+1
+  const pending=S.streak+1;
+  // bonus merit scales with streak (loss aversion: the longer the streak, the more you'd lose)
+  const bonus=20+Math.min(80,pending*3);
+  S.gold+=bonus;
+  if(!S.skills.discipline)S.skills.discipline={xp:0};
+  S.skills.discipline.xp+=40;
+  save();render();
+  // milestone celebrations
+  const milestones={3:"3-day streak — momentum building.",7:"7 days straight. One week locked in.",14:"Two weeks. This is becoming who you are.",30:"30 DAYS. Discipline is now a habit, not a choice.",60:"60 days. Most people never get here.",100:"100 DAYS. Elite consistency."};
+  const ms=milestones[pending];
+  document.getElementById("luTitle").textContent=ms?("🔥 "+pending+"-Day Streak!"):"✅ Perfect Day";
+  document.getElementById("luSub").textContent=(ms||"All orders cleared. +"+bonus+" merit, +40 Discipline XP.")+(ms?` +${bonus} merit.`:"");
+  document.querySelector("#levelup .lu-burst").textContent=ms?"🔥":"🎖️";
+  document.getElementById("levelup").classList.add("show");
+}
+
+/* ---------------- Render ---------------- */
+function render(){
+  checkDailyReset();
+  document.getElementById("heroName").textContent=S.name;
+  document.getElementById("rankLine").textContent=S.rank;
+  document.getElementById("posLine").textContent=S.position;
+  document.getElementById("sGold").textContent=S.gold;
+  document.getElementById("sStreak").textContent=S.streak;
+  document.getElementById("sBest").textContent=S.bestStreak||0;
+  // readiness bar
+  const rd=readiness();
+  const done=S.dailies.filter(d=>d.done).length, total=S.dailies.length;
+  document.getElementById("rdLabel").textContent=rd.label;
+  document.getElementById("rdLabel").style.color=rd.color;
+  document.getElementById("rdPct").textContent=done+"/"+total+" orders today";
+  document.getElementById("rdFill").style.width=Math.round(rd.pct*100)+"%";
+  document.getElementById("rdFill").style.background=rd.color;
+  const warn=document.getElementById("rdWarn");
+  const undone=total-done;
+  if(S.missedYesterday && S.streak===0){
+    warn.className="rd-warn show"; warn.style.color="var(--blood)";
+    warn.innerHTML="💥 Streak broken — you missed a day. Clear every order today to start rebuilding.";
+  } else if(undone>0 && S.streak>0){
+    warn.className="rd-warn show"; warn.style.color="var(--ember)";
+    warn.innerHTML=`⚠️ ${S.streak}-day streak AT RISK — ${undone} order${undone>1?'s':''} left. Don't lose it now.`;
+  } else if(undone>0){
+    warn.className="rd-warn show"; warn.style.color="var(--ink-faint)";
+    warn.innerHTML=`${undone} order${undone>1?'s':''} left to lock in a perfect day.`;
+  } else {
+    warn.className="rd-warn"; warn.innerHTML="";
+  }
+  renderSkills();
+  renderQuests(); renderDailies(); renderBosses(); renderShop();
+  if(typeof renderQuizzes==="function") renderQuizzes();
+  if(typeof renderAft==="function") renderAft();
+  if(typeof renderLog==="function") renderLog();
+  if(typeof renderAdaptiveTargets==="function") renderAdaptiveTargets();
+  if(typeof renderBaseline==="function") renderBaseline();
+  if(typeof renderBoard==="function") renderBoard();
+  if(typeof renderWeight==="function") renderWeight();
+  if(typeof renderAwards==="function") renderAwards();
+}
+
+function renderSkills(){
+  const el=document.getElementById("skillBars");
+  el.innerHTML=Object.keys(TRACKS).map(k=>{
+    const s=skillLevel(S.skills[k]?S.skills[k].xp:0);
+    const pct=Math.round(s.into/s.need*100);
+    return `<div class="skill">
+      <div class="skill-top"><span class="skill-name">${TRACKS[k].icon} ${TRACKS[k].name}</span><span class="skill-lvl">Lvl ${s.lvl}</span></div>
+      <div class="skbar"><div class="skfill" style="width:${pct}%;background:${TRACKS[k].color}"></div></div>
+    </div>`;
+  }).join("");
+}
+
+function diffTag(scope,diff){
+  const cls=diff==="easy"?"diff-easy":diff==="hard"?"diff-hard":"diff-med";
+  const labels={easy:"routine",med:"priority",hard:"high-risk"};
+  const v=VALUES[scope][diff];
+  return `<span class="tag ${cls}">${labels[diff]}</span><span class="tag xp">+${v.xp} XP · ${v.g} pts</span>`;
+}
+
+function renderQuests(){
+  const el=document.getElementById("qList");
+  if(!S.quests.length){el.innerHTML=`<div class="empty"><span class="big">🎯</span>No active missions. Assign one above to begin.</div>`;return}
+  el.innerHTML=S.quests.map(q=>`
+    <li class="card ${q.done?'done':''}">
+      <div class="check" data-q="${q.id}">${q.done?'✓':''}</div>
+      <div class="c-body"><div class="c-name">${esc(q.name)}</div>
+        <div class="c-meta">${diffTag('quest',q.diff)}</div></div>
+      <button class="del" data-dq="${q.id}">✕</button>
+    </li>`).join("");
+}
+function renderDailies(){
+  const el=document.getElementById("dList");
+  if(!S.dailies.length){el.innerHTML=`<div class="empty"><span class="big">📋</span>No daily orders yet. Add habits to execute every day.</div>`;return}
+  el.innerHTML=S.dailies.map(d=>`
+    <li class="card ${d.done?'done':''}">
+      <div class="check" data-d="${d.id}">${d.done?'✓':''}</div>
+      <div class="c-body"><div class="c-name">${esc(d.name)}</div>
+        <div class="c-meta">${diffTag('daily',d.diff)}${d.best?`<span class="tag streakt">🔥 best ${d.best}</span>`:''}</div></div>
+      <button class="del" data-dd="${d.id}">✕</button>
+    </li>`).join("");
+}
+function renderBosses(){
+  const el=document.getElementById("bList");
+  if(!S.bosses.length){el.innerHTML=`<div class="empty"><span class="big">⭐</span>No objectives set. Break a big goal into steps and secure it.</div>`;return}
+  el.innerHTML=S.bosses.map(b=>{
+    const pct=Math.max(0,b.hp/b.maxhp*100);
+    const dead=b.hp<=0;
+    return `<li class="card boss">
+      <div class="boss-top">
+        <div class="boss-skull">${dead?'✅':'⭐'}</div>
+        <div class="boss-name">${esc(b.name)}${dead?' — Secured!':''}</div>
+        <button class="del" data-db="${b.id}">✕</button>
+      </div>
+      ${dead?'':`
+      <div class="hpbar"><div class="hpfill" style="width:${pct}%"></div></div>
+      <div class="hp-meta"><span>${b.hp} / ${b.maxhp} steps left</span><span>+${b.maxhp*8} XP · ${b.maxhp*4} pts total</span></div>
+      <div class="boss-actions">
+        <button class="hit" data-hit="${b.id}">✔ Log progress</button>
+      </div>`}
+    </li>`}).join("");
+}
+function renderShop(){
+  const el=document.getElementById("rList");
+  if(!S.rewards.length){el.innerHTML=`<div class="empty"><span class="big">🏅</span>No R&R set. Add real downtime to spend merit points on.</div>`;return}
+  el.innerHTML=S.rewards.map(r=>`
+    <li class="card">
+      <div class="c-body reward">
+        <div style="flex:1"><div class="c-name">${esc(r.name)}</div>
+          <div class="c-meta"><span class="cost">🎖️ ${r.cost} merit pts</span></div></div>
+        <button class="btn-buy" data-buy="${r.id}" ${S.gold<r.cost?'disabled':''}>Claim</button>
+      </div>
+      <button class="del" data-dr="${r.id}">✕</button>
+    </li>`).join("");
+}
+function esc(s){return s.replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]))}
+
+/* ---------------- Events ---------------- */
+document.querySelectorAll("nav.tabs button").forEach(b=>b.onclick=()=>{
+  document.querySelectorAll("nav.tabs button").forEach(x=>x.classList.remove("on"));
+  document.querySelectorAll(".view").forEach(x=>x.classList.remove("on"));
+  b.classList.add("on");
+  document.getElementById("view-"+b.dataset.tab).classList.add("on");
+});
+
+document.getElementById("qAdd").onclick=()=>{
+  const n=document.getElementById("qName").value.trim();if(!n)return;
+  S.quests.unshift({id:id(),name:n,diff:document.getElementById("qDiff").value,done:false});
+  document.getElementById("qName").value="";save();render();
+};
+document.getElementById("dAdd").onclick=()=>{
+  const n=document.getElementById("dName").value.trim();if(!n)return;
+  S.dailies.unshift({id:id(),name:n,diff:document.getElementById("dDiff").value,done:false,best:0});
+  document.getElementById("dName").value="";save();render();
+};
+document.getElementById("bAdd").onclick=()=>{
+  const n=document.getElementById("bName").value.trim();if(!n)return;
+  const hp=Math.max(2,Math.min(200,parseInt(document.getElementById("bHp").value)||10));
+  S.bosses.unshift({id:id(),name:n,hp:hp,maxhp:hp});
+  document.getElementById("bName").value="";save();render();
+};
+document.getElementById("rAdd").onclick=()=>{
+  const n=document.getElementById("rName").value.trim();if(!n)return;
+  const c=Math.max(1,parseInt(document.getElementById("rCost").value)||10);
+  S.rewards.push({id:id(),name:n,cost:c});
+  document.getElementById("rName").value="";save();render();
+};
+
+document.body.addEventListener("click",e=>{
+  const t=e.target;
+  // complete quest
+  if(t.dataset.q){const q=S.quests.find(x=>x.id===t.dataset.q);if(q&&!q.done){q.done=true;const v=VALUES.quest[q.diff];grant(v.xp,v.g,"Mission complete",q.track);setTimeout(()=>{S.quests=S.quests.filter(x=>x.id!==q.id||!x.done);},900);}return}
+  // complete daily
+  if(t.dataset.d){const d=S.dailies.find(x=>x.id===t.dataset.d);if(d&&!d.done){d.done=true;const v=VALUES.daily[d.diff];grant(v.xp,v.g,"Order executed",d.track);const allNow=S.dailies.every(x=>x.done);if(allNow){onPerfectDay();}}else if(d&&d.done){d.done=false;save();render();}return}
+  // boss hit
+  if(t.dataset.hit){const b=S.bosses.find(x=>x.id===t.dataset.hit);if(b&&b.hp>0){b.hp--;grant(8,4,"Progress logged",b.track);if(b.hp<=0){setTimeout(()=>{toast(`<span class="t-xp">✅ ${esc(b.name)} secured! Bonus awarded</span>`);S.gold+=b.maxhp*2;save();render();},400);}}return}
+  // buy reward
+  if(t.dataset.buy){const r=S.rewards.find(x=>x.id===t.dataset.buy);if(r&&S.gold>=r.cost){S.gold-=r.cost;save();render();toast(`🏅 Claimed: ${esc(r.name)} — you earned it.`);}return}
+  // deletes
+  if(t.dataset.dq){S.quests=S.quests.filter(x=>x.id!==t.dataset.dq);save();render();return}
+  if(t.dataset.dd){S.dailies=S.dailies.filter(x=>x.id!==t.dataset.dd);save();render();return}
+  if(t.dataset.db){S.bosses=S.bosses.filter(x=>x.id!==t.dataset.db);save();render();return}
+  if(t.dataset.dr){S.rewards=S.rewards.filter(x=>x.id!==t.dataset.dr);save();render();return}
+});
+
+document.getElementById("renameBtn").onclick=()=>{
+  const n=prompt("Enter your name / callsign:",S.name);if(n&&n.trim()){S.name=n.trim().slice(0,30);save();render();}
+};
+document.getElementById("editRankBtn").onclick=()=>{
+  const r=prompt("Your current MS year / rank (e.g. 'MS2 Cadet'):",S.rank);
+  if(r===null) return;
+  const p=prompt("Your leadership position (e.g. 'S1', 'Squad Leader', 'No leadership role'):",S.position);
+  if(r&&r.trim()) S.rank=r.trim().slice(0,40);
+  if(p!==null && p.trim()) S.position=p.trim().slice(0,40);
+  save();render();
+};
+
+// Enter-to-submit
+["qName","dName"].forEach(idn=>document.getElementById(idn).addEventListener("keydown",e=>{if(e.key==="Enter")document.getElementById(idn==="qName"?"qAdd":"dAdd").click();}));
+
+/* ---------------- Toast & skill-up ---------------- */
+let toastT;
+function toast(html){const el=document.getElementById("toast");el.innerHTML=html;el.classList.add("show");clearTimeout(toastT);toastT=setTimeout(()=>el.classList.remove("show"),2200);}
+function showLevelUp(track,lvl){
+  const tr=TRACKS[track];
+  document.getElementById("luTitle").textContent=tr.icon+" "+tr.name+" — Level "+lvl;
+  document.getElementById("luSub").textContent="Your "+tr.name+" skill leveled up. Keep stacking reps. Drive on.";
+  document.getElementById("levelup").classList.add("show");
+}
+document.getElementById("luClose").onclick=()=>document.getElementById("levelup").classList.remove("show");
+
+/* ---------------- Backup / reset ---------------- */
+document.getElementById("exportBtn").onclick=()=>{
+  const blob=new Blob([JSON.stringify(S,null,2)],{type:"application/json"});
+  const a=document.createElement("a");a.href=URL.createObjectURL(blob);
+  a.download="questline-backup-"+today().replace(/ /g,"-")+".json";a.click();
+};
+document.getElementById("importBtn").onclick=()=>document.getElementById("importFile").click();
+document.getElementById("importFile").onchange=e=>{
+  const f=e.target.files[0];if(!f)return;const rd=new FileReader();
+  rd.onload=()=>{try{S=Object.assign(structuredClone(DEFAULT),JSON.parse(rd.result));save();render();toast("Backup restored");}catch(x){toast("Could not read that file");}};
+  rd.readAsText(f);
+};
+document.getElementById("resetBtn").onclick=()=>{if(confirm("Erase all progress and start over? This cannot be undone.")){localStorage.removeItem(KEY);S=structuredClone(DEFAULT);save();render();}};
+
+/* ---------------- QUIZZES ---------------- */
+function renderQuizzes(){
+  const el=document.getElementById("quizList");
+  if(!el) return;
+  const bank=window.QUIZ_BANK||{};
+  el.innerHTML=Object.keys(bank).map(key=>{
+    const t=bank[key];
+    const st=S.quizzes[key]||{passed:false,bestPct:0,attempts:0};
+    const passLabel=Math.round(t.pass*100);
+    return `<div class="quiz-card ${st.passed?'passed':''}">
+      <div class="quiz-head">
+        <span class="quiz-ic">${t.icon}</span>
+        <div class="quiz-meta">
+          <div class="quiz-title">${t.name}</div>
+          <div class="quiz-sub">${t.questions.length} questions · pass ≥ ${passLabel}%${st.attempts?` · best ${st.bestPct}%`:''}</div>
+        </div>
+        <span class="quiz-badge ${st.passed?'pass':'todo'}">${st.passed?'✓ passed':'not passed'}</span>
+      </div>
+      <button class="quiz-btn" data-quiz="${key}">${st.passed?'Retake / Review':'Start Quiz'}</button>
+    </div>`;
+  }).join("");
+}
+
+let QZ=null; // {key, idx, correct, order}
+function startQuiz(key){
+  const t=window.QUIZ_BANK[key]; if(!t) return;
+  // shuffle a copy of questions
+  const order=t.questions.map((q,i)=>i).sort(()=>Math.random()-0.5);
+  QZ={key,idx:0,correct:0,order};
+  document.getElementById("qmTitle").textContent=t.icon+" "+t.name;
+  document.getElementById("quizModal").classList.add("show");
+  showQuizQ();
+}
+function showQuizQ(){
+  const t=window.QUIZ_BANK[QZ.key];
+  const total=QZ.order.length;
+  document.getElementById("qmProg").style.width=(QZ.idx/total*100)+"%";
+  if(QZ.idx>=total){ return finishQuiz(); }
+  const q=t.questions[QZ.order[QZ.idx]];
+  const body=document.getElementById("qmBody");
+  body.innerHTML=`<div class="qm-qnum">Question ${QZ.idx+1} of ${total}</div>
+    <div class="qm-q">${esc(q.q)}</div>
+    <div id="qmOpts">${q.a.map((opt,i)=>`<button class="qm-opt" data-opt="${i}">${esc(opt)}</button>`).join("")}</div>`;
+  body.scrollTop=0;
+}
+function answerQuiz(choice){
+  const t=window.QUIZ_BANK[QZ.key];
+  const q=t.questions[QZ.order[QZ.idx]];
+  const opts=document.querySelectorAll("#qmOpts .qm-opt");
+  opts.forEach((o,i)=>{o.disabled=true;if(i===q.c)o.classList.add("correct");if(i===choice&&choice!==q.c)o.classList.add("wrong");});
+  if(choice===q.c) QZ.correct++;
+  const body=document.getElementById("qmBody");
+  const exp=document.createElement("div");
+  exp.className="qm-exp";
+  exp.innerHTML=(choice===q.c?"✅ Correct. ":"❌ Not quite. ")+esc(q.e);
+  body.appendChild(exp);
+  const nx=document.createElement("button");
+  nx.className="qm-next";
+  nx.textContent=QZ.idx+1>=QZ.order.length?"See Results":"Next Question";
+  nx.onclick=()=>{QZ.idx++;showQuizQ();};
+  body.appendChild(nx);
+  body.scrollTop=body.scrollHeight;
+}
+function finishQuiz(){
+  const t=window.QUIZ_BANK[QZ.key];
+  const total=QZ.order.length;
+  const pct=Math.round(QZ.correct/total*100);
+  const passed=pct>=Math.round(t.pass*100);
+  const prev=S.quizzes[QZ.key]||{passed:false,bestPct:0,attempts:0};
+  const firstPass=passed && !prev.passed;
+  S.quizzes[QZ.key]={passed:prev.passed||passed, bestPct:Math.max(prev.bestPct,pct), attempts:prev.attempts+1};
+  // first time passing: reward + convert to daily review + advance knowledge objective
+  if(firstPass){
+    S.gold+=20;
+    if(!S.skills.knowledge) S.skills.knowledge={xp:0};
+    S.skills.knowledge.xp+=50;
+    // add daily review order if not present
+    const reviewName="🧠 Review: "+t.name+" (retake quiz)";
+    if(!S.dailies.some(d=>d.review===QZ.key)){
+      S.dailies.push({id:id(),name:reviewName,diff:"easy",track:"knowledge",done:false,best:0,review:QZ.key});
+    }
+    // advance the "pass every quiz" objective
+    const obj=S.bosses.find(b=>b.auto==="quizzes");
+    if(obj){const passedCount=Object.values(S.quizzes).filter(x=>x.passed).length; obj.hp=Math.max(0,obj.maxhp-passedCount); if(obj.hp<=0){toast("⭐ All quizzes passed — Knowledge objective secured!");}}
+  }
+  save();
+  const body=document.getElementById("qmBody");
+  document.getElementById("qmProg").style.width="100%";
+  body.innerHTML=`<div class="qm-result">
+    <div class="big">${passed?"🎖️":"📚"}</div>
+    <h2>${passed?"Passed":"Keep Studying"}</h2>
+    <div class="score" style="color:${passed?'var(--jade)':'var(--ember)'}">${pct}%</div>
+    <p style="color:var(--ink-dim)">${QZ.correct} of ${total} correct · need ${Math.round(t.pass*100)}%</p>
+    ${firstPass?`<p style="color:var(--gold);margin-top:12px">+20 merit pts · +50 Knowledge XP<br>Daily review order added to keep it sharp.</p>`:''}
+    <button class="qm-next" style="margin-top:22px;max-width:300px" id="qmDone">Return</button>
+  </div>`;
+  document.getElementById("qmDone").onclick=closeQuiz;
+}
+function closeQuiz(){document.getElementById("quizModal").classList.remove("show");QZ=null;render();}
+document.getElementById("qmClose").onclick=closeQuiz;
+document.getElementById("qmBody").addEventListener("click",e=>{
+  const o=e.target.closest(".qm-opt");
+  if(o && !o.disabled){answerQuiz(parseInt(o.dataset.opt));}
+});
+document.body.addEventListener("click",e=>{
+  const qb=e.target.closest("[data-quiz]");
+  if(qb){startQuiz(qb.dataset.quiz);}
+});
+
+/* ---------------- AFT SCORECARD ---------------- */
+// Approx AFT scoring (general standard, male 17-21 ballpark). NOT official —
+// for relative tracking + weakest-event detection only. Verify on the real chart.
+function parseTime(str){ // "m:ss" or "mm:ss" -> seconds
+  if(!str) return null;
+  const p=String(str).split(":").map(s=>parseInt(s.trim()));
+  if(p.length===2 && !isNaN(p[0]) && !isNaN(p[1])) return p[0]*60+p[1];
+  return null;
+}
+function score_dl(lbs){ if(lbs==null)return null; // 60pt~140, 100pt~340 (approx)
+  return clampScore(60 + (lbs-140)/(340-140)*40);}
+function score_hrp(reps){ if(reps==null)return null; // 60pt~10, 100pt~57
+  return clampScore(60 + (reps-10)/(57-10)*40);}
+function score_sdc(sec){ if(sec==null)return null; // lower better; 60pt~180s, 100pt~108s
+  return clampScore(60 + (180-sec)/(180-108)*40);}
+function score_plank(sec){ if(sec==null)return null; // 60pt~85s(1:25), 100pt~225s(3:45)
+  return clampScore(60 + (sec-85)/(225-85)*40);}
+function score_run(sec){ if(sec==null)return null; // lower better; 60pt~1365s(22:45), 100pt~795s(13:15)
+  return clampScore(60 + (1365-sec)/(1365-795)*40);}
+function clampScore(x){return Math.max(0,Math.min(100,Math.round(x)));}
+
+function renderAft(){
+  const hist=document.getElementById("aftHistory");
+  if(!hist) return;
+  if(!S.aft.length){hist.innerHTML=`<div class="empty"><span class="big">💪</span>No AFT logged yet. Enter your scores above.</div>`;}
+  else{
+    const rev=S.aft.slice().reverse();
+    hist.innerHTML=rev.map((a,i)=>{
+      const older=rev[i+1];
+      let tr="";
+      if(older){const d=a.total-older.total; tr=d>0?`<span style="color:var(--jade);font-size:12px"> ▲${d}</span>`:d<0?`<span style="color:var(--ember);font-size:12px"> ▼${Math.abs(d)}</span>`:`<span style="color:var(--ink-faint);font-size:12px"> —</span>`;}
+      return `<div class="aft-hist-row"><span>${a.date}</span><span class="ttl">${a.total} pts${tr}</span></div>`;
+    }).join("");
+  }
+  if(S.aft.length){ showAftResult(S.aft[S.aft.length-1]); }
+}
+function showAftResult(a){
+  const el=document.getElementById("aftResult");
+  const prev = S.aft.length>1 ? S.aft[S.aft.indexOf(a)-1] : null;
+  const events=[
+    {k:"dl",label:"Deadlift",s:a.scores.dl},
+    {k:"hrp",label:"Hand-Release Push-up",s:a.scores.hrp},
+    {k:"sdc",label:"Sprint-Drag-Carry",s:a.scores.sdc},
+    {k:"plank",label:"Plank",s:a.scores.plank},
+    {k:"run",label:"2-Mile Run",s:a.scores.run},
+  ].filter(e=>e.s!=null);
+  if(!events.length){el.innerHTML="";return;}
+  const weakest=events.reduce((m,e)=>e.s<m.s?e:m,events[0]);
+  const failing=events.filter(e=>e.s<60);
+  const nearMin=events.filter(e=>e.s>=60 && e.s<=65 && e.k!==weakest.k);
+  // declining events vs previous test
+  const declining=prev?events.filter(e=>prev.scores[e.k]!=null && e.s < prev.scores[e.k]-2):[];
+  function trend(e){
+    if(!prev||prev.scores[e.k]==null) return "";
+    const d=e.s-prev.scores[e.k];
+    if(d>2) return `<span style="color:var(--jade)"> ▲${d}</span>`;
+    if(d<-2) return `<span style="color:var(--ember)"> ▼${Math.abs(d)}</span>`;
+    return `<span style="color:var(--ink-faint)"> —</span>`;
+  }
+  // build focus: primary weakest + any declining secondary
+  let focus=EVENT_FOCUS[weakest.k];
+  const secondary=declining.filter(e=>e.k!==weakest.k);
+  if(secondary.length){
+    focus+=` <br><br><b>Also watch:</b> ${secondary.map(e=>e.label).join(", ")} ${secondary.length>1?'are':'is'} trending down — ${secondary.map(e=>EVENT_FOCUS_SHORT[e.k]).join("; ")}.`;
+  }
+  el.innerHTML=`<div class="aft-result-card">
+    <h3>Latest — ${a.date} · ${a.total} pts ${a.total>=350?'<span style="color:var(--jade)">(350+ ✓)</span>':a.total>=300?'<span style="color:var(--gold)">(300+ pass)</span>':'<span style="color:var(--ember)">(below 300)</span>'}</h3>
+    ${events.map(e=>`<div class="aft-event ${e.k===weakest.k?'weak':''}"><span>${e.label}${e.k===weakest.k?' ← weakest':''}</span><span class="ev-score">${e.s} pts${trend(e)}${e.s<60?' ⚠️':''}</span></div>`).join("")}
+    <div class="aft-focus">📍 <b>Plan focus:</b> ${focus} ${failing.length?`<br><br>⚠️ ${failing.length} event(s) below the 60-pt minimum — fix immediately to avoid a no-go.`:nearMin.length?`<br><br>⚠️ ${nearMin.map(e=>e.label).join(", ")} sitting near the 60-pt floor — keep a buffer.`:''}</div>
+  </div>`;
+}
+const EVENT_FOCUS={
+  dl:"Deadlift is your lowest event and the closest to the 60-pt floor — that's your standing risk. Run the equipment deadlift block (4×6) twice a week, add heavy carries, and push the load up steadily. Don't let this one fail you.",
+  hrp:"Push-ups are the weak point. Daily grease-the-groove sets plus the Session-1 and Session-3 push-up volume; train to failure twice a week.",
+  sdc:"Sprint-Drag-Carry needs work. Make Session 4 (the AFT circuit) twice a week — sprints, drags, and loaded carries for speed under load.",
+  plank:"Plank is the weak link. 3× max-hold planks daily, progress side planks + hollow holds for core endurance.",
+  run:"The 2-mile is your weakest. Make Session 2 the priority — add a third run some weeks (intervals, tempo, long easy).",
+};
+const EVENT_FOCUS_SHORT={
+  dl:"add deadlift volume and grip work",
+  hrp:"hold your push-up volume up",
+  sdc:"hit the AFT circuit for speed under load",
+  plank:"keep up daily max-hold planks",
+  run:"add a weekly run",
+};
+document.getElementById("aftSave").onclick=()=>{
+  const dl=parseInt(document.getElementById("aDl").value)||null;
+  const hrp=parseInt(document.getElementById("aHrp").value)||null;
+  const sdc=parseTime(document.getElementById("aSdc").value);
+  const plank=parseTime(document.getElementById("aPlank").value);
+  const run=parseTime(document.getElementById("aRun").value);
+  if(dl==null&&hrp==null&&sdc==null&&plank==null&&run==null){toast("Enter at least one event score");return;}
+  const scores={dl:score_dl(dl),hrp:score_hrp(hrp),sdc:score_sdc(sdc),plank:score_plank(plank),run:score_run(run)};
+  const total=Object.values(scores).reduce((s,v)=>s+(v||0),0);
+  const entry={date:new Date().toLocaleDateString(),raw:{dl,hrp,sdc,plank,run},scores,total};
+  S.aft.push(entry);
+  if(!S.skills.fitness)S.skills.fitness={xp:0};
+  S.skills.fitness.xp+=30;
+  save();render();
+  ["aDl","aHrp","aSdc","aPlank","aRun"].forEach(i=>document.getElementById(i).value="");
+  toast(`<span class="t-xp">AFT logged: ${total} pts</span> · plan re-tuned`);
+};
+
+/* ---------------- WORKOUT LOG ---------------- */
+let LG=null; // current draft {session, exercises:[{name,type,w,sets:[...]}]}
+function initLogTab(){
+  const sel=document.getElementById("lgSession");
+  if(!sel) return;
+  if(!sel.options.length){
+    sel.innerHTML=Object.keys(SESSIONS).map(k=>`<option value="${k}">${SESSIONS[k].name}</option>`).join("");
+    sel.onchange=()=>buildLogForm(sel.value);
+  }
+  if(!LG) buildLogForm(sel.value);
+}
+function buildLogForm(skey){
+  const s=SESSIONS[skey];
+  LG={session:skey, exercises:s.ex.map(e=>({name:e.n,type:e.t,w:!!e.w,custom:!!e.custom,sets:[blankSet(e.t)]}))};
+  renderLogForm();
+}
+function blankSet(type){
+  if(type==="reps") return {reps:"",weight:""};
+  if(type==="time") return {time:""};
+  if(type==="dist") return {dist:"",time:""};
+  return {reps:""};
+}
+function renderLogForm(){
+  const el=document.getElementById("lgExercises");
+  el.innerHTML=LG.exercises.map((ex,xi)=>{
+    const typLabel=ex.type==="reps"?(ex.w?"reps × weight":"reps"):ex.type==="time"?"hold/time":"distance + time";
+    return `<div class="lg-ex">
+      <div class="lg-ex-name">${ex.custom?'':esc(ex.name)} <span class="typ">${typLabel}</span></div>
+      ${ex.custom?`<input class="lg-custom-name" placeholder="Exercise name" value="${esc(ex.name==='Custom exercise'?'':ex.name)}" data-cn="${xi}">`:''}
+      ${ex.sets.map((st,si)=>`<div class="lg-set">
+        <span class="setn">#${si+1}</span>
+        ${setInputs(ex,st,xi,si)}
+        ${ex.sets.length>1?`<button class="rmset" data-rm="${xi}.${si}">✕</button>`:''}
+      </div>`).join("")}
+      <button class="lg-addset" data-addset="${xi}">+ add set</button>
+    </div>`;
+  }).join("");
+}
+function setInputs(ex,st,xi,si){
+  if(ex.type==="reps"){
+    return `<input type="number" placeholder="reps" value="${st.reps}" data-f="${xi}.${si}.reps">`+
+      (ex.w?`<input type="number" placeholder="lbs (opt)" value="${st.weight}" data-f="${xi}.${si}.weight">`:'');
+  }
+  if(ex.type==="time"){
+    return `<input type="text" placeholder="m:ss or sec" value="${st.time}" data-f="${xi}.${si}.time">`;
+  }
+  if(ex.type==="dist"){
+    return `<input type="text" placeholder="dist (mi/m)" value="${st.dist}" data-f="${xi}.${si}.dist">`+
+      `<input type="text" placeholder="time m:ss" value="${st.time}" data-f="${xi}.${si}.time">`;
+  }
+  return "";
+}
+// delegated input + button handling for log form
+document.addEventListener("input",e=>{
+  const f=e.target.dataset.f;
+  if(f){const[xi,si,field]=f.split(".");LG.exercises[xi].sets[si][field]=e.target.value;return;}
+  const cn=e.target.dataset.cn;
+  if(cn!=null){LG.exercises[cn].name=e.target.value;}
+});
+document.addEventListener("click",e=>{
+  const add=e.target.dataset.addset;
+  if(add!=null){const ex=LG.exercises[add];ex.sets.push(blankSet(ex.type));renderLogForm();return;}
+  const rm=e.target.dataset.rm;
+  if(rm!=null){const[xi,si]=rm.split(".");LG.exercises[xi].sets.splice(si,1);renderLogForm();return;}
+  const dw=e.target.dataset.delw;
+  if(dw!=null){if(confirm("Delete this workout?")){S.workouts=S.workouts.filter(w=>w.id!==dw);save();renderLog();}return;}
+});
+function setHasData(ex,st){
+  if(ex.type==="reps") return st.reps!=="";
+  if(ex.type==="time") return st.time!=="";
+  if(ex.type==="dist") return st.dist!==""||st.time!=="";
+  return false;
+}
+document.getElementById("lgSave").onclick=()=>{
+  if(!LG) return;
+  const dur=parseInt(document.getElementById("lgDur").value)||null;
+  // keep only exercises with at least one filled set
+  const exercises=LG.exercises.map(ex=>({
+    name:ex.name, type:ex.type, w:ex.w,
+    sets:ex.sets.filter(st=>setHasData(ex,st))
+  })).filter(ex=>ex.sets.length>0 && ex.name && ex.name!=="Custom exercise");
+  if(!exercises.length){toast("Log at least one set first");return;}
+  S.workouts.push({id:id(), date:new Date().toLocaleDateString(), ts:Date.now(), session:LG.session, duration:dur, exercises});
+  if(!S.skills.fitness)S.skills.fitness={xp:0};
+  S.skills.fitness.xp+=25; S.gold+=8; S.totalDone++;
+  save();
+  document.getElementById("lgDur").value="";
+  buildLogForm(document.getElementById("lgSession").value);
+  render();
+  toast(`<span class="t-xp">Workout logged · +25 Fitness XP +8 pts</span>`);
+};
+// best-set helpers for progress tracking
+function setVolume(ex,st){ // a single comparable number per set for "best"
+  if(ex.type==="reps"){const r=parseFloat(st.reps)||0;const w=parseFloat(st.weight)||0;return w>0?r*w:r;}
+  if(ex.type==="time"){return parseTime(st.time)||parseFloat(st.time)||0;}
+  if(ex.type==="dist"){return parseFloat(st.dist)||0;}
+  return 0;
+}
+function fmtSet(ex,st){
+  if(ex.type==="reps"){return st.reps+(st.weight?`×${st.weight}lb`:"");}
+  if(ex.type==="time"){return st.time;}
+  if(ex.type==="dist"){return [st.dist,st.time].filter(Boolean).join(" / ");}
+  return "";
+}
+function renderLog(){
+  if(!document.getElementById("lgSession")) return;
+  initLogTab();
+  // progress by exercise: scan all workouts, group by exercise name
+  const prog=document.getElementById("lgProgress");
+  const byEx={};
+  S.workouts.forEach(w=>w.exercises.forEach(ex=>{
+    const best=ex.sets.reduce((m,st)=>Math.max(m,setVolume(ex,st)),0);
+    const bestSet=ex.sets.reduce((m,st)=>setVolume(ex,st)>setVolume(ex,m)?st:m,ex.sets[0]);
+    (byEx[ex.name]=byEx[ex.name]||[]).push({ts:w.ts,best,bestSet,ex});
+  }));
+  const names=Object.keys(byEx);
+  if(!names.length){prog.innerHTML=`<div class="empty"><span class="big">🏋️</span>No workouts logged yet. Pick a session above and log your sets.</div>`;}
+  else{
+    prog.innerHTML=names.map(n=>{
+      const arr=byEx[n].sort((a,b)=>a.ts-b.ts);
+      const latest=arr[arr.length-1];
+      const allTimeBest=arr.reduce((m,x)=>x.best>m.best?x:m,arr[0]);
+      let trend="";
+      if(arr.length>1){
+        const prev=arr[arr.length-2];
+        const d=latest.best-prev.best;
+        // for time/dist where lower is better (runs, SDC), invert interpretation
+        const lowerBetter=(latest.ex.type==="dist") || (latest.ex.type==="time" && /run|sprint|drag|sdc|200m/i.test(n));
+        if(Math.abs(d)<0.01) trend=`<span style="color:var(--ink-faint)">— holding steady</span>`;
+        else if((d>0&&!lowerBetter)||(d<0&&lowerBetter)) trend=`<span style="color:var(--jade)">▲ improving</span>`;
+        else trend=`<span style="color:var(--ember)">▼ slipping — push this next time</span>`;
+      } else trend=`<span style="color:var(--ink-faint)">first entry</span>`;
+      return `<div class="lg-prog-row">
+        <div class="lg-prog-top"><span class="lg-prog-name">${esc(n)}</span><span class="lg-prog-best">best: ${esc(fmtSet(allTimeBest.ex,allTimeBest.bestSet))}</span></div>
+        <div class="lg-prog-trend">${trend} · last: ${esc(fmtSet(latest.ex,latest.bestSet))} (${arr.length}×)</div>
+      </div>`;
+    }).join("");
+  }
+  // recent workouts
+  const hist=document.getElementById("lgHistory");
+  if(!S.workouts.length){hist.innerHTML="";}
+  else{
+    hist.innerHTML=S.workouts.slice().reverse().slice(0,12).map(w=>`<div class="lg-hist">
+      <button class="del-w" data-delw="${w.id}">✕</button>
+      <div class="lg-hist-top"><span class="dt">${SESSIONS[w.session]?SESSIONS[w.session].name.split(' · ')[0]:'Workout'}</span><span>${w.date}${w.duration?` · ${w.duration} min`:''}</span></div>
+      ${w.exercises.map(ex=>`<div class="lg-hist-ex">${esc(ex.name)}: ${ex.sets.map(st=>esc(fmtSet(ex,st))).join(", ")}</div>`).join("")}
+    </div>`).join("");
+  }
+}
+
+/* ---------------- ADAPTIVE TARGETS (FM auto-rewrite) ---------------- */
+// For each logged exercise, compute the next target from recent performance.
+// Progressive overload when trending up/steady; HOLD + flag when stalling.
+function exerciseSeries(name){
+  const out=[];
+  S.workouts.slice().sort((a,b)=>a.ts-b.ts).forEach(w=>{
+    w.exercises.filter(e=>e.name===name).forEach(ex=>{
+      const best=ex.sets.reduce((m,st)=>setVolume(ex,st)>setVolume(ex,m)?st:m,ex.sets[0]);
+      out.push({ts:w.ts,ex,best,vol:setVolume(ex,best)});
+    });
+  });
+  return out;
+}
+// map a logged exercise name to a baseline test key (loose matching)
+function baselineKeyFor(name){
+  const n=name.toLowerCase();
+  if(/push-?up/.test(n)) return "max_pushups";
+  if(/plank/.test(n)&&!/side/.test(n)) return "max_plank";
+  if(/deadlift/.test(n)) return "max_deadlift";
+  if(/pull-?up|inverted row/.test(n)) return "max_pullups";
+  if(/squat/.test(n)&&!/bulgarian|split|pistol|jump/.test(n)) return "max_squat";
+  if(/2-?mile|long easy|tempo|interval/.test(n)) return "run_2mi";
+  if(/sprint-drag|sdc/.test(n)) return "sdc_sim";
+  return null;
+}
+// numeric "value" for a baseline result, comparable across months
+function baselineVolume(def,val){
+  if(!val) return null;
+  if(def.type==="reps") return (parseFloat(val.reps)||0)*((parseFloat(val.weight)||0)>0?(parseFloat(val.weight)||0):1);
+  if(def.type==="time") return parseTime(val.time)||parseFloat(val.time)||0;
+  if(def.type==="dist") return parseTime(val.time)||0; // for runs, time is the comparable (lower better)
+  return null;
+}
+// get last two baselines' values for a key -> {latest, prev, def}
+function baselineTrend(bkey){
+  if(!bkey) return null;
+  const def=BASELINE_TEST.find(d=>d.key===bkey);
+  const entries=S.baselines.filter(b=>b.results&&b.results[bkey]).sort((a,b)=>a.ts-b.ts);
+  if(!entries.length) return null;
+  const latest=entries[entries.length-1].results[bkey];
+  const prev=entries.length>1?entries[entries.length-2].results[bkey]:null;
+  return {def, latest, prev, latestVol:baselineVolume(def,latest), prevVol:prev?baselineVolume(def,prev):null};
+}
+
+function computeTarget(name){
+  const s=exerciseSeries(name);
+  if(!s.length) return null;
+  const last=s[s.length-1];
+  const ex=last.ex;
+  const lowerBetter=(ex.type==="dist")||(ex.type==="time" && /run|sprint|drag|sdc|200m/i.test(name));
+  // session trend over last up-to-3 entries
+  let trend="first";
+  if(s.length>=2){
+    const a=s[s.length-1].vol, b=s[s.length-2].vol;
+    const better=lowerBetter? a<b-0.01 : a>b+0.01;
+    const worse =lowerBetter? a>b+0.01 : a<b-0.01;
+    trend=better?"up":worse?"down":"flat";
+  }
+  let stalled=false;
+  if(s.length>=3){
+    const v=[s[s.length-3].vol,s[s.length-2].vol,s[s.length-1].vol];
+    stalled = lowerBetter ? !(v[2]<v[0]) : !(v[2]>v[0]);
+  }
+  // ---- BASELINE BLENDING ----
+  const bt=baselineTrend(baselineKeyFor(name));
+  let baselineNote="";
+  if(bt){
+    // is the latest baseline month-over-month improving?
+    if(bt.prevVol!=null){
+      const blBetter = bt.def.lowerBetter ? bt.latestVol<bt.prevVol-0.01 : bt.latestVol>bt.prevVol+0.01;
+      const blWorse  = bt.def.lowerBetter ? bt.latestVol>bt.prevVol+0.01 : bt.latestVol<bt.prevVol-0.01;
+      if(blBetter){
+        // baseline says you're stronger — override a false "stall" and push
+        if(stalled||trend==="flat"||trend==="down"){ stalled=false; trend="up"; baselineNote=" (baseline up this month — keep climbing)"; }
+        else baselineNote=" (baseline confirms progress)";
+      } else if(blWorse || (!blBetter && !blWorse)){
+        // baseline flat or down confirms a real stall
+        if(stalled||trend==="flat") baselineNote = blWorse?" (baseline also down — reset & rebuild)":" (baseline flat — change the stimulus)";
+      }
+    } else {
+      baselineNote=" (anchored to this month's baseline)";
+    }
+  }
+  // build target string
+  if(ex.type==="reps"){
+    const r=parseFloat(last.best.reps)||0; const w=parseFloat(last.best.weight)||0;
+    if(w>0){
+      if(trend==="down"||stalled) return {target:`${r} reps × ${w} lb (hold & nail form)`, hold:true, note:(stalled?"stalled — deload slightly or fix technique before adding":"dropped last time — repeat it clean")+baselineNote};
+      if(r>=10) return {target:`${r-2} reps × ${w+5} lb`, note:"add weight, reset reps"+baselineNote};
+      return {target:`${r+1} reps × ${w} lb`, note:"add a rep"+baselineNote};
+    } else {
+      if(trend==="down"||stalled) return {target:`${r} reps (hold)`, hold:true, note:(stalled?"stalled — try slower tempo or a harder variation":"dropped — repeat it")+baselineNote};
+      return {target:`${r+2} reps`, note:"+2 reps"+baselineNote};
+    }
+  }
+  if(ex.type==="time"){
+    const sec=parseTime(last.best.time)||parseFloat(last.best.time)||0;
+    if(lowerBetter){
+      if(trend==="down"||stalled) return {target:`${fmtSec(sec)} (hold)`, hold:true, note:(stalled?"not getting faster — add a focused speed session":"slower last time — repeat & beat it")+baselineNote};
+      return {target:`beat ${fmtSec(sec)}`, note:"shave a few seconds"+baselineNote};
+    } else {
+      if(trend==="down"||stalled) return {target:`${fmtSec(sec)} (hold)`, hold:true, note:(stalled?"plateaued — add side planks / hollow holds":"dropped — repeat it")+baselineNote};
+      return {target:`${fmtSec(sec+10)}`, note:"+10 sec"+baselineNote};
+    }
+  }
+  if(ex.type==="dist"){
+    return {target:`log distance + time`, note:(trend==="up"?"trending faster — keep pushing":trend==="down"?"slower last run — focus the next one":"build consistency")+baselineNote};
+  }
+  return null;
+}
+function fmtSec(s){s=Math.round(s);const m=Math.floor(s/60);const r=s%60;return m>0?`${m}:${String(r).padStart(2,'0')}`:`${r}s`;}
+
+function renderAdaptiveTargets(){
+  const el=document.getElementById("adaptiveTargets");
+  if(!el) return;
+  // unique exercise names from the log
+  const names=[...new Set(S.workouts.flatMap(w=>w.exercises.map(e=>e.name)))];
+  if(!names.length){
+    el.innerHTML=`<div class="adapt-card"><h3>🎯 Adaptive Targets</h3><div class="adapt-empty">Log a few workouts (Log tab) and personalized next-session targets will appear here, auto-adjusting to your progress — pushing you when you're improving, holding when you've stalled.</div></div>`;
+    return;
+  }
+  const rows=names.map(n=>{
+    const t=computeTarget(n);
+    if(!t) return "";
+    return `<div class="adapt-row"><div class="adapt-ex"><div class="nm">${esc(n)}</div><div class="note">${esc(t.note||"")}</div></div><div class="adapt-tgt ${t.hold?'hold':''}">${esc(t.target)}</div></div>`;
+  }).filter(Boolean).join("");
+  el.innerHTML=`<div class="adapt-card">
+    <h3>🎯 Your Next-Session Targets</h3>
+    <div class="adapt-sub">Auto-calculated from your workout log. Green = push harder; amber = hold/fix before adding. Beat these and they climb.</div>
+    ${rows}
+  </div>`;
+}
+
+/* ---------------- MONTHLY BASELINE ---------------- */
+function currentMonth(){const d=new Date();return d.getFullYear()+"-"+String(d.getMonth()+1).padStart(2,"0");}
+function monthLabel(m){const[y,mo]=m.split("-");return new Date(y,mo-1,1).toLocaleDateString(undefined,{month:"long",year:"numeric"});}
+function baselineDueThisMonth(){
+  return !S.baselines.some(b=>b.month===currentMonth());
+}
+let BL_DRAFT=null;
+function renderBaseline(){
+  const area=document.getElementById("baselineArea");
+  const prompt=document.getElementById("baselinePrompt");
+  if(!area) return;
+  const due=baselineDueThisMonth();
+  // prompt banner
+  if(due){
+    prompt.innerHTML=`<div class="bl-prompt">📅 <b>New month — baseline due.</b> Run a max-effort test on the movements below (one all-out set each). This re-anchors your training targets so they track your real strength, not just day-to-day noise.</div>`;
+  } else {
+    const thisMonth=S.baselines.filter(b=>b.month===currentMonth()).pop();
+    prompt.innerHTML=`<div class="bl-prompt" style="background:rgba(111,158,84,.1);border-color:#3c5230">✅ <b style="color:var(--jade)">${monthLabel(currentMonth())} baseline logged.</b> Targets are anchored to it. Next baseline prompts at the start of next month.</div>`;
+  }
+  // latest baseline summary (with month-over-month deltas)
+  let latestHtml="";
+  if(S.baselines.length){
+    const sorted=S.baselines.slice().sort((a,b)=>a.ts-b.ts);
+    const latest=sorted[sorted.length-1];
+    const prev=sorted.length>1?sorted[sorted.length-2]:null;
+    latestHtml=`<div class="bl-latest"><h4>Latest baseline — ${monthLabel(latest.month)}</h4>`+
+      BASELINE_TEST.map(def=>{
+        const v=latest.results[def.key]; if(!v) return "";
+        const disp=fmtBaselineVal(def,v);
+        let delta="";
+        if(prev&&prev.results[def.key]){
+          const a=baselineVolume(def,v), b=baselineVolume(def,prev.results[def.key]);
+          const better=def.lowerBetter? a<b : a>b;
+          const same=Math.abs(a-b)<0.01;
+          delta=same?`<span class="delta" style="color:var(--ink-faint)">—</span>`:
+            better?`<span class="delta" style="color:var(--jade)">▲ improved</span>`:
+            `<span class="delta" style="color:var(--ember)">▼ down</span>`;
+        }
+        return `<div class="bl-latest-row"><span>${esc(def.name.replace(/ \(.*\)/,''))}: <b>${esc(disp)}</b></span>${delta}</div>`;
+      }).filter(Boolean).join("")+`</div>`;
+  }
+  // input form
+  if(!BL_DRAFT) BL_DRAFT={};
+  const form=`<div class="bl-card ${due?'due':''}">
+    ${BASELINE_TEST.map(def=>{
+      const last=lastBaselineVal(def.key);
+      return `<div class="bl-ex">
+        <div class="bl-ex-name">${esc(def.name)}${last?`<div class="prev">last: ${esc(fmtBaselineVal(def,last))}</div>`:''}</div>
+        <div class="units">${baselineInputs(def)}</div>
+      </div>`;
+    }).join("")}
+    <button class="btn-add" id="blSave" style="margin-top:12px">${due?'Log This Month&rsquo;s Baseline':'Save Baseline (updates targets)'}</button>
+  </div>`;
+  area.innerHTML=latestHtml+form;
+  const btn=document.getElementById("blSave");
+  if(btn) btn.onclick=saveBaseline;
+}
+function baselineInputs(def){
+  if(def.type==="reps"){
+    return `<input type="number" placeholder="reps" data-bl="${def.key}.reps">`+(def.w?`<input type="number" placeholder="lb" data-bl="${def.key}.weight">`:'');
+  }
+  if(def.type==="time") return `<input type="text" class="wide" placeholder="m:ss" data-bl="${def.key}.time">`;
+  if(def.type==="dist") return `<input type="text" class="wide" placeholder="time m:ss" data-bl="${def.key}.time">`;
+  return "";
+}
+function lastBaselineVal(key){
+  const e=S.baselines.filter(b=>b.results&&b.results[key]).sort((a,b)=>a.ts-b.ts);
+  return e.length?e[e.length-1].results[key]:null;
+}
+function fmtBaselineVal(def,v){
+  if(def.type==="reps") return v.reps+(v.weight?`×${v.weight}lb`:"")+" reps";
+  if(def.type==="time") return v.time;
+  if(def.type==="dist") return v.time;
+  return "";
+}
+// capture baseline inputs
+document.addEventListener("input",e=>{
+  const b=e.target.dataset.bl;
+  if(b){const[key,field]=b.split(".");if(!BL_DRAFT)BL_DRAFT={};(BL_DRAFT[key]=BL_DRAFT[key]||{})[field]=e.target.value;}
+});
+function saveBaseline(){
+  if(!BL_DRAFT||!Object.keys(BL_DRAFT).length){toast("Enter at least one baseline result");return;}
+  // keep only keys with real data
+  const results={};
+  Object.keys(BL_DRAFT).forEach(k=>{
+    const v=BL_DRAFT[k];
+    const has=(v.reps&&v.reps!=="")||(v.time&&v.time!=="");
+    if(has) results[k]=v;
+  });
+  if(!Object.keys(results).length){toast("Enter at least one baseline result");return;}
+  const m=currentMonth();
+  // replace existing baseline for this month if re-logging
+  S.baselines=S.baselines.filter(b=>b.month!==m);
+  S.baselines.push({date:new Date().toLocaleDateString(),ts:Date.now(),month:m,results});
+  S.lastBaselineMonth=m;
+  if(!S.skills.fitness)S.skills.fitness={xp:0};
+  S.skills.fitness.xp+=60; S.gold+=25; // baseline is a big effort — reward it
+  BL_DRAFT=null;
+  save();render();
+  toast(`<span class="t-xp">Baseline logged · +60 Fitness XP +25 pts</span> · targets re-anchored`);
+}
+
+/* ---------------- BRANCH / BOARD PREP ---------------- */
+function renderBoard(){
+  const list=document.getElementById("boardList");
+  if(!list) return;
+  document.getElementById("branchGoalHint").textContent="goal: "+(S.branchGoal||"Cyber");
+  const done=S.boardTasks.filter(t=>t.done).length;
+  document.getElementById("boardProg").textContent=done+"/"+S.boardTasks.length+" complete";
+  list.innerHTML=S.boardTasks.map(t=>`<li class="card board-item ${t.done?'done':''}">
+    <div class="check" data-bt="${t.id}">${t.done?'✓':''}</div>
+    <div class="c-body"><div class="c-name">${esc(t.name)}</div></div>
+    <button class="del" data-dbt="${t.id}">✕</button>
+  </li>`).join("");
+}
+document.body.addEventListener("click",e=>{
+  const t=e.target;
+  if(t.dataset.bt){const task=S.boardTasks.find(x=>x.id===t.dataset.bt);if(task){const was=task.done;task.done=!task.done;if(!was&&task.done){grant(20,10,"Board prep task done","knowledge");}else{save();render();}}return;}
+  if(t.dataset.dbt){S.boardTasks=S.boardTasks.filter(x=>x.id!==t.dataset.dbt);save();render();return;}
+});
+const _btAdd=document.getElementById("btAdd");
+if(_btAdd) _btAdd.onclick=()=>{
+  const n=document.getElementById("btName").value.trim();if(!n)return;
+  S.boardTasks.push({id:id(),name:n,done:false});
+  document.getElementById("btName").value="";save();render();
+};
+
+/* ================= THE WEIGHT (promise ledger — solemn, no game mechanics) ============= */
+const W_WEIGHTS={open:1,standing:3,kept:1,broken:1};
+const W_COIN={ ordinary:{fill:"#c7cace",sheen:"#eef0f2",rx:3.0,ry:2.5}, serious:{fill:"#cda84e",sheen:"#f0d98a",rx:3.5,ry:3.0}, standing:{fill:"#c47b52",sheen:"#e6a878",rx:4.1,ry:3.5} };
+function wseed(i,s){const x=Math.sin((i+1)*12.9898+s*78.233)*43758.5453;return x-Math.floor(x);}
+function coinPile(items,x0,x1,yBot,fallback,salt){
+  const order={standing:0,serious:1,ordinary:2};
+  const list=items.slice().sort((a,b)=>(order[a.tier]??1)-(order[b.tier]??1));
+  const n=Math.min(list.length,28); if(!n) return "";
+  const w=x1-x0, coinW=8.5, perRow=Math.max(3,Math.floor(w/coinW)), rowH=5.2; let dots="";
+  for(let i=0;i<n;i++){
+    const p=list[i], st=W_COIN[p&&p.tier]||{fill:fallback,sheen:"rgba(255,255,255,.5)",rx:3.4,ry:2.9};
+    const row=Math.floor(i/perRow), idx=i%perRow, stagger=(row%2)?coinW/2:0, usable=w-coinW;
+    let x=x0+coinW/2+(idx/Math.max(1,perRow-1))*usable+stagger+(wseed(i,salt)-0.5)*2.4;
+    x=Math.max(x0+st.rx+1,Math.min(x1-st.rx-1,x));
+    const y=yBot-st.ry-row*rowH-(wseed(i,salt+5)-0.5)*1.2;
+    dots+=`<g><ellipse cx="${x.toFixed(1)}" cy="${y.toFixed(1)}" rx="${st.rx}" ry="${st.ry}" fill="${st.fill}" opacity=".96" stroke="rgba(0,0,0,.3)" stroke-width=".5"/><ellipse cx="${(x-st.rx*0.3).toFixed(1)}" cy="${(y-st.ry*0.35).toFixed(1)}" rx="${(st.rx*0.45).toFixed(1)}" ry="${(st.ry*0.35).toFixed(1)}" fill="${st.sheen}" opacity=".5"/></g>`;
+  }
+  return dots;
+}
+function jarOpen(items){return `<svg class="jar-vessel" viewBox="0 0 80 130" preserveAspectRatio="xMidYMid meet"><defs><clipPath id="co"><path d="M12 40 Q12 36 18 36 L62 36 Q68 36 68 40 L66 116 Q66 122 60 122 L20 122 Q14 122 14 116 Z"/></clipPath></defs><path d="M8 38 Q40 26 72 38" fill="none" stroke="#d8b06a" stroke-width="2.2" opacity=".85"/><path d="M12 40 Q12 36 18 36 L62 36 Q68 36 68 40 L66 116 Q66 122 60 122 L20 122 Q14 122 14 116 Z" fill="rgba(216,176,106,.05)" stroke="#d8b06a" stroke-width="1.8" opacity=".8"/><g clip-path="url(#co)">${coinPile(items,14,66,121,"#d8b06a",1)}</g></svg>`;}
+function jarStanding(items){return `<svg class="jar-vessel" viewBox="0 0 80 130" preserveAspectRatio="xMidYMid meet"><defs><clipPath id="cs"><path d="M18 32 L62 32 L62 118 L18 118 Z"/></clipPath></defs><rect x="26" y="16" width="28" height="12" rx="1.5" fill="none" stroke="#b3a0cf" stroke-width="2" opacity=".8"/><path d="M18 32 L62 32 L62 118 Q62 120 60 120 L20 120 Q18 120 18 118 Z" fill="rgba(125,106,156,.06)" stroke="#b3a0cf" stroke-width="2" opacity=".85"/><line x1="18" y1="58" x2="62" y2="58" stroke="#b3a0cf" stroke-width="1" opacity=".4"/><line x1="18" y1="88" x2="62" y2="88" stroke="#b3a0cf" stroke-width="1" opacity=".4"/><g clip-path="url(#cs)">${coinPile(items,18,62,119,"#b3a0cf",2)}</g></svg>`;}
+function jarKept(items){return `<svg class="jar-vessel" viewBox="0 0 80 130" preserveAspectRatio="xMidYMid meet"><defs><clipPath id="ck"><path d="M16 44 Q16 40 22 40 L58 40 Q64 40 64 44 L58 104 Q58 106 54 106 L26 106 Q22 106 22 104 Z"/></clipPath></defs><path d="M30 118 L50 118 L46 110 L34 110 Z" fill="none" stroke="#9fc59a" stroke-width="1.6" opacity=".8"/><line x1="40" y1="106" x2="40" y2="110" stroke="#9fc59a" stroke-width="1.6" opacity=".8"/><path d="M16 44 Q16 40 22 40 L58 40 Q64 40 64 44 L58 104 Q58 106 54 106 L26 106 Q22 106 22 104 Z" fill="rgba(159,197,154,.05)" stroke="#9fc59a" stroke-width="1.8" opacity=".85"/><g clip-path="url(#ck)">${coinPile(items,20,60,105,"#9fc59a",3)}</g></svg>`;}
+function jarBroken(items){return `<svg class="jar-vessel" viewBox="0 0 80 130" preserveAspectRatio="xMidYMid meet"><defs><clipPath id="cb"><path d="M16 56 Q16 38 40 38 Q64 38 64 56 L62 116 Q62 120 58 120 L22 120 Q18 120 18 116 Z"/></clipPath></defs><path d="M16 56 Q16 38 40 38 Q64 38 64 56 L62 116 Q62 120 58 120 L22 120 Q18 120 18 116 Z" fill="rgba(120,80,70,.10)" stroke="#a6584f" stroke-width="1.8" opacity=".8"/><path d="M44 40 l-5 16 l4 10 l-6 14" fill="none" stroke="#a6584f" stroke-width="1" opacity=".5"/><g clip-path="url(#cb)">${coinPile(items,18,62,119,"#a6584f",4)}</g></svg>`;}
+function vesselMemorial(count){return `<svg class="jar-vessel" viewBox="0 0 80 130" preserveAspectRatio="xMidYMid meet"><path d="M30 26 L50 26 L46 32 L34 32 Z" fill="none" stroke="#b3a0cf" stroke-width="2" opacity=".8"/><line x1="40" y1="20" x2="40" y2="26" stroke="#b3a0cf" stroke-width="2" opacity=".8"/><rect x="28" y="32" width="24" height="62" rx="3" fill="rgba(125,106,156,.05)" stroke="#b3a0cf" stroke-width="2" opacity=".85"/><path d="M24 98 L56 98 L52 94 L28 94 Z" fill="none" stroke="#b3a0cf" stroke-width="2" opacity=".8"/><g class="mem-flame"><ellipse cx="40" cy="68" rx="9" ry="13" fill="rgba(220,200,150,.22)"/><path d="M40 54 Q47 64 40 78 Q33 64 40 54 Z" fill="#e6cf94" opacity=".85"/><path d="M40 60 Q44 66 40 76 Q36 66 40 60 Z" fill="#fff4d6" opacity=".9"/></g><text x="40" y="114" text-anchor="middle" font-family="ui-monospace,monospace" font-size="9" fill="#b3a0cf" opacity=".7">${count} held</text></svg>`;}
+
+// disc number -> display label (matches Weight app: M-### to self, O-### to other)
+function discLabel(p){
+  const pre = p.who==="self" ? "M" : "O";
+  const n = typeof p.disc==="number" ? p.disc : parseInt(String(p.disc).replace(/\D/g,""))||0;
+  return pre+"-"+String(n).padStart(3,"0");
+}
+function isKeystoneP(p){ return p.keystone===true || (p.who==="self" && (p.disc===1 || p.disc==="M-001")); }
+function wKeystone(){ return S.weight.promises.find(isKeystoneP); }
+
+function renderWeight(){
+  if(!document.getElementById("weightJars")) return;
+  const proms=S.weight.promises||[];
+  const nonFavor=proms.filter(p=>!p.favor);
+  // carried total: open + standing (standing ×3) — mirrors the Weight app
+  let grams=0; nonFavor.forEach(p=>{ if(p.status==="open")grams+=1; else if(p.status==="standing")grams+=3; });
+  const carryEl=document.getElementById("weightCarry");
+  carryEl.textContent = proms.length ? ("You carry "+grams+(grams===1?" gram":" grams")+" right now.") : "";
+  // keystone
+  const ks=wKeystone();
+  const ksEl=document.getElementById("weightKeystone");
+  if(ks){ ksEl.innerHTML=`<div class="ks-card"><div class="ks-tag">${discLabel(ks)} · Keystone · ${ks.status}</div><div class="ks-vow">"${esc(ks.text)}"</div></div>`; }
+  else if(proms.length){ ksEl.innerHTML=`<div class="ks-card"><div class="ks-tag">Keystone · not in this ledger</div><div class="ks-vow" style="color:var(--ink-faint)">No keystone (M-001) found in the imported ledger.</div></div>`; }
+  else { ksEl.innerHTML=`<div class="ks-card"><div class="ks-tag">The Keystone</div><div class="ks-vow">"I will do what I believe is right, and bear the cost of it."</div></div>`; }
+  // jars (read-only — no data-wjar binding hooks)
+  const buckets={open:[],standing:[],kept:[],broken:[]};
+  nonFavor.forEach(p=>{ if(buckets[p.status]) buckets[p.status].push(p); });
+  document.getElementById("weightJars").innerHTML=`
+    <div class="wjar open"><div class="jarbox">${jarOpen(buckets.open)}</div><div class="wjar-name">Open</div><div class="wjar-count">${buckets.open.length}</div></div>
+    <div class="wjar standing"><div class="jarbox">${jarStanding(buckets.standing)}</div><div class="wjar-name">Standing</div><div class="wjar-count">${buckets.standing.length}</div></div>
+    <div class="wjar kept"><div class="jarbox">${jarKept(buckets.kept)}</div><div class="wjar-name">Kept</div><div class="wjar-count">${buckets.kept.length}</div></div>
+    <div class="wjar broken"><div class="jarbox">${jarBroken(buckets.broken)}</div><div class="wjar-name">Dead</div><div class="wjar-count">${buckets.broken.length}</div></div>`;
+  // memorial
+  document.getElementById("weightMemorial").innerHTML=vesselMemorial((S.weight.memorial||[]).length);
+  // ledger
+  const led=document.getElementById("weightLedger");
+  const sorted=nonFavor.slice().sort((a,b)=>(isKeystoneP(b)?1:0)-(isKeystoneP(a)?1:0) || (a.disc||0)-(b.disc||0));
+  if(sorted.length){
+    led.innerHTML=sorted.map(p=>{
+      const when=p.date_made?new Date(p.date_made).toLocaleDateString():(p.date||"");
+      return `<div class="wl-entry ${isKeystoneP(p)?'keystone':''}">
+        <span class="wl-disc">${discLabel(p)}</span>
+        <div class="wl-body"><div class="wl-text">${esc(p.text||"")}</div><div class="wl-meta">${p.who==='self'?'to self':'to another'}${p.name?' · '+esc(p.name):''} · ${esc(p.tier||'')}${when?' · '+when:''}</div></div>
+        <span class="wl-status ${p.status}">${p.status==='broken'?'dead':p.status}</span>
+      </div>`;
+    }).join("");
+  } else {
+    led.innerHTML=`<div class="aw-empty"><span class="big">⚖️</span>No promises mirrored yet. Export your ledger from the Weight app and tap "Update mirror" to bring it in.</div>`;
+  }
+  // daily refresh nudge — fires when the mirror snapshot is from an earlier day
+  const nudge=document.getElementById("wmNudge");
+  if(nudge){
+    const today=new Date().toDateString();
+    const stale = S.lastMirrorUpdate && S.lastMirrorUpdate!==today;
+    if(stale){
+      const since = S.lastMirrorUpdate;
+      nudge.className="wm-nudge show";
+      nudge.innerHTML=`🌅 Good morning. Your mirror is from <b>${esc(since)}</b> — bring in yesterday's promises?<br><button class="wm-nudge-btn" id="wmNudgeBtn">Update from the Weight app</button>`;
+      const nb=document.getElementById("wmNudgeBtn");
+      if(nb) nb.onclick=()=>{ const f=document.getElementById("wmFile"); if(f) f.click(); };
+    } else {
+      nudge.className="wm-nudge"; nudge.innerHTML="";
+    }
+  }
+}
+let _wToastT;
+function weightToast(msg){const el=document.getElementById("toast");el.innerHTML=`<span style="color:#d8b06a">${esc(msg)}</span>`;el.classList.add("show");clearTimeout(_wToastT);_wToastT=setTimeout(()=>el.classList.remove("show"),2800);}
+
+// Import a Weight-app export (raw `state` JSON: {nextDisc, promises[], memorial[]})
+function importWeightLedger(obj){
+  if(!obj || !Array.isArray(obj.promises)){ weightToast("That file isn't a Weight ledger export."); return; }
+  S.weight = {
+    nextDisc: obj.nextDisc||1,
+    promises: obj.promises.map(p=>({
+      id:p.id||id(), disc:p.disc, favor:!!p.favor, text:p.text||"", who:p.who||"self",
+      name:p.name||"", tier:p.tier||"ordinary", keyword:p.keyword||"",
+      status:p.status||"open", verify:p.verify||null, stamped:!!p.stamped,
+      date_made:p.date_made||null, date_closed:p.date_closed||null, reason:p.reason||""
+    })),
+    memorial: Array.isArray(obj.memorial)? obj.memorial.map(m=>({name:m.name||"",date_gone:m.date_gone||"",note:m.note||""})) : []
+  };
+  S.lastMirrorUpdate = new Date().toDateString();
+  save(); render();
+  const n=S.weight.promises.length, mem=S.weight.memorial.length;
+  weightToast(`Mirror updated — ${n} promise${n!==1?'s':''}${mem?`, ${mem} remembered`:''}.`);
+}
+
+/* ================= AWARDS — the "I Love Me" wall ================= */
+const AW_IC={award:"🎖️",coin:"🪙",cert:"📜",badge:"🏅",milestone:"⭐",memento:"📦"};
+function renderAwards(){
+  const el=document.getElementById("awallGrid"); if(!el) return;
+  if(!S.awards.length){el.innerHTML=`<div class="aw-empty"><span class="big">🏆</span>The wall is empty. Add your first award, coin, badge, or milestone above — it fills as you earn.</div>`;return;}
+  el.innerHTML=S.awards.slice().reverse().map(a=>`<div class="aw-card">
+    <button class="aw-del" data-daw="${a.id}">✕</button>
+    <div class="aw-ic">${AW_IC[a.kind]||"🏆"}</div>
+    <div class="aw-title">${esc(a.title)}</div>
+    ${a.note?`<div class="aw-note">${esc(a.note)}</div>`:""}
+    <div class="aw-date">${esc(a.date)}</div>
+  </div>`).join("");
+}
+
+/* ---------------- Weight mirror + Awards handlers ---------------- */
+document.body.addEventListener("click",e=>{
+  const daw=e.target.closest("[data-daw]");
+  if(daw){if(confirm("Remove this from the wall?")){S.awards=S.awards.filter(a=>a.id!==daw.dataset.daw);save();render();}return;}
+});
+// Open the Weight app (portal link)
+const _wmOpen=document.getElementById("wmOpen");
+if(_wmOpen) _wmOpen.onclick=()=>{
+  let url=S.weightAppUrl;
+  if(!url){ url=(prompt("Paste the link to your hosted Weight app:","https://")||"").trim(); if(!url||url==="https://")return; S.weightAppUrl=url; save(); }
+  window.open(url,"_blank","noopener");
+};
+// Edit / set the Weight app link
+const _wmLinkEdit=document.getElementById("wmLinkEdit");
+if(_wmLinkEdit) _wmLinkEdit.onclick=()=>{
+  const url=(prompt("Weight app link:",S.weightAppUrl||"https://")||"").trim();
+  if(url&&url!=="https://"){ S.weightAppUrl=url; save(); weightToast("Link saved."); updateWmStatus(); }
+};
+// Update mirror — import a Weight ledger .json export
+const _wmImport=document.getElementById("wmImport"), _wmFile=document.getElementById("wmFile");
+if(_wmImport&&_wmFile){
+  _wmImport.onclick=()=>_wmFile.click();
+  _wmFile.onchange=ev=>{
+    const f=ev.target.files[0]; if(!f)return;
+    const r=new FileReader();
+    r.onload=()=>{ try{ importWeightLedger(JSON.parse(r.result)); }catch(err){ weightToast("Couldn't read that file."); } _wmFile.value=""; };
+    r.readAsText(f);
+  };
+}
+function updateWmStatus(){
+  const el=document.getElementById("wmStatus"); if(!el)return;
+  el.textContent = S.weightAppUrl
+    ? 'Read-only mirror. Linked to your Weight app. To refresh, export your ledger there and tap "Update mirror."'
+    : 'Read-only mirror. Set the Weight app link below, then export your ledger there and tap "Update mirror" to bring it in.';
+}
+updateWmStatus();
+const _awAdd=document.getElementById("awAdd");
+if(_awAdd) _awAdd.onclick=()=>{
+  const title=document.getElementById("awTitle").value.trim(); if(!title){toast("Give it a title first");return;}
+  const kind=document.getElementById("awKind").value;
+  const note=document.getElementById("awNote").value.trim();
+  S.awards.push({id:id(),ts:Date.now(),date:new Date().toLocaleDateString(),kind,title,note});
+  document.getElementById("awTitle").value=""; document.getElementById("awNote").value="";
+  save();render();
+  toast("🏆 Added to the wall");
+};
+
+/* ================= CLOUD FILE SYNC (File System Access API) =================
+   Link a JSON file in a synced folder (OneDrive/iCloud/Drive). The app writes
+   to that local file on every change; the cloud client syncs it across devices.
+   Not supported on iPhone/iPad Safari — those fall back to export/import. */
+const FS_SUPPORTED = ("showSaveFilePicker" in window) && ("showOpenFilePicker" in window);
+let fileHandle=null, cloudDirty=false, _cloudT=null;
+
+// tiny IndexedDB to persist the file handle across sessions
+function idbOpen(){return new Promise((res,rej)=>{const r=indexedDB.open("ops_cloud",1);r.onupgradeneeded=()=>r.result.createObjectStore("h");r.onsuccess=()=>res(r.result);r.onerror=()=>rej(r.error);});}
+async function idbSet(k,v){const db=await idbOpen();return new Promise((res,rej)=>{const t=db.transaction("h","readwrite");t.objectStore("h").put(v,k);t.oncomplete=()=>res();t.onerror=()=>rej(t.error);});}
+async function idbGet(k){const db=await idbOpen();return new Promise((res,rej)=>{const t=db.transaction("h","readonly");const rq=t.objectStore("h").get(k);rq.onsuccess=()=>res(rq.result);rq.onerror=()=>rej(rq.error);});}
+async function idbDel(k){const db=await idbOpen();return new Promise((res)=>{const t=db.transaction("h","readwrite");t.objectStore("h").delete(k);t.oncomplete=()=>res();});}
+
+async function verifyPerm(handle, write){
+  const opts={mode: write?"readwrite":"read"};
+  if((await handle.queryPermission(opts))==="granted") return true;
+  if((await handle.requestPermission(opts))==="granted") return true;
+  return false;
+}
+function cloudWriteDebounced(){
+  if(!fileHandle) return;
+  cloudDirty=true; clearTimeout(_cloudT);
+  _cloudT=setTimeout(cloudFlush, 800);
+}
+async function cloudFlush(){
+  if(!fileHandle||!cloudDirty) return;
+  try{
+    if(!(await verifyPerm(fileHandle,true))){ setCloudStatus("permission needed — tap 'link cloud file' to re-grant", true); return; }
+    const w=await fileHandle.createWritable();
+    await w.write(JSON.stringify(S,null,2));
+    await w.close();
+    cloudDirty=false; setCloudStatus(null);
+  }catch(e){ setCloudStatus("couldn't write the cloud file — re-link or export", true); }
+}
+async function linkCloudFile(){
+  if(!FS_SUPPORTED){
+    setCloudStatus("This device can't link a file (iPhone/Safari). Use export/import to move data here.", true);
+    return;
+  }
+  const existing=confirm("Link your Operations data file.\n\nOK = pick an EXISTING operations-data.json (e.g. already in your OneDrive)\nCancel = create a NEW file in your OneDrive folder");
+  try{
+    let handle;
+    if(existing){
+      [handle]=await window.showOpenFilePicker({types:[{description:"Operations data",accept:{"application/json":[".json"]}}]});
+      // read it in and adopt that data
+      if(await verifyPerm(handle,false)){
+        const f=await handle.getFile(); const txt=await f.text();
+        if(txt.trim()){ try{ const data=JSON.parse(txt); S=data; localStorage.setItem(KEY,JSON.stringify(S)); }catch(_){} }
+      }
+    } else {
+      handle=await window.showSaveFilePicker({suggestedName:"operations-data.json",types:[{description:"Operations data",accept:{"application/json":[".json"]}}]});
+    }
+    fileHandle=handle;
+    await idbSet("handle",handle);
+    if(!(await verifyPerm(fileHandle,true))){ setCloudStatus("permission not granted", true); return; }
+    // initial write so the file holds current data
+    cloudDirty=true; await cloudFlush();
+    render();
+    setCloudStatus(null);
+    toast("☁️ Cloud file linked — data now auto-saves there");
+  }catch(e){ /* user cancelled picker — ignore */ }
+}
+async function unlinkCloudFile(){
+  fileHandle=null; await idbDel("handle"); render(); setCloudStatus(null);
+  toast("Cloud file unlinked on this device");
+}
+function setCloudStatus(msg,warn){
+  const hint=document.getElementById("cloudHint"), foot=document.getElementById("footStatus");
+  if(foot){ foot.textContent = fileHandle ? "OPERATIONS · synced to your linked cloud file" : "OPERATIONS · all data lives only on this device"; foot.className = fileHandle?"linked":""; }
+  if(hint){ hint.textContent = msg||""; hint.className = "cloud-hint"+(warn?" warn":""); }
+}
+// on launch: try to restore a previously linked handle and read latest from it
+async function cloudInit(){
+  if(!FS_SUPPORTED) return;
+  try{
+    const h=await idbGet("handle");
+    if(h){
+      fileHandle=h;
+      if(await verifyPerm(h,false)){
+        const f=await h.getFile(); const txt=await f.text();
+        if(txt.trim()){ try{ const data=JSON.parse(txt); if(data&&typeof data==="object"){ S=data; localStorage.setItem(KEY,JSON.stringify(S)); render(); } }catch(_){} }
+      }
+    }
+  }catch(e){}
+  setCloudStatus(null);
+}
+const _cloudBtn=document.getElementById("cloudBtn");
+if(_cloudBtn) _cloudBtn.onclick=()=>{ if(fileHandle){ if(confirm("Unlink this cloud file on this device? Your data stays; it just stops auto-saving to the file.")) unlinkCloudFile(); } else linkCloudFile(); };
+cloudInit();
+
+/* ---------------- Service worker (offline) ---------------- */
+if("serviceWorker" in navigator){navigator.serviceWorker.register("sw.js").catch(()=>{});}
+
+render();
+
+
+</script>
+</body>
+</html>

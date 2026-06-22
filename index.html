@@ -456,6 +456,11 @@
   .ah-row{display:flex;justify-content:space-between;font-size:12.5px;padding:3px 0;color:var(--ink-dim)}
   .ah-row b{color:var(--ink)}
   .ah-note{font-size:11px;color:var(--ink-faint);margin-top:8px;font-style:italic;line-height:1.5}
+  .ah-recovery{font-size:12.5px;padding:8px 10px;border-radius:8px;margin-bottom:9px;line-height:1.5;border:1px solid var(--line)}
+  .ah-recovery.ready{background:rgba(111,158,84,.12);border-color:var(--jade)}
+  .ah-recovery.caution{background:rgba(200,119,46,.12);border-color:var(--ember)}
+  .ah-recovery.easy{background:rgba(156,74,52,.14);border-color:var(--blood)}
+  .ah-recovery-detail{font-size:11px;color:var(--ink-faint);margin-top:4px;font-style:italic}
   /* Habits */
   .habit-add-wrap{margin-top:12px;border:1px dashed var(--line);border-radius:10px;padding:10px 13px}
   .habit-add-wrap summary{cursor:pointer;font-size:13px;color:var(--ink-dim);font-weight:600}
@@ -2329,6 +2334,43 @@ function fmFocusLine(){
   const weakest=events.reduce((m,e)=>e.s<m.s?e:m,events[0]);
   return `Prioritize your ${weakest.label} (${weakest.s} pts) — it's your weakest AFT event right now.`;
 }
+// Recovery readiness from imported RHR/HRV vs your own baseline. Honest + directional only:
+// returns {level:'ready'|'caution'|'easy'|null, line, detail} or null if not enough data.
+function recoveryReadiness(){
+  const hi=S.healthImport||{}; const hist=hi.history||[];
+  if(hist.length<3) return null; // need a baseline of a few readings
+  const latest=hist[hist.length-1];
+  const prior=hist.slice(0,-1);
+  const avg=(arr,key)=>{ const v=arr.map(h=>h[key]).filter(x=>x!=null); return v.length? v.reduce((a,b)=>a+b,0)/v.length : null; };
+  const rhrBase=avg(prior,"rhr"), hrvBase=avg(prior,"hrv");
+  let flags=[]; // negative = needs recovery
+  if(latest.rhr!=null && rhrBase!=null){
+    const d=latest.rhr-rhrBase;
+    if(d>=5) flags.push({dir:-1, txt:`resting HR is ${Math.round(d)} bpm above your baseline`});
+    else if(d<=-3) flags.push({dir:1, txt:`resting HR is below baseline (well-recovered)`});
+  }
+  if(latest.hrv!=null && hrvBase!=null){
+    const pct=(latest.hrv-hrvBase)/hrvBase;
+    if(pct<=-0.15) flags.push({dir:-1, txt:`HRV is ${Math.round(-pct*100)}% below your baseline`});
+    else if(pct>=0.10) flags.push({dir:1, txt:`HRV is above baseline (well-recovered)`});
+  }
+  if(!flags.length) return {level:"ready", line:"Recovery markers look normal vs your baseline — train as planned.", detail:""};
+  const neg=flags.filter(f=>f.dir<0), pos=flags.filter(f=>f.dir>0);
+  if(neg.length>=2) return {level:"easy", line:"Recovery markers are down — consider an easier session or extra rest today.", detail:neg.map(f=>f.txt).join("; ")+"."};
+  if(neg.length===1) return {level:"caution", line:"One recovery marker is off — train, but listen to your body and don't force a PR today.", detail:neg[0].txt+"."};
+  return {level:"ready", line:"Recovery markers look strong — a good day to push.", detail:pos.map(f=>f.txt).join("; ")+"."};
+}
+// VO2 max -> aerobic fitness benchmark (general ACSM-style age/sex bands, directional)
+function vo2Benchmark(){
+  const hi=S.healthImport||{}; const v=hi.latest&&hi.latest.vo2max?hi.latest.vo2max.value:null;
+  if(v==null) return null;
+  const age=aftCtx&&aftCtx().age?aftCtx().age:20; const male=(S.profile.sex||"m")!=="f";
+  // rough male/female under-30 bands; coarse but honest as a directional category
+  let band;
+  const m=male?[(30),(38),(45),(52)]:[(26),(33),(40),(46)];
+  if(v<m[0]) band="below average"; else if(v<m[1]) band="average"; else if(v<m[2]) band="above average"; else if(v<m[3]) band="excellent"; else band="superior";
+  return {v, band, line:`VO₂ max ${v} — ${band} aerobic fitness for your age. This is the engine behind your 2-mile run; steady zone-2 work plus intervals raises it over weeks.`};
+}
 function showAftResult(a){
   const el=document.getElementById("aftResult");
   const prev = S.aft.length>1 ? S.aft[S.aft.indexOf(a)-1] : null;
@@ -3349,7 +3391,9 @@ function renderVitals(){
     const labelFor=k=>{ const t=Object.keys(AH_METRICS).find(t=>AH_METRICS[t].key===k); return t?AH_METRICS[t]:null; };
     const rows=Object.keys(hi.latest).map(k=>{ const d=labelFor(k); if(!d) return ""; return `<div class="r-row"><span>${esc(d.label)}</span><b>${hi.latest[k].value}${d.u?' '+d.u:''}</b></div>`; }).join("");
     const when=hi.lastImport?new Date(hi.lastImport).toLocaleDateString():"";
-    ahBlock=`<div class="bl-readout" style="margin-top:10px"><div style="font-size:11.5px;color:var(--gold);font-weight:600;margin-bottom:6px"> Apple Health (imported ${when})</div>${rows}</div>`;
+    const rec = typeof recoveryReadiness==="function" ? recoveryReadiness() : null;
+    const recHtml = rec ? `<div class="ah-recovery ${rec.level}"><b>${rec.level==="easy"?"🟠 Ease off":rec.level==="caution"?"🟡 Train smart":"🟢 Good to train"}</b> — ${esc(rec.line)}${rec.detail?`<div class="ah-recovery-detail">${esc(rec.detail)} <span style="opacity:.7">Recovery signals are noisy day-to-day and aren't medical advice — use as a rough guide.</span></div>`:""}</div>` : "";
+    ahBlock=`<div class="bl-readout" style="margin-top:10px"><div style="font-size:11.5px;color:var(--gold);font-weight:600;margin-bottom:6px"> Apple Health (imported ${when})</div>${recHtml}${rows}</div>`;
   }
   if(!v.length){
     el.innerHTML=(ahBlock||`<div class="bl-readout" style="color:var(--ink-faint)">No vitals logged yet. Add a reading below.</div>`);
@@ -3528,7 +3572,17 @@ function applyAppleHealth(latest, me){
     const sk=S.lifeSkills.find(s=>s.auto==="vital:rhr");
     if(sk){ const rhr=latest.restingHR.value; const lvl=rhr<50?4:rhr<60?3:rhr<70?2:1; if(lvl>sk.currentLevel){ sk.currentLevel=lvl; skUpdatePeak(sk); sk.lastQuestTs=Date.now(); } }
   }
-  S.healthImport={ lastImport:new Date().toISOString(), latest:extra, fields:imported.slice() };
+  // keep a small rolling history of recovery markers (RHR/HRV/VO2) so the training
+  // advisory can compare today vs your own baseline. Keyed by reading date to avoid dupes.
+  const prevHist=(S.healthImport&&S.healthImport.history)||[];
+  const histMap={}; prevHist.forEach(h=>{ histMap[h.date]=h; });
+  const mk=(k)=> latest[k]? (conv(k)) : null;
+  const recDate = latest.restingHR? localYMD(new Date(latest.restingHR.ts)) : today;
+  if(latest.restingHR || latest.hrv || latest.vo2max){
+    histMap[recDate]={ date:recDate, rhr: latest.restingHR?Math.round(latest.restingHR.value):null, hrv: latest.hrv?Math.round(latest.hrv.value):null, vo2: latest.vo2max?Math.round(mk("vo2max")*10)/10:null };
+  }
+  const history=Object.values(histMap).sort((a,b)=>a.date<b.date?-1:1).slice(-30); // keep last 30
+  S.healthImport={ lastImport:new Date().toISOString(), latest:extra, fields:imported.slice(), history };
   save(); render();
   // summary UI
   const sumEl=document.getElementById("vtImportSummary");
@@ -4404,8 +4458,20 @@ function renderToday(){
       <button class="td-go" data-gototab="quizzes">Open study plans →</button></div>`);
   }
 
-  // 6) FM training advisory (what to train)
-  if(typeof fmFocusLine==="function"){ const fl=fmFocusLine(); if(fl) cards.push(`<div class="td-card"><div class="td-h">💪 Training focus</div><div class="td-row"><span>${esc(fl)}</span></div><button class="td-go" data-gototab="plan">Open FM →</button></div>`); }
+  // 6) FM training advisory (what to train) + recovery readiness from Health import
+  const rec = typeof recoveryReadiness==="function" ? recoveryReadiness() : null;
+  const vo2 = typeof vo2Benchmark==="function" ? vo2Benchmark() : null;
+  if(typeof fmFocusLine==="function" || rec || vo2){
+    const fl = typeof fmFocusLine==="function" ? fmFocusLine() : null;
+    if(fl || rec || vo2){
+      const recIcon = rec ? (rec.level==="easy"?"🟠":rec.level==="caution"?"🟡":"🟢") : "";
+      let body="";
+      if(rec) body+=`<div class="td-row"><span>${recIcon} ${esc(rec.line)}</span></div>`;
+      if(fl) body+=`<div class="td-row"><span>${esc(fl)}</span></div>`;
+      if(vo2) body+=`<div class="td-row"><span>🫁 ${esc(vo2.line)}</span></div>`;
+      cards.push(`<div class="td-card"><div class="td-h">💪 Training focus</div>${body}<button class="td-go" data-gototab="plan">Open FM →</button></div>`);
+    }
+  }
 
   // 7) Reminders: AFT status, donation eligibility, stale weight/vitals
   const reminders=[];

@@ -141,6 +141,6 @@ document.body.addEventListener("click",e=>{
   const evedit=e.target.closest("[data-evedit]"); if(evedit){ evEdit(evedit.dataset.evedit); return; }
   const mbedit=e.target.closest("[data-mbedit]"); if(mbedit){ mbEdit(mbedit.dataset.mbedit); return; }
   const skedit=e.target.closest("[data-skedit]"); if(skedit){ skEdit(skedit.dataset.skedit); return; }
-  const skjump=e.target.closest("[data-skjump]"); if(skjump){ const t=document.getElementById("skcat-"+skjump.dataset.skjump); if(t) t.scrollIntoView({behavior:"smooth",block:"start"}); return; }
+  const skjump=e.target.closest("[data-skjump]"); if(skjump){ const t=document.getElementById("skcat-"+skjump.dataset.skjump); if(t){ const hdr=t.querySelector('.sk-deck-header'),body=t.querySelector('.sk-deck-body'); if(hdr&&!hdr.classList.contains('open')){ hdr.classList.add('open'); if(body) body.classList.add('open'); } t.scrollIntoView({behavior:"smooth",block:"start"}); } return; }
   const aftstd=e.target.closest("[data-aftstd]"); if(aftstd){ S.aftStandard=aftstd.dataset.aftstd; save(); render(); return; }
 });

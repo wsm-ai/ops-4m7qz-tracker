@@ -124,6 +124,49 @@ Eight features ranked by cadet impact. All are honest, offline-safe, and require
 
 ---
 
+## 9. Qualification log with auto-skill advancement
+
+**Value:** A cadet who passes the CWST, earns a CLS certification, or qualifies Expert on BRM has verified their skill at an objective standard — but currently has to manually level each affected skill. There's also no permanent record in the app that a skill level came from a formal military qualification vs. self-assessment. A qualification log gives each earned credential a home, and automatically advances the skills that credential certifies, so the app reflects verified competency rather than estimates.
+
+**Design:**
+- A new **Qualifications** section in the Awards tab (alongside existing awards/memberships)
+- A `QUAL_CATALOG` constant mapping qual name → `{fullName, category, description, skills: [{name, level, note}]}`
+  - `name` matches the exact `name` field in SEED_SKILLS
+  - `level` is the minimum level that qualification certifies — `skReachLevel()` is called, so it never lowers a skill that's already higher
+- `S.qualifications = []` in DEFAULT state; migration defaults absent saves to `[]`
+- Log Qualification button → modal with: qual dropdown, date field, and a live preview showing "This will advance: Swimming Lv 3 → 5, ..."
+- On save: for each skill in the qual's list, call `skReachLevel(sk, targetLevel)`; record `{skillName, fromLevel, toLevel}` in the qual entry
+- Display earned quals as cards: qual name, date, category badge, "Skills advanced: X" summary
+- Toast: "CWST logged · Swimming advanced to Lv 5"
+
+**Starting qualification catalog (military):**
+
+| Qualification | Skills advanced | Level granted |
+|---|---|---|
+| CWST (Combat Water Survival Test) | Swimming | 5 (the ladder explicitly marks L5 as "Complete the CWST") |
+| BRM — Marksman | Marksmanship (M4) | 4 |
+| BRM — Sharpshooter | Marksmanship (M4) | 5 |
+| BRM — Expert | Marksmanship (M4) | 6 |
+| CLS (Combat Lifesaver) | First aid | 7 (ladder L7: "Hold a current Combat Lifesaver certification") |
+| TCCC | First aid | 5 (ladder L5: "Perform CPR to current standard") |
+| SERE | Fieldcraft & survival | 10 (ladder L10: "Complete a multi-day field-survival course (e.g. SERE-level)") |
+| Day land nav course (pass) | Land navigation | 4 (ladder L4: "Complete a 3-point day land-nav course unassisted") |
+| Night land nav course (pass) | Land navigation | 5 (ladder L5: "Complete a night land-nav course unassisted") |
+| Land nav — Ranger standard | Land navigation | 10 (ladder L10: "Pass a Ranger/SF-school-standard land-nav assessment") |
+
+**BRM sub-qualifications:** These are three separate entries in the catalog (Marksman / Sharpshooter / Expert) so the cadet logs the actual score tier they earned. The dropdown shows all three; only one should be logged per qualification event.
+
+**Future expansion:** The catalog is a plain JS object in `src/core/constants.js`. New categories (certifications, civilian quals, licenses) just add keys. A future version can split the dropdown by category when there are too many to list.
+
+**Implementation files:**
+- `src/core/constants.js` — add `QUAL_CATALOG`
+- `src/core/state.js` — `DEFAULT` gets `qualifications:[]`; migration handles absent field
+- `src/tabs/awards.js` — new `renderQuals()` section + log modal
+- `src/tabs/awards.html` — add `<div id="qualsSection"></div>` in the awards tab
+- `src/styles/main.css` — `.qual-card`, `.qual-badge`, `.qual-preview` styles
+
+---
+
 ## Implementation order recommendation
 
 | Priority | Feature | Effort | Impact |
@@ -131,8 +174,9 @@ Eight features ranked by cadet impact. All are honest, offline-safe, and require
 | 1 | Skill fading digest on Dawn | Very low | High (daily awareness) |
 | 2 | Baseline test nudge on Dawn | Very low | High (training system input) |
 | 3 | AFT score history sparkline | Low | High (trend visibility) |
-| 4 | Oath path breakdown | Low | Medium (balance awareness) |
-| 5 | FM weekly goal from AFT gap | Low | Medium (prescription) |
-| 6 | Oath archive search | Low | Medium (history access) |
-| 7 | Daily order completion time | Low | Medium (behavioral insight) |
-| 8 | Skill decay grace period | Medium | Medium (fairness / realism) |
+| 4 | Qualification log + auto-leveling | Medium | High (verified competency record) |
+| 5 | Oath path breakdown | Low | Medium (balance awareness) |
+| 6 | FM weekly goal from AFT gap | Low | Medium (prescription) |
+| 7 | Oath archive search | Low | Medium (history access) |
+| 8 | Daily order completion time | Low | Medium (behavioral insight) |
+| 9 | Skill decay grace period | Medium | Medium (fairness / realism) |

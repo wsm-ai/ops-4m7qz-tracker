@@ -1,3 +1,340 @@
+// === SKILL EMBLEMS ===
+// Each path has a base sigil. At level 1 all skills in the same path look identical.
+// As eff/max (t) grows toward 1, the seed hash of the skill's id drives divergence,
+// so at max level every skill has a unique, fully-realized form of the path motif.
+// t = eff/max (0–1), seed = hash(id) 0–255+
+const skEmblemSvg = (function(){
+  function _s(id){ let h=0; for(let i=0;i<id.length;i++) h=((h<<5)-h+id.charCodeAt(i))|0; return Math.abs(h); }
+  function _fi(t,a,b){ return Math.max(0,Math.min(1,(t-a)/(b-a))); }
+  function _f(n){ return n.toFixed(1); }
+
+  // Shared outer ring: plain circle → tick-marked → double-ringed
+  function _ring(t,s){
+    const r=17, sw=(1+t*.7).toFixed(2), op=(0.4+t*.5).toFixed(2);
+    let o=[`<circle cx="24" cy="24" r="${r}" fill="none" stroke="currentColor" stroke-width="${sw}" opacity="${op}"/>`];
+    if(t>.28){
+      const fade=_fi(t,.28,.6), n=4+(s&3)*2;
+      for(let i=0;i<n;i++){
+        const a=i/n*Math.PI*2, c=Math.cos(a), sv=Math.sin(a), tl=1.5+fade*((s>>4&3)*.5);
+        o.push(`<line x1="${_f(24+c*(r-.5))}" y1="${_f(24+sv*(r-.5))}" x2="${_f(24+c*(r-.5-tl))}" y2="${_f(24+sv*(r-.5-tl))}" stroke="currentColor" stroke-width="1" opacity="${_f(fade)}"/>`);
+      }
+    }
+    if(t>.65) o.push(`<circle cx="24" cy="24" r="${_f(r*.82)}" fill="none" stroke="currentColor" stroke-width=".7" opacity="${_f(_fi(t,.65,.88)*.42)}"/>`);
+    return o.join('');
+  }
+
+  // TACTICAL — Rune-sword
+  // Base: vertical blade + crossguard. Diverges in pommel shape, crossguard style, rune.
+  function _tactical(t,s){
+    const s0=s%3, s1=s>>2&3, s2=s>>4&1;
+    let o=[];
+    const bw=_f(1.5+s2*.8*_fi(t,.4,1));
+    o.push(`<rect x="${_f(24-parseFloat(bw)/2)}" y="7" width="${bw}" height="20" rx=".8" fill="none" stroke="currentColor" stroke-width="1.5"/>`);
+    if(t>.12){
+      const fi=_fi(t,.12,.38), cw=_f(7+s1*2.5*t);
+      o.push(`<line x1="${_f(24-parseFloat(cw)*fi)}" y1="21" x2="${_f(24+parseFloat(cw)*fi)}" y2="21" stroke="currentColor" stroke-width="${_f(1+fi*.5)}" opacity="${_f(fi)}"/>`);
+      if(t>.6&&s1===1){
+        const tf=_fi(t,.6,.9)*2;
+        o.push(`<path d="M${_f(24-parseFloat(cw))},21 q0,-${_f(tf)} ${_f(tf)},${_f(-tf*.6)}" fill="none" stroke="currentColor" stroke-width=".9"/>`);
+        o.push(`<path d="M${_f(24+parseFloat(cw))},21 q0,-${_f(tf)} -${_f(tf)},${_f(-tf*.6)}" fill="none" stroke="currentColor" stroke-width=".9"/>`);
+      }
+      if(t>.6&&s1===2){ const tf=_fi(t,.6,.9); o.push(`<line x1="${_f(24-parseFloat(cw))}" y1="${_f(21-1.8*tf)}" x2="${_f(24+parseFloat(cw))}" y2="${_f(21-1.8*tf)}" stroke="currentColor" stroke-width=".8" opacity="${_f(tf)}"/>`); }
+    }
+    if(t>.28){
+      const fi=_fi(t,.28,.55), pr=_f(2.2+s0*1.2*t);
+      if(s0===0) o.push(`<circle cx="24" cy="31" r="${pr}" fill="none" stroke="currentColor" stroke-width="1.2" opacity="${_f(fi)}"/>`);
+      else if(s0===1) o.push(`<ellipse cx="24" cy="31" rx="${_f(parseFloat(pr)*1.4)}" ry="${_f(parseFloat(pr)*.75)}" fill="none" stroke="currentColor" stroke-width="1.2" opacity="${_f(fi)}"/>`);
+      else { const p=parseFloat(pr); o.push(`<polygon points="24,${_f(31-p)} ${_f(24+p*.7)},31 24,${_f(31+p)} ${_f(24-p*.7)},31" fill="none" stroke="currentColor" stroke-width="1.2" opacity="${_f(fi)}"/>`); }
+    }
+    if(t>.42&&s2===1){ const fi=_fi(t,.42,.72); o.push(`<line x1="24" y1="9" x2="24" y2="${_f(9+11*fi)}" stroke="currentColor" stroke-width=".6" opacity="${_f(fi*.65)}"/>`); }
+    if(t>.68){
+      const fi=_fi(t,.68,1);
+      if(s0===0) o.push(`<path d="M24,13 L24,18 M22.5,15.5 L25.5,13.5" fill="none" stroke="currentColor" stroke-width=".85" opacity="${_f(fi)}"/>`);
+      else if(s0===1) o.push(`<path d="M24,18 L24,13 M24,13 L22,10.5 M24,13 L26,10.5" fill="none" stroke="currentColor" stroke-width=".85" opacity="${_f(fi)}"/>`);
+      else o.push(`<path d="M22.5,11 L25.5,14 L22.5,17" fill="none" stroke="currentColor" stroke-width=".85" opacity="${_f(fi)}"/>`);
+    }
+    return o.join('');
+  }
+
+  // PHYSICAL — Ember flame
+  // Base: single teardrop flame. Diverges in lean, inner flame, tongues, ember field.
+  function _physical(t,s){
+    const s0=s%3, s1=s>>2&2;
+    let o=[];
+    const lean=[-1.5,0,1.5][s0]*t, fh=_f(10+5*t);
+    o.push(`<path d="M${_f(24+lean)},${_f(27-parseFloat(fh))} C${_f(21+lean)},23 22,28 24,30 C26,28 ${_f(27)},23 ${_f(24+lean)},${_f(27-parseFloat(fh))}" fill="none" stroke="currentColor" stroke-width="1.4"/>`);
+    if(t>.22){
+      const fi=_fi(t,.22,.5), ih=_f(5+3.5*t);
+      o.push(`<path d="M24,${_f(26-parseFloat(ih))} C23,23 23.5,27 24,28.5 C24.5,27 25,23 24,${_f(26-parseFloat(ih))}" fill="none" stroke="currentColor" stroke-width=".9" opacity="${_f(fi)}"/>`);
+    }
+    if(t>.4){
+      const fi=_fi(t,.4,.65), side=s0===0?-4.5:4.5;
+      o.push(`<path d="M24,28 C${_f(24+side*fi)},23 ${_f(24+side*fi*1.3)},21 ${_f(22.5+side*.5*fi)},${_f(19-fi*2)}" fill="none" stroke="currentColor" stroke-width=".9" opacity="${_f(fi*.8)}"/>`);
+    }
+    if(t>.58){
+      const fi=_fi(t,.58,.82);
+      o.push(`<path d="M20.5,30 Q24,32.5 27.5,30" fill="none" stroke="currentColor" stroke-width=".9" opacity="${_f(fi)}"/>`);
+      const ns=1+s1; for(let i=0;i<ns;i++) o.push(`<circle cx="${_f(24+[-3,3][i])}" cy="${_f(25-fi*4-i*1.5)}" r=".8" fill="currentColor" opacity="${_f(fi*.65)}"/>`);
+    }
+    if(t>.78){
+      const fi=_fi(t,.78,1);
+      o.push(`<path d="M24,${_f(19-fi*2)} C21.5,21.5 23,${_f(17-fi)},24,${_f(15-fi*2)} C25,${_f(17-fi)},26.5,21.5 24,${_f(19-fi*2)}" fill="none" stroke="currentColor" stroke-width=".8" opacity="${_f(fi)}"/>`);
+    }
+    return o.join('');
+  }
+
+  // COGNITIVE — Rune-eye (Odin's eye)
+  // Base: almond outline. Diverges in iris, pupil offset, brow curve, lash count, rune.
+  function _cognitive(t,s){
+    const s0=s%3, s1=s>>2&3;
+    let o=[];
+    const ew=_f(8+s0*1.8*_fi(t,.3,1)), ec=_f(24-s1*.4*_fi(t,.5,1));
+    o.push(`<path d="M${_f(parseFloat(ec)-parseFloat(ew))},24 Q${ec},${_f(19.5-s0*.7*t)} ${_f(parseFloat(ec)+parseFloat(ew))},24 Q${ec},${_f(28.5+s0*.7*t)} ${_f(parseFloat(ec)-parseFloat(ew))},24" fill="none" stroke="currentColor" stroke-width="1.4"/>`);
+    if(t>.22){
+      const fi=_fi(t,.22,.5), ir=_f(3.2+fi*.6);
+      o.push(`<circle cx="${ec}" cy="24" r="${ir}" fill="none" stroke="currentColor" stroke-width="1" opacity="${_f(fi)}"/>`);
+    }
+    if(t>.38){
+      const fi=_fi(t,.38,.6), po=_f(s1*.5*fi);
+      o.push(`<circle cx="${_f(parseFloat(ec)+parseFloat(po))}" cy="24" r="${_f(1.2+fi*.4)}" fill="currentColor" opacity="${_f(fi)}"/>`);
+    }
+    if(t>.52){
+      const fi=_fi(t,.52,.75), bx1=_f(parseFloat(ec)-8*fi), bx2=_f(parseFloat(ec)+8*fi), by=_f(18.5-fi*1.5);
+      o.push(`<path d="M${bx1},${by} Q${ec},${_f(parseFloat(by)-3*fi)} ${bx2},${by}" fill="none" stroke="currentColor" stroke-width="1" opacity="${_f(fi*.8)}"/>`);
+    }
+    if(t>.65){
+      const fi=_fi(t,.65,.9);
+      if(s0===0) o.push(`<path d="M21,24 L27,24 M21.5,22 L26.5,22" stroke="currentColor" stroke-width=".8" opacity="${_f(fi)}"/>`);
+      else if(s0===1) o.push(`<path d="M22,22 L26,24 L22,26" fill="none" stroke="currentColor" stroke-width=".85" opacity="${_f(fi)}"/>`);
+      else o.push(`<path d="M21.5,22 L26.5,26 M21.5,26 L26.5,22" stroke="currentColor" stroke-width=".75" opacity="${_f(fi)}"/>`);
+    }
+    if(t>.78){
+      const fi=_fi(t,.78,1), nl=2+(s1>>1), ey_hi=_f(20-s0*.7*t), ey_lo=_f(28+s0*.7*t);
+      for(let i=0;i<nl;i++){
+        const xo=_f((i-nl/2+.5)*2.8+parseFloat(ec));
+        o.push(`<line x1="${xo}" y1="${ey_hi}" x2="${_f(parseFloat(xo)+.3)}" y2="${_f(parseFloat(ey_hi)-1.8*fi)}" stroke="currentColor" stroke-width=".8" opacity="${_f(fi*.7)}"/>`);
+        o.push(`<line x1="${xo}" y1="${ey_lo}" x2="${_f(parseFloat(xo)+.3)}" y2="${_f(parseFloat(ey_lo)+1.4*fi)}" stroke="currentColor" stroke-width=".8" opacity="${_f(fi*.5)}"/>`);
+      }
+    }
+    return o.join('');
+  }
+
+  // PHYSIOLOGICAL — Valknut
+  // Base: single triangle. Diverges in rotation, overlap, inner triangle, outer circle.
+  function _physiological(t,s){
+    const s0=s%3; // rotation offset
+    let o=[];
+    function tri(cx,cy,r,deg){
+      const pts=[]; for(let i=0;i<3;i++){ const a=(deg+i*120)*Math.PI/180; pts.push(`${_f(cx+r*Math.cos(a))},${_f(cy+r*Math.sin(a))}`); }
+      return `<polygon points="${pts.join(' ')}" fill="none" stroke="currentColor" stroke-width="1.2"/>`;
+    }
+    const rot=90+s0*20*t;
+    o.push(tri(24,24,9,rot));
+    if(t>.28){ const fi=_fi(t,.28,.55); o.push(`<g opacity="${_f(fi)}">${tri(24,24,8,rot+120)}</g>`); }
+    if(t>.48){ const fi=_fi(t,.48,.7); o.push(`<g opacity="${_f(fi)}">${tri(24,24,7,rot+240)}</g>`); }
+    if(t>.68){ const fi=_fi(t,.68,.88); o.push(`<g opacity="${_f(fi*.45)}">${tri(24,24,3,rot)}</g>`); }
+    if(t>.82){ const fi=_fi(t,.82,1); o.push(`<circle cx="24" cy="24" r="11" fill="none" stroke="currentColor" stroke-width=".8" opacity="${_f(fi*.55)}"/>`); }
+    return o.join('');
+  }
+
+  // TECHNICAL — Gear / circuit node
+  // Base: 4-tooth gear. Diverges in tooth count, bore shape, spokes, circuit traces.
+  function _technical(t,s){
+    const s0=s%3, s1=s>>2&3;
+    let o=[];
+    const teeth=t<.2?4:t<.45?6:t<.65?8:10, gR=9, tH=2.5+t*.8;
+    let pts=[]; for(let i=0;i<teeth;i++){ const tw=.38; const a1=i/teeth*Math.PI*2,a2=(i+tw)/teeth*Math.PI*2,a3=(i+1-tw)/teeth*Math.PI*2; pts.push(`${_f(24+gR*Math.cos(a1))},${_f(24+gR*Math.sin(a1))}`); pts.push(`${_f(24+(gR+tH)*Math.cos(a2))},${_f(24+(gR+tH)*Math.sin(a2))}`); pts.push(`${_f(24+(gR+tH)*Math.cos(a3))},${_f(24+(gR+tH)*Math.sin(a3))}`); }
+    o.push(`<polygon points="${pts.join(' ')}" fill="none" stroke="currentColor" stroke-width="1.2"/>`);
+    if(t>.32){
+      const fi=_fi(t,.32,.55), br=_f(3+fi*1.5);
+      o.push(`<circle cx="24" cy="24" r="${br}" fill="none" stroke="currentColor" stroke-width="1" opacity="${_f(fi)}"/>`);
+      if(t>.58){
+        const fi2=_fi(t,.58,.8);
+        if(s0===0){ const hp=[]; for(let i=0;i<6;i++){ const a=i/6*Math.PI*2; hp.push(`${_f(24+4*Math.cos(a))},${_f(24+4*Math.sin(a))}`); } o.push(`<polygon points="${hp.join(' ')}" fill="none" stroke="currentColor" stroke-width=".8" opacity="${_f(fi2)}"/>`); }
+        else if(s0===1) o.push(`<rect x="20.5" y="20.5" width="7" height="7" fill="none" stroke="currentColor" stroke-width=".8" opacity="${_f(fi2)}" transform="rotate(${_f(45*fi2)},24,24)"/>`);
+        else o.push(`<circle cx="24" cy="24" r="${_f(3.5*fi2)}" fill="none" stroke="currentColor" stroke-width=".8" opacity="${_f(fi2)}"/>`);
+      }
+      if(t>.68){
+        const fi2=_fi(t,.68,.88), ns=4+(s1&1), br_n=parseFloat(br);
+        for(let i=0;i<ns;i++){ const a=i/ns*Math.PI*2; o.push(`<line x1="${_f(24+br_n*.9*Math.cos(a))}" y1="${_f(24+br_n*.9*Math.sin(a))}" x2="${_f(24+(gR-.5)*Math.cos(a))}" y2="${_f(24+(gR-.5)*Math.sin(a))}" stroke="currentColor" stroke-width=".8" opacity="${_f(fi2*.65)}"/>`); }
+      }
+    }
+    if(t>.8){
+      const fi=_fi(t,.8,1), nc=1+(s1%3), out=gR+tH+2;
+      for(let i=0;i<nc;i++){ const a=(i/nc+.18)*Math.PI*2; const x1=_f(24+(gR+tH)*Math.cos(a)),y1=_f(24+(gR+tH)*Math.sin(a)),x2=_f(24+out*Math.cos(a)),y2=_f(24+out*Math.sin(a)),x3=_f(24+out*Math.cos(a)+3*Math.cos(a+Math.PI/2)),y3=_f(24+out*Math.sin(a)+3*Math.sin(a+Math.PI/2)); o.push(`<polyline points="${x1},${y1} ${x2},${y2} ${x3},${y3}" fill="none" stroke="currentColor" stroke-width=".8" opacity="${_f(fi*.65)}"/>`); }
+    }
+    return o.join('');
+  }
+
+  // LEADERSHIP — Crown
+  // Base: center spire + base line. Diverges in side spires, jewel shape, band ornamentation.
+  function _leadership(t,s){
+    const s0=s%3, s1=s>>2&2;
+    let o=[];
+    const bw=_f(9+4.5*t), sh=_f(7+5*t);
+    o.push(`<line x1="${_f(24-parseFloat(bw))}" y1="29" x2="${_f(24+parseFloat(bw))}" y2="29" stroke="currentColor" stroke-width="${_f(1.2+t*.3)}"/>`);
+    o.push(`<line x1="24" y1="29" x2="24" y2="${_f(29-parseFloat(sh))}" stroke="currentColor" stroke-width="${_f(1.3+t*.4)}"/>`);
+    if(t>.18){
+      const fi=_fi(t,.18,.44), bwn=parseFloat(bw), shn=parseFloat(sh);
+      const sx=[24-bwn*.55,24+bwn*.55];
+      sx.forEach(x=>o.push(`<line x1="${_f(x)}" y1="29" x2="${_f(x)}" y2="${_f(29-shn*.68*fi)}" stroke="currentColor" stroke-width="1.1" opacity="${_f(fi)}"/>`));
+      if(t>.48){
+        const fi2=_fi(t,.48,.68);
+        const sx2=[24-bwn*.28,24+bwn*.28];
+        sx2.forEach(x=>o.push(`<line x1="${_f(x)}" y1="29" x2="${_f(x)}" y2="${_f(29-shn*.48*fi2)}" stroke="currentColor" stroke-width="1" opacity="${_f(fi2)}"/>`));
+      }
+    }
+    if(t>.62){
+      const fi=_fi(t,.62,.82), bwn=parseFloat(bw), shn=parseFloat(sh);
+      [[24,shn],[24-bwn*.55,shn*.68],[24+bwn*.55,shn*.68]].forEach(([jx,jh])=>{
+        const jy=_f(29-jh*fi);
+        if(s0===0) o.push(`<circle cx="${_f(jx)}" cy="${jy}" r="1.2" fill="currentColor" opacity="${_f(fi*.9)}"/>`);
+        else if(s0===1){ const p=1.4; o.push(`<polygon points="${_f(jx)},${_f(parseFloat(jy)-p)} ${_f(jx+p*.7)},${jy} ${_f(jx)},${_f(parseFloat(jy)+p)} ${_f(jx-p*.7)},${jy}" fill="currentColor" opacity="${_f(fi*.9)}"/>`); }
+        else o.push(`<path d="M${_f(jx-1.2)},${jy} L${_f(jx+1.2)},${jy} M${_f(jx)},${_f(parseFloat(jy)-1.2)} L${_f(jx)},${_f(parseFloat(jy)+1.2)}" stroke="currentColor" stroke-width=".9" opacity="${_f(fi*.7)}"/>`);
+      });
+    }
+    if(t>.75){
+      const fi=_fi(t,.75,1), bwn=parseFloat(bw);
+      if(s1===0) o.push(`<line x1="${_f(24-bwn)}" y1="30.8" x2="${_f(24+bwn)}" y2="30.8" stroke="currentColor" stroke-width=".7" opacity="${_f(fi)}"/>`);
+      else{ for(let i=0;i<5;i++) o.push(`<circle cx="${_f(24-bwn+bwn*2/4*i)}" cy="30.8" r=".75" fill="currentColor" opacity="${_f(fi)}"/>`); }
+      if(t>.9&&s0===2){ const fi2=_fi(t,.9,1); [24-bwn,24+bwn].forEach(x=>o.push(`<line x1="${_f(x)}" y1="29" x2="${_f(x+(x<24?1:-1))}" y2="${_f(29-parseFloat(sh)*.32)}" stroke="currentColor" stroke-width=".9" opacity="${_f(fi2)}"/>`)); }
+    }
+    return o.join('');
+  }
+
+  // ACADEMIC — Open rune-scroll / tome
+  // Base: horizontal scroll bar + curl ends. Diverges in page angle, text lines, chapter marks, bookmark.
+  function _academic(t,s){
+    const s0=s%3, s1=s>>2&1;
+    let o=[];
+    if(t<=.35){
+      const fi=_fi(t,0,.35), sw=_f(9*fi);
+      o.push(`<line x1="${_f(24-parseFloat(sw))}" y1="24" x2="${_f(24+parseFloat(sw))}" y2="24" stroke="currentColor" stroke-width="1.3" opacity="${_f(fi)}"/>`);
+      o.push(`<path d="M${_f(24-parseFloat(sw))},24 Q${_f(24-parseFloat(sw)-2)},22 ${_f(24-parseFloat(sw)-1.5)},21" fill="none" stroke="currentColor" stroke-width="1" opacity="${_f(fi)}"/>`);
+      o.push(`<path d="M${_f(24+parseFloat(sw))},24 Q${_f(24+parseFloat(sw)+2)},22 ${_f(24+parseFloat(sw)+1.5)},21" fill="none" stroke="currentColor" stroke-width="1" opacity="${_f(fi)}"/>`);
+      if(t>.18){ const fi2=_fi(t,.18,.35),sw_n=parseFloat(sw); for(let i=0;i<2;i++) o.push(`<line x1="${_f(24-sw_n*.7)}" y1="${22+i*2.5}" x2="${_f(24+sw_n*.7)}" y2="${22+i*2.5}" stroke="currentColor" stroke-width=".7" opacity="${_f(fi2*.6)}"/>`); }
+    }
+    if(t>.3){
+      const fi=_fi(t,.3,.58), pa=[11,8,14][s0]*fi, bh=14, bw=8;
+      o.push(`<path d="M24,${_f(24-bh/2)} L${_f(24-bw)},${_f(24-bh/2+pa*.3)} L${_f(24-bw)},${_f(24+bh/2+pa*.3)} L24,${_f(24+bh/2)} Z" fill="none" stroke="currentColor" stroke-width="1.2" opacity="${_f(fi)}"/>`);
+      o.push(`<path d="M24,${_f(24-bh/2)} L${_f(24+bw)},${_f(24-bh/2+pa*.3)} L${_f(24+bw)},${_f(24+bh/2+pa*.3)} L24,${_f(24+bh/2)} Z" fill="none" stroke="currentColor" stroke-width="1.2" opacity="${_f(fi)}"/>`);
+      o.push(`<line x1="24" y1="${_f(24-bh/2)}" x2="24" y2="${_f(24+bh/2)}" stroke="currentColor" stroke-width="1.5" opacity="${_f(fi)}"/>`);
+      if(t>.52){
+        const fi2=_fi(t,.52,.78), nl=2+s0;
+        for(let i=0;i<nl;i++){ const ly=_f(23-2+i*3.2); o.push(`<line x1="${_f(24-bw+1.5)}" y1="${ly}" x2="${_f(24-1.8)}" y2="${ly}" stroke="currentColor" stroke-width=".65" opacity="${_f(fi2*.55)}"/>`); o.push(`<line x1="${_f(24+1.8)}" y1="${ly}" x2="${_f(24+bw-1.5)}" y2="${ly}" stroke="currentColor" stroke-width=".65" opacity="${_f(fi2*.55)}"/>`); }
+      }
+      if(t>.72&&s1===1){ const fi2=_fi(t,.72,1), pa_n=pa; o.push(`<path d="M${_f(24+bw)},${_f(24-bh/2+pa_n*.3)} L${_f(24+bw)},${_f(24-bh/2+pa_n*.3+3*fi2)} L${_f(24+bw-2)},${_f(24-bh/2+pa_n*.3+1.5*fi2)} Z" fill="currentColor" opacity="${_f(fi2*.65)}"/>`); }
+      if(t>.82){ const fi2=_fi(t,.82,1); o.push(`<line x1="24" y1="${_f(24-bh/2)}" x2="${_f(24-bw*.3)}" y2="${_f(24-bh/2)}" stroke="currentColor" stroke-width="1.2" opacity="${_f(fi2*.55)}"/>`); }
+    }
+    return o.join('');
+  }
+
+  // PERSONAL — Seed to sprout / small tree
+  // Base: oval seed. Diverges in leaf shape, root depth, branch spread.
+  function _personal(t,s){
+    const s0=s%3, s1=s>>2&1;
+    let o=[];
+    const cy=_f(27-t*2), sw=_f(4+2.5*t), sh_v=_f(5+2.5*t);
+    o.push(`<ellipse cx="24" cy="${cy}" rx="${sw}" ry="${sh_v}" fill="none" stroke="currentColor" stroke-width="1.3"/>`);
+    const cy_n=parseFloat(cy), sh_n=parseFloat(sh_v);
+    if(t>.18){ const fi=_fi(t,.18,.44), rl=(4+s1*2.5)*fi; o.push(`<line x1="24" y1="${_f(cy_n+sh_n*.5)}" x2="24" y2="${_f(cy_n+sh_n*.5+rl)}" stroke="currentColor" stroke-width="1" opacity="${_f(fi)}"/>`); }
+    if(t>.38){
+      const fi=_fi(t,.38,.58), sl=(7+3*t)*fi;
+      o.push(`<line x1="24" y1="${_f(cy_n-sh_n*.3)}" x2="24" y2="${_f(cy_n-sh_n*.3-sl)}" stroke="currentColor" stroke-width="1.2" opacity="${_f(fi)}"/>`);
+      const ly=_f(cy_n-sh_n*.3-sl*.5), lw=[3,1.8,4][s0];
+      o.push(`<path d="M24,${ly} Q${_f(24+lw*fi)},${_f(parseFloat(ly)-3*fi)} 24,${_f(parseFloat(ly)-6*fi)}" fill="none" stroke="currentColor" stroke-width="1" opacity="${_f(fi)}"/>`);
+    }
+    if(t>.55){
+      const fi=_fi(t,.55,.75), sl2=10+4*t, lw=[3,1.8,4][s0];
+      const mx=_f(cy_n-sh_n*.3-sl2*.6);
+      o.push(`<path d="M24,${mx} Q${_f(24-lw*fi)},${_f(parseFloat(mx)-2.5*fi)} ${_f(24-lw*fi*.5)},${_f(parseFloat(mx)-5*fi)}" fill="none" stroke="currentColor" stroke-width="1" opacity="${_f(fi)}"/>`);
+    }
+    if(t>.75){
+      const fi=_fi(t,.75,1), sl3=13, top=cy_n-sh_n*.3-sl3, rl=(4+s1*2.5)*_fi(t,.18,.44);
+      o.push(`<line x1="24" y1="${_f(top+3)}" x2="${_f(24-5*fi)}" y2="${_f(top-2*fi)}" stroke="currentColor" stroke-width=".9" opacity="${_f(fi)}"/>`);
+      o.push(`<line x1="24" y1="${_f(top+3)}" x2="${_f(24+5*fi)}" y2="${_f(top-2*fi)}" stroke="currentColor" stroke-width=".9" opacity="${_f(fi)}"/>`);
+      o.push(`<line x1="24" y1="${_f(cy_n+sh_n*.5+rl*.5)}" x2="${_f(24-3*fi)}" y2="${_f(cy_n+sh_n*.5+rl*.5+3*fi)}" stroke="currentColor" stroke-width=".7" opacity="${_f(fi*.65)}"/>`);
+      o.push(`<line x1="24" y1="${_f(cy_n+sh_n*.5+rl*.5)}" x2="${_f(24+3*fi)}" y2="${_f(cy_n+sh_n*.5+rl*.5+3*fi)}" stroke="currentColor" stroke-width=".7" opacity="${_f(fi*.65)}"/>`);
+    }
+    return o.join('');
+  }
+
+  // HEARTH — Hearthstone arch
+  // Base: ember dot. Diverges in flame size, arch width, keystone rune.
+  function _hearth(t,s){
+    const s0=s%3, s1=s>>2&2;
+    let o=[];
+    const er=_f(1.5+t*1.8);
+    o.push(`<circle cx="24" cy="26.5" r="${er}" fill="currentColor" opacity="${_f(.55+t*.35)}"/>`);
+    if(t>.18){
+      const fi=_fi(t,.18,.44), fh=_f(9*fi);
+      o.push(`<path d="M24,${_f(26.5+parseFloat(er))} C22,24 23,${_f(26-parseFloat(fh))} 24,${_f(24.5-parseFloat(fh))} C25,${_f(26-parseFloat(fh))} 26,24 24,${_f(26.5+parseFloat(er))}" fill="none" stroke="currentColor" stroke-width="1.2" opacity="${_f(fi)}"/>`);
+    }
+    if(t>.38){
+      const fi=_fi(t,.38,.58), aw=[6,8,10][s0]*fi;
+      o.push(`<path d="M${_f(24-aw)},29.5 Q24,${_f(29.5+3*fi)} ${_f(24+aw)},29.5" fill="none" stroke="currentColor" stroke-width="1.1" opacity="${_f(fi)}"/>`);
+      o.push(`<circle cx="${_f(24-aw*.5)}" cy="29.5" r=".75" fill="currentColor" opacity="${_f(fi*.55)}"/>`);
+      o.push(`<circle cx="${_f(24+aw*.5)}" cy="29.5" r=".75" fill="currentColor" opacity="${_f(fi*.55)}"/>`);
+    }
+    if(t>.52){
+      const fi=_fi(t,.52,.72), aw=[7,9,11][s0], ah=11*fi;
+      o.push(`<line x1="${_f(24-aw)}" y1="29.5" x2="${_f(24-aw)}" y2="${_f(29.5-ah)}" stroke="currentColor" stroke-width="1.3" opacity="${_f(fi)}"/>`);
+      o.push(`<line x1="${_f(24+aw)}" y1="29.5" x2="${_f(24+aw)}" y2="${_f(29.5-ah)}" stroke="currentColor" stroke-width="1.3" opacity="${_f(fi)}"/>`);
+      o.push(`<path d="M${_f(24-aw)},${_f(29.5-ah)} Q24,${_f(29.5-ah-aw*.65*fi)} ${_f(24+aw)},${_f(29.5-ah)}" fill="none" stroke="currentColor" stroke-width="1.3" opacity="${_f(fi)}"/>`);
+    }
+    if(t>.72){
+      const fi=_fi(t,.72,1), aw=[7,9,11][s0], ah=11*_fi(t,.52,.72);
+      const ky=_f(29.5-ah-aw*.65*_fi(t,.52,.72)-2);
+      if(s1===0) o.push(`<path d="M24,${_f(parseFloat(ky)-2)} L${_f(24+2)},${ky} L24,${_f(parseFloat(ky)+2)} L${_f(24-2)},${ky} Z" fill="none" stroke="currentColor" stroke-width=".8" opacity="${_f(fi)}"/>`);
+      else if(s1===1) o.push(`<path d="M24,${_f(parseFloat(ky)-2)} L${_f(24+2)},${ky} L24,${_f(parseFloat(ky)+2)} L${_f(24-2)},${ky} Z M${_f(24-2)},${ky} L${_f(24+2)},${ky}" fill="none" stroke="currentColor" stroke-width=".75" opacity="${_f(fi)}"/>`);
+      else o.push(`<path d="M${_f(24-2.5)},${_f(parseFloat(ky)-1.5)} L${_f(24+2.5)},${_f(parseFloat(ky)+1.5)} M${_f(24+2.5)},${_f(parseFloat(ky)-1.5)} L${_f(24-2.5)},${_f(parseFloat(ky)+1.5)}" stroke="currentColor" stroke-width=".8" opacity="${_f(fi)}"/>`);
+    }
+    return o.join('');
+  }
+
+  // ROOTS — Root network
+  // Base: single horizontal root bar. Diverges in branching angle spread, depth, knot detail.
+  function _roots(t,s){
+    const s0=s%3, s1=s>>2&1;
+    let o=[];
+    const rw=_f(7+6.5*t);
+    o.push(`<line x1="${_f(24-parseFloat(rw))}" y1="25" x2="${_f(24+parseFloat(rw))}" y2="25" stroke="currentColor" stroke-width="1.3"/>`);
+    if(t>.14){
+      const fi=_fi(t,.14,.4), rl=(7+3*s1)*fi;
+      o.push(`<line x1="24" y1="25" x2="24" y2="${_f(25+rl)}" stroke="currentColor" stroke-width="1.1" opacity="${_f(fi)}"/>`);
+    }
+    if(t>.28){
+      const fi=_fi(t,.28,.55), sp=[5.5,7.5,9.5][s0]*fi, rl2=(5+2.5*t)*fi;
+      [-sp,sp].forEach(dx=>o.push(`<line x1="${_f(24+dx)}" y1="25" x2="${_f(24+dx)}" y2="${_f(25+rl2)}" stroke="currentColor" stroke-width=".9" opacity="${_f(fi)}"/>`));
+      [-.5*fi,.5*fi].forEach((dx,i)=>o.push(`<line x1="${_f(24+parseFloat(_f(sp*(i?1:-1)))*1)}" y1="25" x2="${_f(24+parseFloat(_f(sp*(i?1:-1)))*1.3)}" y2="${_f(25-rl2*.55)}" stroke="currentColor" stroke-width=".8" opacity="${_f(fi*.55)}"/>`));
+    }
+    if(t>.55){
+      const fi=_fi(t,.55,.78), sp=[5.5,7.5,9.5][s0];
+      [-sp,sp].forEach((dx,side)=>{
+        const bx=24+dx, by=28.5;
+        o.push(`<line x1="${_f(bx)}" y1="${by}" x2="${_f(bx+(side?3:-3)*fi)}" y2="${_f(by+3*fi)}" stroke="currentColor" stroke-width=".7" opacity="${_f(fi*.55)}"/>`);
+        o.push(`<line x1="${_f(bx)}" y1="${by}" x2="${_f(bx+(side?-2:2)*fi)}" y2="${_f(by+3.5*fi)}" stroke="currentColor" stroke-width=".7" opacity="${_f(fi*.55)}"/>`);
+      });
+    }
+    if(t>.78){
+      const fi=_fi(t,.78,1), rl=(7+3*s1)*_fi(t,.14,.4), ky=_f(25+rl*.5);
+      if(s1===0) o.push(`<circle cx="24" cy="${ky}" r="${_f(1.8*fi)}" fill="none" stroke="currentColor" stroke-width=".9" opacity="${_f(fi)}"/>`);
+      else o.push(`<path d="M${_f(24-2*fi)},${ky} L${_f(24+2*fi)},${ky} M24,${_f(parseFloat(ky)-2*fi)} L24,${_f(parseFloat(ky)+2*fi)}" stroke="currentColor" stroke-width=".9" opacity="${_f(fi)}"/>`);
+    }
+    return o.join('');
+  }
+
+  const _FNS={tactical:_tactical,physical:_physical,cognitive:_cognitive,physiological:_physiological,technical:_technical,leadership:_leadership,academic:_academic,personal:_personal,hearth:_hearth,roots:_roots};
+
+  return function(sk, eff, max){
+    if(!eff||eff<1) return '';
+    const t=Math.min(1,eff/max), s=_s(sk.id||sk.name), fn=_FNS[sk.cat];
+    if(!fn) return '';
+    const col=typeof skLeafColor==='function'?skLeafColor(eff,max):'#6e7459';
+    return `<svg width="48" height="48" viewBox="0 0 48 48" style="color:${col}" aria-hidden="true">${_ring(t,s)}${fn(t,s)}</svg>`;
+  };
+})();
+
 function renderSkillsTab(){
   const listEl=document.getElementById("skList"); if(!listEl) return;
   if(syncSkillsFromActivity()) save();
@@ -29,6 +366,9 @@ function renderSkillsTab(){
   }
   // skill list — category → top-level skill (group shows subs) → leaf
   if(!S.lifeSkills.length){ listEl.innerHTML=`<div class="aw-empty"><span class="big">🧠</span>No skills yet. Add one above to start tracking levels.</div>`; return; }
+
+  // Path color mapping for deck headers and card tints
+  const PATH_COL={tactical:"#7a3e3e",physical:"#7a5c2a",cognitive:"#3a5c7a",physiological:"#3a6b4a",technical:"#4a4a6b",leadership:"#6b5a2a",academic:"#5a3a6b",personal:"#3a6b3a",hearth:"#7a4a2a",roots:"#4a5a3a"};
 
 // Return the tier {label, from, to} that applies at a given effective level, from a skill's
 // `tiers` field: [{label:"Basics", upTo:3}, {label:"Advanced", upTo:6}, ...].
@@ -66,9 +406,21 @@ function skProgressBlock(sk, eff){
   }
   return out;
 }
+
   const leafCard=(sk,isSub)=>{
     const eff=skEffectiveLevel(sk), maxed=sk.currentLevel>=sk.levels.length && eff>=sk.levels.length;
     const days=skDaysLeft(sk);
+    const pathCol=PATH_COL[sk.cat]||"#3a3a3a";
+    const maxLv=(sk.levels||[]).length||1;
+    const fillPct=Math.round((eff/maxLv)*100);
+    const leafCol=typeof skLeafColor==="function"?skLeafColor(eff,maxLv):"#6e7459";
+    const pathIcon=(typeof SK_PATH_ICON!=="undefined"&&SK_PATH_ICON[sk.cat])||"🌿";
+    const pathName=(typeof SK_CAT!=="undefined"&&SK_CAT[sk.cat])||sk.cat||"";
+    const tier=skTier(sk, eff);
+    const tierLabel=tier && eff>0 ? tier.label : (eff>0 ? ("Level "+eff) : "Unproven");
+    const peak=sk.peakLevel||0;
+
+    // Ladder rungs
     const ladder=sk.levels.map(l=>{
       const have=l.n<=eff, current=l.n===eff;
       const next = l.n===eff+1;                       // the level you'd reach next
@@ -78,11 +430,8 @@ function skProgressBlock(sk, eff){
       const cta = next ? `<span class="sk-rung-cta">tap if reached →</span>` : (reachable?`<span class="sk-rung-cta dim">reached?</span>`:"");
       return `<div class="${cls}"${attrs}><div class="dot">${have?'✓':l.n}</div><div class="rung-txt"><b>L${l.n}.</b> ${esc(l.ability)}</div>${cta}</div>`;
     }).join("");
-    let fadeNote="";
-    if(sk.currentLevel>0){
-      if(eff<sk.currentLevel) fadeNote=`<div class="sk-fade-note warn">⚠️ Slipped from L${sk.currentLevel} to L${eff} — tap L${eff+1} below when you can do it again to reclaim it.</div>`;
-      else if(days!==null) fadeNote=`<div class="sk-fade-note ${days<=Math.ceil(sk.fadeDays*0.34)?'warn':''}">Fades in ${days} day${days!==1?'s':''} (every ${sk.fadeDays}d).</div>`;
-    }
+
+    // History timeline
     const histItems=(sk.history||[]).filter(h=>h.type==="promote"||h.type==="decay").slice(-8);
     const histHtml=histItems.length>1?(()=>{
       const parts=histItems.map((h,i)=>{
@@ -92,39 +441,62 @@ function skProgressBlock(sk, eff){
       });
       return '<div class="sk-hist">'+parts.join('')+'</div>';
     })():'';
-    const peak=sk.peakLevel||0;
-    const peakStr = (peak>0 && peak>eff) ? ` · peak L${peak}` : "";
+
+    // Detail-section fade / reclaim notes
+    let fadeDetail="";
+    if(sk.currentLevel>0){
+      if(eff<sk.currentLevel) fadeDetail=`<div class="sk-fade-note warn">⚠️ Slipped from L${sk.currentLevel} to L${eff} — tap L${eff+1} below when you can do it again to reclaim it.</div>`;
+      else if(days!==null) fadeDetail=`<div class="sk-fade-note ${days<=Math.ceil((sk.fadeDays||30)*0.34)?'warn':''}">Fades in ${days} day${days!==1?'s':''} (every ${sk.fadeDays}d).</div>`;
+    }
     let reclaimNote="";
     if(peak>eff && peak>0){
       reclaimNote=`<div class="sk-fade-note reclaim">🏔️ You've held Level ${peak} before — reclaiming it should come faster than learning it new.</div>`;
     }
-    const tier=skTier(sk, eff);
-    const tierPrefix = (tier && eff>0) ? `<span class="sk-tier-prefix">${esc(tier.label)}:</span> ` : "";
-    const tierBadge = (tier && eff>0) ? ` <span class="sk-tier-tag">${esc(tier.label)}</span>` : "";
-    const leafCol=typeof skLeafColor==="function"?skLeafColor(eff,sk.levels.length):"#6e7459";
-    const pathIcon=(typeof SK_PATH_ICON!=="undefined"&&SK_PATH_ICON[sk.cat])||"🌿";
-    const pathName=(typeof SK_CAT!=="undefined"&&SK_CAT[sk.cat])||sk.cat||"";
-    const maxLv=(sk.levels||[]).length||1;
-    const fillPct=Math.round((eff/maxLv)*100);
-    return `<div class="sk-card ${isSub?'sk-sub':''}" style="border-left:3px solid ${leafCol};--sk-fill:${fillPct}%">
-      <div class="sk-card-top">
-        <div><div class="sk-card-name">${tierPrefix}${esc(sk.name)}${sk.auto?' <span class="sk-auto">auto</span>':''}</div>
-        <div class="sk-card-world">${pathIcon} ${esc(pathName)}</div></div>
-        <span class="sk-level-badge ${maxed?'maxed':''}">${eff>0?'Lv '+eff:'Unproven'}${tierBadge}${maxed?' · MAX':peakStr}</span>
-        <button class="sk-copy-btn" data-skcopy="${sk.id}" title="Copy skill card">⧉</button>
-        <button class="sk-card-edit" data-skedit="${sk.id}">✎</button>
-        <button class="sk-card-del" data-skdel="${sk.id}">✕</button>
+
+    // Card-face footer: short fade indicator
+    let fadeFoot="";
+    if(sk.currentLevel>0){
+      if(eff<sk.currentLevel) fadeFoot=`<span class="sk-fade-foot warn">⚠️ Slipped</span>`;
+      else if(days!==null && days<=Math.ceil((sk.fadeDays||30)*0.34)) fadeFoot=`<span class="sk-fade-foot warn">🍂 ${days}d left</span>`;
+      else if(days!==null) fadeFoot=`<span class="sk-fade-foot">🍂 ${days}d</span>`;
+    }
+
+    // Level / max badge in header
+    const lvBadge=maxed ? `Lv ${eff} / ${maxLv} <span class="sk-max-badge">MAX</span>` : (peak>eff&&peak>0 ? `Lv ${eff} / ${maxLv} <span class="sk-peak-badge">peak L${peak}</span>` : `Lv ${eff} / ${maxLv}`);
+
+    return `<div class="sk-card ${isSub?'sk-sub':''} ${eff>0?'started':''}" style="--sk-col:${leafCol};--sk-fill:${fillPct}%">
+      <div class="sk-card-header" style="background:${pathCol}22;border-bottom:1px solid ${pathCol}55">
+        <span class="sk-card-path-icon">${pathIcon}</span>
+        <span class="sk-card-path-label">PATH OF ${esc(pathName.toUpperCase())}</span>
+        <span class="sk-card-path-lv">${lvBadge}</span>
+        <button class="sk-card-edit" data-skedit="${sk.id}" title="Edit">✎</button>
+        <button class="sk-card-del" data-skdel="${sk.id}" title="Delete">✕</button>
       </div>
-      <div class="sk-ladder">${ladder}</div>
-      ${histHtml}
-      ${fadeNote}
-      ${reclaimNote}
-      ${(sk.why||sk.whatYouDo||sk.howTo||sk.prep||sk.recover||sk.safety||sk.roadmap||sk.advance||sk.maintain)?`<details class="sk-info"><summary>ℹ️ Why, how &amp; how to level up</summary><div class="sk-info-body">${sk.why?`<p><b>Why:</b> ${esc(sk.why)}</p>`:''}${sk.whatYouDo?`<p><b>What you do:</b> ${esc(sk.whatYouDo)}</p>`:''}${sk.howTo?`<p><b>How:</b> ${esc(sk.howTo)}</p>`:''}${sk.prep?`<p class="sk-prep"><b>🤸 Warm-up before:</b> ${esc(sk.prep)}</p>`:''}${sk.recover?`<p class="sk-recover"><b>🧘 Stretch after:</b> ${esc(sk.recover)}</p>`:''}${skProgressBlock(sk,eff)}${sk.safety?`<p class="sk-safety">⚠️ ${esc(sk.safety)}</p>`:''}</div></details>`:''}
-      <button class="sk-work" data-skwork="${sk.id}">▶ Work on this</button>
-      <div class="sk-work-panel" id="skwork-${sk.id}"></div>
-      <div class="sk-level-bar"><div class="sk-level-fill" style="width:var(--sk-fill);background:${leafCol}"></div></div>
+      <div class="sk-card-emblem">
+        ${skEmblemSvg(sk,eff,maxLv)||`<div class="sk-emblem-placeholder" style="border-color:${leafCol}"></div>`}
+      </div>
+      <div class="sk-card-name">${esc(sk.name)}${sk.auto?' <span class="sk-auto">auto</span>':''}</div>
+      <div class="sk-card-tier">${esc(tierLabel)}</div>
+      <div class="sk-level-bar"><div class="sk-level-fill" style="background:${leafCol}"></div></div>
+      <div class="sk-card-footer">
+        <div class="sk-card-footer-left">${fadeFoot}</div>
+        <button class="sk-copy-btn" data-skcopy="${sk.id}" title="Copy skill card">⧉ copy</button>
+      </div>
+      <details class="sk-card-detail">
+        <summary>▸ Ladder &amp; history</summary>
+        <div class="sk-card-detail-inner">
+          <div class="sk-ladder">${ladder}</div>
+          ${histHtml}
+          ${fadeDetail}
+          ${reclaimNote}
+          ${(sk.why||sk.whatYouDo||sk.howTo||sk.prep||sk.recover||sk.safety||sk.roadmap||sk.advance||sk.maintain)?`<details class="sk-info"><summary>ℹ️ Why, how &amp; how to level up</summary><div class="sk-info-body">${sk.why?`<p><b>Why:</b> ${esc(sk.why)}</p>`:''}${sk.whatYouDo?`<p><b>What you do:</b> ${esc(sk.whatYouDo)}</p>`:''}${sk.howTo?`<p><b>How:</b> ${esc(sk.howTo)}</p>`:''}${sk.prep?`<p class="sk-prep"><b>🤸 Warm-up before:</b> ${esc(sk.prep)}</p>`:''}${sk.recover?`<p class="sk-recover"><b>🧘 Stretch after:</b> ${esc(sk.recover)}</p>`:''}${skProgressBlock(sk,eff)}${sk.safety?`<p class="sk-safety">⚠️ ${sk.safety}</p>`:''}</div></details>`:''}
+          <button class="sk-work" data-skwork="${sk.id}">▶ Work on this</button>
+          <div class="sk-work-panel" id="skwork-${sk.id}"></div>
+        </div>
+      </details>
     </div>`;
   };
+
   const groupCard=sk=>{
     const subs=skSubsOf(sk);
     const rolled=skRolledLevel(sk);
@@ -138,13 +510,45 @@ function skProgressBlock(sk, eff){
       <div class="sk-subs">${subs.map(s=>leafCard(s,true)).join("")}</div>
     </div>`;
   };
+
+  // Determine the most recently active path to expand by default
+  const px=S.pathXP||{};
+  let maxPxCat=null, maxPxVal=-1;
+  SK_CAT_ORDER.forEach(c=>{
+    const tops=skTopLevelInCat(c);
+    if(!tops.length) return;
+    if((px[c]||0)>maxPxVal){ maxPxVal=px[c]||0; maxPxCat=c; }
+    if(maxPxCat===null) maxPxCat=c; // fallback: first cat with skills
+  });
+
   let html="";
   SK_CAT_ORDER.forEach(cat=>{
     const tops=skTopLevelInCat(cat);
     if(!tops.length) return;
     const catLvl=catRolledLevel(cat);
-    html+=`<div class="sk-cat-hd" id="skcat-${cat}"><span class="sk-cat-name">${SK_CAT[cat]}</span><span class="sk-cat-lvl">Lv ${fmtLvl(catLvl)}</span></div>`;
-    tops.forEach(sk=>{ html += sk.group ? groupCard(sk) : leafCard(sk,false); });
+    const pathCol=PATH_COL[cat]||"#3a3a3a";
+    const pathIcon=(typeof SK_PATH_ICON!=="undefined"&&SK_PATH_ICON[cat])||"🌿";
+    const pathName=(typeof SK_CAT!=="undefined"&&SK_CAT[cat])||cat||"";
+    const isOpen=cat===maxPxCat;
+    // fading skill count for this category
+    const catLeaves=S.lifeSkills.filter(s=>s.cat===cat&&!s.group&&s.levels&&s.levels.length&&s.currentLevel>0);
+    const fadingCount=catLeaves.filter(s=>{ const d=skDaysLeft(s); return d!==null && d<=Math.ceil((s.fadeDays||30)*0.34); }).length;
+    const fadingBadge=fadingCount>0?`<span class="sk-deck-fading">🍂 ${fadingCount}</span>`:"";
+    const cardsHtml=tops.map(sk=> sk.group ? groupCard(sk) : leafCard(sk,false)).join("");
+
+    html+=`<div class="sk-deck" id="skcat-${cat}">
+      <div class="sk-deck-header${isOpen?' open':''}" style="--deck-col:${pathCol}" onclick="this.classList.toggle('open');this.nextElementSibling.classList.toggle('open')">
+        <span class="sk-deck-icon">${pathIcon}</span>
+        <span class="sk-deck-name">${esc(pathName)}</span>
+        <span class="sk-deck-lv">Lv ${fmtLvl(catLvl)}</span>
+        <span class="sk-deck-count">${tops.length} skill${tops.length!==1?'s':''}</span>
+        ${fadingBadge}
+        <span class="sk-deck-arrow">▼</span>
+      </div>
+      <div class="sk-deck-body${isOpen?' open':''}">
+        ${cardsHtml}
+      </div>
+    </div>`;
   });
   listEl.innerHTML=html;
   // populate the right-side category jump bar (only cats that have skills)
@@ -155,4 +559,3 @@ function skProgressBlock(sk, eff){
       `<button data-skjump="${c}">${icons[c]||"•"}<span class="jb-tip">${SK_CAT[c]}</span></button>`).join("");
   }
 }
-

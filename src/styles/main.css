@@ -447,18 +447,47 @@
   .sk-pass{background:rgba(111,158,84,.16);border-color:var(--jade);color:var(--jade)}
   .sk-pass:hover{background:rgba(111,158,84,.28)}
   .sk-skip{background:transparent;border-color:var(--line);color:var(--ink-faint)}
-  /* skill list cards */
-  .sk-card{background:var(--panel);border:1px solid var(--line);border-left:3px solid var(--line);border-radius:11px;padding:13px 15px;margin-bottom:10px}
-  .sk-card-world{font-size:10px;color:var(--ink-faint);letter-spacing:.04em;margin-top:1px}
-  .sk-level-bar{height:3px;background:var(--line);border-radius:2px;margin-top:10px}
-  .sk-level-fill{height:3px;border-radius:2px;transition:width .3s}
-  .sk-card-top{display:flex;justify-content:space-between;align-items:center;gap:8px}
-  .sk-card-name{font-size:15px;font-weight:700}
-  .sk-card-cat{font-size:11px;color:var(--ink-faint);letter-spacing:.05em;text-transform:uppercase}
+  /* skill list cards — Phase 1 deck layout */
+  /* Deck wrappers */
+  .sk-deck{margin-bottom:18px}
+  .sk-deck-header{display:flex;align-items:center;gap:9px;cursor:pointer;padding:11px 14px;background:rgba(255,255,255,.03);border:1px solid var(--line);border-left:4px solid var(--deck-col,var(--line));border-radius:10px;user-select:none;transition:background .15s}
+  .sk-deck-header:hover{background:rgba(255,255,255,.055)}
+  .sk-deck-icon{font-size:17px;flex:none}
+  .sk-deck-name{font-size:13px;font-weight:700;letter-spacing:.07em;text-transform:uppercase;color:var(--ink);flex:1}
+  .sk-deck-lv{font-size:12px;color:var(--gold);font-weight:700;background:rgba(184,160,106,.12);border:1px solid var(--gold);padding:2px 9px;border-radius:14px;flex:none}
+  .sk-deck-count{font-size:11px;color:var(--ink-faint);flex:none}
+  .sk-deck-fading{font-size:11px;color:var(--ember);font-weight:600;flex:none}
+  .sk-deck-arrow{font-size:11px;color:var(--ink-faint);transition:transform .2s;display:inline-block}
+  .sk-deck-header.open .sk-deck-arrow{transform:rotate(180deg)}
+  .sk-deck-body{display:none;padding-top:8px}
+  .sk-deck-body.open{display:block}
+  /* Card face — full redesign */
+  .sk-card{border-radius:12px;border:1px solid var(--sk-col,var(--line));background:var(--panel);position:relative;padding:0;margin-bottom:10px;box-shadow:0 4px 16px rgba(0,0,0,.45)}
+  .sk-card.started::before{content:"";position:absolute;top:5px;left:5px;width:13px;height:13px;border-top:2px solid var(--sk-col,var(--line));border-left:2px solid var(--sk-col,var(--line));border-radius:2px 0 0 0;opacity:.65;pointer-events:none}
+  .sk-card.started::after{content:"";position:absolute;bottom:5px;right:5px;width:13px;height:13px;border-bottom:2px solid var(--sk-col,var(--line));border-right:2px solid var(--sk-col,var(--line));border-radius:0 0 2px 0;opacity:.65;pointer-events:none}
+  .sk-card-header{display:flex;align-items:center;gap:8px;padding:9px 13px;border-radius:12px 12px 0 0;border-bottom:1px solid rgba(0,0,0,.4)}
+  .sk-card-path-icon{font-size:15px;flex:none}
+  .sk-card-path-label{font-size:10px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--ink-dim);flex:1}
+  .sk-card-path-lv{font-size:11px;font-weight:700;color:var(--ink);flex:none;opacity:.9}
+  .sk-card-emblem{display:flex;align-items:center;justify-content:center;padding:14px 0 6px}
+  .sk-emblem-placeholder{width:42px;height:42px;border-radius:50%;border:1px dashed;opacity:.3}
+  .sk-emblem-svg{display:block;filter:drop-shadow(0 0 4px currentColor)}
+  .sk-card-name{font-size:17px;font-weight:700;text-align:center;padding:0 20px 4px;line-height:1.25}
+  .sk-card-tier{font-size:11.5px;color:var(--ink-faint);text-align:center;padding:0 14px 12px;letter-spacing:.03em}
+  .sk-level-bar{height:5px;background:rgba(0,0,0,.35);margin:0 14px;border-radius:3px}
+  .sk-level-fill{height:5px;border-radius:3px;transition:width .3s;width:var(--sk-fill,0%)}
+  .sk-card-footer{display:flex;justify-content:space-between;align-items:center;padding:9px 13px 10px;gap:8px;margin-top:8px}
+  .sk-card-footer-left{flex:1;font-size:11.5px}
+  .sk-fade-foot{font-size:11px;color:var(--ink-faint)}
+  .sk-fade-foot.warn{color:var(--ember)}
+  .sk-card-detail{border-top:1px solid rgba(255,255,255,.05)}
+  .sk-card-detail>summary{cursor:pointer;padding:8px 14px;font-size:12px;color:var(--violet);font-weight:600;list-style:none;display:flex;align-items:center;gap:5px}
+  .sk-card-detail>summary::-webkit-details-marker{display:none}
+  .sk-card-detail-inner{padding:4px 14px 10px}
+  .sk-max-badge{font-size:10px;font-weight:700;color:var(--gold);background:rgba(184,160,106,.2);border:1px solid var(--gold);border-radius:8px;padding:1px 5px;margin-left:4px;vertical-align:middle}
+  .sk-peak-badge{font-size:10px;color:var(--ink-faint);opacity:.8;margin-left:4px}
   .sk-level-badge{font-size:12px;font-weight:700;color:var(--violet);background:rgba(124,147,168,.12);border:1px solid #5a4d72;padding:3px 10px;border-radius:20px;flex:none}
   .sk-level-badge.maxed{color:var(--gold);border-color:var(--gold)}
-  .sk-tier-prefix{color:var(--gold);font-weight:700}
-  .sk-tier-tag{font-size:10px;font-weight:600;opacity:.85;text-transform:uppercase;letter-spacing:.04em}
   .sk-tier-band{display:inline-block;font-size:9.5px;font-weight:700;text-transform:uppercase;letter-spacing:.06em;color:var(--gold);background:rgba(184,160,106,.14);border:1px solid var(--line);border-radius:4px;padding:0 5px;margin-right:6px;vertical-align:middle}
   .sk-fade-note.reclaim{color:var(--gold)}
   .vt-tag{font-size:10px;letter-spacing:.04em;padding:1px 7px;border-radius:10px;border:1px solid;margin-left:5px;font-weight:600}
@@ -778,8 +807,7 @@
   .sk-fade-note.warn{color:var(--ember)}
   .sk-card-del{background:none;border:none;color:var(--ink-faint);cursor:pointer;font-size:14px;flex:none}
   .sk-card-del:hover{color:var(--blood)}
-  .sk-cat-hd{font-size:12px;font-weight:700;letter-spacing:.12em;text-transform:uppercase;color:var(--violet);margin:18px 2px 10px;padding-bottom:5px;border-bottom:1px solid var(--line);display:flex;justify-content:space-between;align-items:center}
-  .sk-cat-lvl{color:var(--gold);font-weight:700;letter-spacing:.04em;background:rgba(184,160,106,.12);border:1px solid var(--gold);padding:2px 10px;border-radius:20px}
+  .sk-cat-hd{display:none} /* replaced by .sk-deck-header */
   /* group (parent) skill */
   .sk-group{border:1px solid var(--line);border-left:3px solid var(--gold);border-radius:11px;padding:12px 13px;margin-bottom:11px;background:rgba(184,160,106,.04)}
   .sk-group-top{display:flex;align-items:center;gap:8px;margin-bottom:8px}

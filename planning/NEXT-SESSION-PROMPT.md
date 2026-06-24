@@ -4,9 +4,21 @@ Paste this into a new Claude Code session to resume work.
 
 ---
 
-You are continuing work on **Operations**, a gamified ROTC life-tracker PWA built for an Army ROTC cadet (MS2, Cyber branch goal). Read `CLAUDE.md` first — it is the binding rulebook. Then read `docs/OPERATIONS-HANDOFF.md` for full architecture. Then read `planning/IMPROVEMENTS-v102.md` for the prioritized feature list to implement next.
+You are continuing work on **Operations**, a gamified ROTC life-tracker PWA built for an Army ROTC cadet (MS2, Cyber branch goal). Read `CLAUDE.md` first — it is the binding rulebook. Then read `docs/OPERATIONS-HANDOFF.md` for full architecture. Then read `planning/VISUAL-OVERHAUL-PROMPT.md` for the visual redesign spec and phase tracker.
 
-**Current version: v101.** The service worker is at `operations-v101` in `sw.js`.
+**Current version: v102.** The service worker is at `operations-v102` in `sw.js`.
+
+### What was just completed (v102 — Visual Overhaul Phase 1)
+
+**Phase 1 — Skill cards + deck UI** is complete:
+
+- Skills tab transformed from a flat list into a collapsible deck-based card interface
+- Each path (tactical, physical, cognitive, etc.) is now a `.sk-deck` with a collapsible header showing path icon, name, world level, skill count, and fading count badge
+- The most recently active path (highest `pathXP[cat]`) is expanded by default; all others collapsed
+- Each skill card (`leafCard()`) redesigned: header band with "PATH OF X" + Lv N/Max, center emblem placeholder (Phase 2 will fill this in), skill name (large, centered), tier label, level fill bar, footer with fade warning + copy button, corner accents via `::before`/`::after`, and detailed ladder/history in a collapsible `<details>` element
+- Jump bar navigation and tree-tap navigation both now open the target deck when navigating to it
+- Files changed: `src/tabs/skills.js`, `src/styles/main.css`, `src/core/tree.js`, `src/tabs/awards.js`
+- `npm run regress` passes with 0 pageerror, SKILL AUDIT `{badCount: 0}`
 
 ### What was just completed (v101)
 
@@ -69,6 +81,7 @@ Implement the features from `IMPROVEMENTS-v102.md` in the recommended order. Sta
 | Fading-soon digest on Dawn | `src/tabs/today.js` |
 | Baseline test nudge on Dawn | `src/tabs/today.js` |
 | AFT score history sparkline | `src/tabs/aft.js`, `src/styles/main.css` |
+| Qualification log + auto-leveling | `src/core/constants.js`, `src/core/state.js`, `src/tabs/awards.js`, `src/tabs/awards.html`, `src/styles/main.css` |
 | Oath path breakdown | `src/core/state.js`, `src/styles/main.css` |
 | FM weekly goal from AFT gap | `src/tabs/plan.js`, `src/styles/main.css` |
 | Oath archive search | `src/core/state.js`, `src/core/events.js`, `src/styles/main.css` |

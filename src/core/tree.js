@@ -333,7 +333,14 @@ function _treeWireGestures(){
     const nb=document.querySelector('#sideNav button[data-tab="skills"]'); if(nb) nb.click();
     setTimeout(()=>{
       const sk=(S.lifeSkills||[]).find(s=>s.id===skId);
-      if(sk){ const el=document.getElementById(`skcat-${sk.cat}`); if(el) el.scrollIntoView({behavior:"smooth",block:"start"}); }
+      if(sk){
+        const el=document.getElementById(`skcat-${sk.cat}`);
+        if(el){
+          const hdr=el.querySelector('.sk-deck-header'), body=el.querySelector('.sk-deck-body');
+          if(hdr&&!hdr.classList.contains('open')){ hdr.classList.add('open'); if(body) body.classList.add('open'); }
+          el.scrollIntoView({behavior:"smooth",block:"start"});
+        }
+      }
     },150);
   });
 }

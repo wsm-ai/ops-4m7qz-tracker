@@ -1,137 +1,99 @@
 # Operations
 
-A personal command-center PWA for an Army ROTC cadet — a gamified, evidence-based
-tracker for fitness, cognition, officer knowledge, habits, and branching goals.
-Installable on laptop, tablet, and phone; works offline; all data stays on the
-device (with optional cloud-file sync).
+A gamified ROTC + life-tracker **Progressive Web App** for a single user (Wyatt, an Army ROTC cadet aiming for a Cyber / 17-series branch). It is a **single-file, fully offline** app: everything measurable in a cadet's and soldier's development becomes a *skill* with measurable levels, decay, peak tracking, and progression — woven around a **Yggdrasil world-tree** symbolism.
 
-## What goes live (GitHub Pages)
+- **Stack:** one big `index.html` (HTML + CSS + JS) + a `quizbank.js` + a service worker. No framework, no build step to *run* it, no external runtime dependencies.
+- **Data:** lives in the browser's `localStorage` per device, with an optional cloud-file (JSON) backup/sync.
+- **Install:** "Add to Home Screen" on a phone/tablet, or open `index.html` in any browser.
+- **Current version:** **v88** (see `sw.js` cache string). 16 tabs, 93 skills across 10 themed Paths.
 
-These files at the repo **root** are the app. Pages serves them as the site:
+> The build tooling (Node + Playwright + Python) exists only for **testing and packaging**. The app itself ships as static files and runs with zero dependencies.
 
-- `index.html` — the app
-- `quizbank.js` — the quiz questions (sourced from ROTC advance sheets & TCs)
-- `sw.js` — service worker (installability + offline)
-- `manifest.json` — PWA manifest
-- `icon-192.png`, `icon-512.png` — app icons
+---
 
-Keep all of them at the root, together. After uploading a new version, hard-refresh
-(Ctrl/Cmd+Shift+R) so the service worker picks up the new files. The cache version in
-`sw.js` is bumped on every release to force the update. **Export a backup before
-updating** — your data migrates automatically, but a backup is cheap insurance.
+## Quick start (run it)
 
-## The app, in brief
+You don't need Node or Python to *use* the app — just serve the folder:
 
-A set of tabs, each a tool. Current version: **v34** (16 tabs).
+```bash
+# any static server works; pick one:
+python3 -m http.server 8080
+# then open http://localhost:8080/index.html
+```
 
-### Daily use
-- **Today** — the landing dashboard. Aggregates everything actionable today in one
-  screen: habits due (checkable here), daily orders left, skills needing attention,
-  spaced-repetition cards due, study reviews due, your training focus (your weakest
-  AFT event), and status/reminders (AFT pass status, blood-donation eligibility,
-  stale-weight nudge). Open the app → know what to do.
-- **Missions / Orders / Objectives** — one-off tasks, **daily habits**, and big
-  multi-step goals. Habits have their own streaks (independent of the day-streak), a
-  starter library, a one-time **grace day** so one miss doesn't reset months, and they
-  **feed linked skills** (completing a habit refreshes that skill's decay timer).
-- **Momentum** — a perfect-day bonus, escalating streak milestones, a readiness bar,
-  and streak-at-risk warnings. Motivating-strict, never punitive.
+Or simply open `index.html` directly in a browser (some features like the service worker only register over http/https, not `file://`, but the app still runs).
 
-### Body & health
-- **Profile** — identity, birthdate (auto-age), height/weight with last-measured
-  dates, best lifts, an **Emergency Info** card (blood type + allergies, screen-grab
-  ready), **Blood Donation** tracking (real ABO/Rh compatibility + 56-day eligibility),
-  and a **Vitals** log (pulse, blood pressure, hemoglobin) with trend sparklines.
-  *Vitals are informational only — not medical advice.*
-- **AFT** — the Army Fitness Test scorecard using the **official scoring tables**
-  (HQDA EXORD 218-25 Annex B, eff 1 Jun 2025), age/sex-bracketed, with a General vs
-  Combat standard toggle and pass/fail against the real thresholds. Anchor points are
-  exact; values between anchors are interpolated — verify graded scores on the official
-  chart.
-- **Log** — a workout logger with per-exercise progress, stall detection, and a
-  monthly baseline that re-anchors targets.
-- **FM** — an adaptive training plan whose targets auto-calculate from the log and
-  baseline. Logging **cadre PT** makes it recovery-aware (eases off recently-worked
-  muscle groups). Factors in age-based recovery pacing and your build.
+## Quick start (develop it)
 
-### Mind & knowledge
-- **Test** — in-app cognitive tests, each measuring a skill and giving improvement
-  tips: reaction time, memory span, typing, n-back (working memory), go/no-go
-  (attention), processing speed, mental math. Plus the **Memory Track**: a real
-  spaced-repetition (SRS) engine and a memory-palace trainer — the "memorize anything"
-  system. *Browser tests are relative progress trackers, not clinical/IQ instruments.*
-- **Quiz** — 16 banks (~124 questions) on Army knowledge from real ROTC advance sheets
-  and TCs; each question cites its source. Passing banks levels the **ROTC knowledge**
-  skill. Includes a **study-plan generator** that builds a spaced review schedule for
-  any graded test. *Study aid — verify against the originals and cadre.*
-- **Board** — Cyber Branch (17-series) reference facts and a Talent-Based Branching /
-  promotion-board prep checklist.
+Install the test/build tooling once:
 
-### Skills
-- **Skills** — a hierarchical skill tree across eight categories (Tactical, Physical,
-  Cognitive, Physiological, Technical, Leadership, Academic, Personal). Each skill has
-  a level ladder, a decay timer, a quest, a **peak-level memory** (your all-time high,
-  so you can see what to reclaim), and never falls below Level 1 once started. Many
-  carry plain-language **"why & how"** copy (including exercise form, warm-up/cool-down,
-  and instructor-safety notes for the combat skills), and every skill has a **"Work on
-  this"** button that routes to the right trainer, plan, or protocol. Strength skills
-  auto-level from your real lift-to-bodyweight ratios; AFT events and quiz/test results
-  feed their skills automatically.
+```bash
+npm install                 # installs Playwright (dev-only)
+npx playwright install chromium
+```
 
-### Records & rewards
-- **R&R** — a rewards shop you spend Merit Points in.
-- **The Wall** — the "I Love Me" wall: awards, coins, badges, certs, memberships,
-  events, and volunteer hours.
-- **Records** — **History & Trends** (AFT/weight/vitals/skills over time), a private
-  **Counseling Log** (4856-style leadership-event record), reusable **packing/gear
-  checklists** (ruck/FTX/lab templates), and **CSV export** of AFT history, awards,
-  volunteer hours, and counseling.
-- **Weight** — a **read-only mirror** of the standalone *The Weight* promise-ledger app
-  (`tw-9f3kx-ledger`). Binding and keeping happen in the real Weight app; this shows
-  the jars, keystone, memorial, and ledger. Kept solemn — no points or streaks touch it.
+Then the loop is:
 
-## Data & sync
+```bash
+npm run check               # fast: syntax-check the main script (no browser)
+npm run regress             # full: load app headless, click all 16 tabs, assert no errors
+npm run verify              # check + regress together
+npm run package             # build dist/operations.zip + dist/operations-preview.html
+```
 
-- All data is stored locally in the browser, **per device** — nothing is sent to a
-  server, and the public site never contains your data, only the app code.
-- **Export / import backup** moves data between devices manually (works everywhere,
-  including iPhone).
-- **Link cloud file** (footer) uses the File System Access API to auto-save your data
-  to a `.json` file in a synced folder (e.g. OneDrive), keeping linked devices in sync.
-  Works on desktop Chrome/Edge and Android; **not** on iPhone/iPad Safari, which uses
-  export/import instead.
+See **SETUP.md** for the detailed Claude-Code-in-VS-Code workflow, and **CLAUDE.md** for the rules an AI assistant must follow when editing this repo.
 
-## Install
+---
 
-1. Host these root files (GitHub Pages, or drag the folder to a static host).
-2. Open the resulting URL on each device and install:
-   - **Windows (Chrome/Edge):** install icon in the address bar, or menu → Install.
-   - **Samsung (Chrome / Samsung Internet):** menu → Add to Home screen.
-   - **iPhone (Safari only):** Share → Add to Home Screen.
+## Repository layout
 
-## Honest constraints (kept visible in the app too)
+```
+index.html              The entire app (HTML + CSS + JS in one file, ~8,200 lines)
+quizbank.js             The 16 ROTC quiz banks, loaded via <script src>
+sw.js                   Service worker; holds the cache version string ("operations-vNN")
+manifest.json           PWA manifest
+icon-192.png            App icons (regenerated by scripts/make_icons.py)
+icon-512.png
+HOW TO INSTALL.txt      End-user install instructions
 
-- **No automatic Apple Watch sync.** A static web app can't read HealthKit/Bluetooth.
-  Vitals are manual entry; the "Import from Apple Health export" button is a stub for a
-  future file-import feature.
-- **In-app cognitive tests are relative trackers**, not clinical or IQ instruments —
-  device and input lag affect reaction/processing scores.
-- **Brain-training transfer is limited** — gains are mostly task-specific. The Memory
-  Track trains *deliberate* memorization to a high level; it won't make unrelated
-  remembering effortless.
-- **Combat (CQC) and Physical Control skills are concept-tracking only.** You cannot
-  learn to fight or restrain safely from text — train hands-on with a qualified
-  instructor. Heavy lifts likewise need a coach to check form.
-- **AFT scoring** uses the official 1 Jun 2025 tables (exact anchors + interpolation);
-  the official PDF and your cadre are the final word for graded tests.
-- **Quiz content** is an AI-assisted study aid and may contain errors; confirm against
-  original ROTC materials.
-- **Blood type** is used only for emergency ID and real donation-compatibility facts —
-  never for invented "blood-type fitness" claims.
-- **Vitals/BP/hemoglobin ranges are informational, not medical advice** — see a
-  clinician for anything concerning.
-- The training plan is a general framework, not medical or cadre direction.
-- Privacy: a GitHub Pages site is publicly reachable by anyone with the URL even with
-  an obscure repo name. For true privacy, host behind a password (Cloudflare Pages /
-  Netlify). Your personal data stays safe regardless — it lives only in the browser or
-  your linked cloud file.
+README.md               This file
+SETUP.md                Step-by-step dev setup for VS Code + Claude Code
+CLAUDE.md               Operating rules for AI assistants editing this repo (READ FIRST)
+OPERATIONS-HANDOFF.md   Full project context: architecture, systems, decisions, history
+
+package.json            npm scripts (check / regress / preview / package / icons / verify)
+scripts/
+  check_syntax.js       Syntax-check index.html's main script (no execution)
+  regress.js            Headless Playwright regression across all 16 tabs (+ --shot)
+  build_preview.py      Inline quizbank.js into a single operations-preview.html
+  package.js            Bump cache, regen icons, zip the app, build the preview
+  make_icons.py         Regenerate the chevron app icons (PIL)
+.vscode/
+  extensions.json       Recommends the Claude Code extension
+dist/                   Build outputs (git-ignored): operations.zip, operations-preview.html
+```
+
+---
+
+## What the app does (one-paragraph tour)
+
+Open it and the **Today** tab aggregates what to do now: habit quests, skills needing attention, the training advisory, vitals/donation reminders, and AFT pass status. The **Skills** tab is the heart: 93 skills organized into 10 **Paths** (Body, War, Mind, Vitality, Craft, Command, Knowledge, Self, Hearth, Roots), each skill with a measurable level ladder (level = a thing you can *do*, anchored at the top to a documented human ceiling), decay over time (but never below level 1 once started), and an all-time **peak**. A **List ↔ Tree** toggle renders the skills as a Yggdrasil world-tree: a trunk with a seven-world crown and three foundational worlds in the roots. Other tabs cover the Army **AFT** (official scoring tables), **quizzes** + spaced-repetition, a **training planner**, vitals + Apple-Health import, awards/records, a counseling log, checklists, board prep, and a **Weight** promise-ledger that the **Integrity** skill mirrors read-only.
+
+---
+
+## Core design principles (do not break these)
+
+1. **Honesty over hype.** Real, evidence-based methods only. No faked metrics or invented correlations. Where the science is limited, the app says so.
+2. **Measurability over status.** Every skill level describes what you can *do* (verifiable benchmarks), never a vague tier like "elite."
+3. **Offline & private.** Everything stays on-device / in the user's own cloud file. Nothing is uploaded anywhere.
+4. **Progress is sacred.** A skill is never lost (it floors at level 1), peak is tracked, and **every data migration must preserve user progress.**
+5. **Auto skills are earned, never self-reported.** Skills with an `auto:` field level only from measured/logged data — there is no tap-to-level on them.
+6. **Symbolism is a feature.** The tree-of-growth / Yggdrasil theme is woven in intentionally, not decoration.
+
+A fuller list lives in `CLAUDE.md` and `OPERATIONS-HANDOFF.md`.
+
+---
+
+## Versioning & releases
+
+The shipped version is the cache string in `sw.js` (`operations-vNN`). **Every change that ships must bump it** (so the service worker updates on users' devices) and is packaged via `npm run package`. The app also carries a `SKILL_LADDER_VER` constant used by the skill migration; bump that whenever any skill ladder/tier/guidance changes so old saves force-resync (details in `CLAUDE.md`).

@@ -2217,6 +2217,7 @@ const BASELINE_TEST = [
 ];
 const KEY="operations_v2";
 let S = load();
+try{ if(typeof window!=="undefined") window.S = S; }catch(_){}  // expose for tests/devtools; harmless in app
 
 function id(){return Math.random().toString(36).slice(2,9)}
 function load(){
@@ -2269,7 +2270,7 @@ function load(){
     return merged;
   }catch(e){return structuredClone(DEFAULT)}
 }
-function save(){localStorage.setItem(KEY,JSON.stringify(S)); cloudWriteDebounced();}
+function save(){localStorage.setItem(KEY,JSON.stringify(S)); try{ if(typeof window!=="undefined") window.S=S; }catch(_){} cloudWriteDebounced();}
 // skill level from xp: rising cost curve
 function skillLevel(xp){let lvl=1,need=80,acc=0;while(xp>=acc+need){acc+=need;lvl++;need+=40;}return{lvl,into:xp-acc,need};}
 

@@ -1,0 +1,46 @@
+  <section class="view" id="view-skills">
+    <div class="sk-jumpbar" id="skJumpbar"></div>
+    <div class="sec-h"><h2>Paths</h2><span class="hint">grow the tree · keep it alive</span></div>
+    <div class="plan-intro">This is your tree of growth. It branches into <b>Paths</b> — the great domains of a soldier and a person (Body, Mind, War, Craft, Command, Knowledge, Vitality, Self). Each Path carries <b>skills</b>, and skills carry <b>sub-skills</b>. Every skill has <b>levels that build on each other</b> — each level a concrete ability you prove with a promotion test. A skill can fade if neglected, shedding levels like a branch sheds leaves — but it <b>never dies</b>: it floors at Level 1, always ready to grow back faster than it was first earned. Tend the whole tree, or specialize a single bough toward its peak.</div>
+
+    <div class="adder">
+      <div class="sk-form-title">Plant a skill</div>
+      <input id="skName" placeholder="Skill — e.g. Land navigation, Public speaking" maxlength="50">
+      <div class="row" style="gap:9px;margin-top:9px">
+        <select id="skCat" style="flex:1">
+          <option value="physical">Path of the Body</option>
+          <option value="cognitive">Path of the Mind</option>
+          <option value="tactical">Path of War</option>
+          <option value="technical">Path of the Craft</option>
+          <option value="leadership">Path of Command</option>
+          <option value="academic">Path of Knowledge</option>
+          <option value="physiological">Path of Vitality</option>
+          <option value="personal">Path of the Self</option>
+        </select>
+        <select id="skFade" style="flex:1">
+          <option value="14">Fades in 2 weeks</option>
+          <option value="30" selected>Fades in 1 month</option>
+          <option value="60">Fades in 2 months</option>
+          <option value="90">Fades in 3 months</option>
+          <option value="180">Fades in 6 months</option>
+        </select>
+      </div>
+      <label class="lg-label" style="margin-top:9px">Make this a sub-skill of (optional)</label>
+      <select id="skParent"><option value="">— top-level skill —</option></select>
+      <div class="sk-levels-help">Define each level as an ability you can test (level 1 first). Add as many as you want.</div>
+      <div id="skLevelInputs"></div>
+      <button class="sk-addlevel" id="skAddLevel">+ add a level</button>
+      <button class="btn-add" id="skSave" style="margin-top:10px">Plant skill</button>
+    </div>
+
+    <div id="skAttention"></div>
+
+    <div class="sec-h" style="margin-top:18px"><h2>Your Tree</h2>
+      <div class="sk-viewtoggle">
+        <button id="skViewList" class="sk-vt-btn active" data-skview="list">☰ List</button>
+        <button id="skViewTree" class="sk-vt-btn" data-skview="tree">🌳 Tree</button>
+      </div>
+    </div>
+    <div id="skTree" style="display:none"></div>
+    <div id="skList"></div>
+  </section>

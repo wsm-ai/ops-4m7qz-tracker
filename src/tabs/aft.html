@@ -1,0 +1,18 @@
+  <section class="view" id="view-aft">
+    <div class="sec-h"><h2>AFT Scorecard</h2><span class="hint">input scores, auto-tune plan</span></div>
+    <div id="aftStandardBar"></div>
+    <div class="adder">
+      <p style="font-size:13px;color:var(--ink-dim);margin-bottom:10px">Enter your latest AFT raw results. The plan re-weights to attack your weakest event.</p>
+      <div class="aft-grid">
+        <label>Deadlift (lbs)<input id="aDl" type="number" min="0" max="500" placeholder="e.g. 240"></label>
+        <label>Push-ups (reps)<input id="aHrp" type="number" min="0" max="120" placeholder="e.g. 45"></label>
+        <label>Sprint-Drag-Carry (m:ss)<input id="aSdc" type="text" placeholder="e.g. 1:55"></label>
+        <label>Plank (m:ss)<input id="aPlank" type="text" placeholder="e.g. 3:10"></label>
+        <label>2-Mile Run (mm:ss)<input id="aRun" type="text" placeholder="e.g. 15:30"></label>
+      </div>
+      <button class="btn-add" id="aftSave">Log AFT Scores</button>
+    </div>
+    <div id="aftResult"></div>
+    <div class="sec-h" style="margin-top:18px"><h2>Score History</h2></div>
+    <div id="aftHistory"></div>
+  </section>

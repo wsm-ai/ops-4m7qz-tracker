@@ -1,0 +1,27 @@
+  <section class="view" id="view-quests">
+    <div class="adder">
+      <input id="qName" placeholder="Swear an oath — e.g. Finish history essay" maxlength="80">
+      <div class="row">
+        <select id="qDiff">
+          <option value="easy">Routine · 15 XP · 5 pts</option>
+          <option value="med" selected>Priority · 35 XP · 12 pts</option>
+          <option value="hard">High-Risk · 70 XP · 28 pts</option>
+        </select>
+        <select id="qPath">
+          <option value="tactical">⚔️ Path of War</option>
+          <option value="physical">🌿 Path of the Body</option>
+          <option value="cognitive">🌀 Path of the Mind</option>
+          <option value="physiological">💧 Path of Vitality</option>
+          <option value="technical">🔨 Path of the Craft</option>
+          <option value="leadership">🏴 Path of Command</option>
+          <option value="academic">📜 Path of Knowledge</option>
+          <option value="personal">🪞 Path of the Self</option>
+          <option value="hearth">🔥 Path of the Hearth</option>
+          <option value="roots">🌳 Path of Roots</option>
+        </select>
+      </div>
+      <button class="btn-add" id="qAdd">Swear the Oath</button>
+    </div>
+    <div class="sec-h"><h2>Active Oaths</h2><span class="hint">sworn and unfinished — each one a debt</span></div>
+    <ul class="list" id="qList"></ul>
+  </section>

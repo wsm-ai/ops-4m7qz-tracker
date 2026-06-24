@@ -1,0 +1,236 @@
+  <section class="view" id="view-plan">
+    <div class="sec-h"><h2>FM — Training</h2><span class="hint">AFT field manual</span></div>
+    <div id="coachToday"></div>
+    <div id="skillBalance"></div>
+    <div id="recoveryAdvisory"></div>
+    <div id="adaptiveTargets"></div>
+    <div class="plan-intro">
+      Built to max your <b>AFT</b> (Deadlift · Hand-Release Push-up · Sprint-Drag-Carry · Plank · 2-Mile Run) and rebuild strength + endurance after your break. Runs <b>on top of ROTC PT</b>: on weeks you have PT, count it as one session and do the rest. Aim for <b>4 hard sessions/week</b> (never two hard days back-to-back) plus the <b>Mobility + Balance day</b> on an easy/rest day — it adds recovery, not fatigue.
+    </div>
+
+    <div class="gym-toggle" id="gymToggle">
+      <div class="gym-toggle-row">
+        <div>
+          <div class="gym-toggle-label">Equipment mode</div>
+          <div class="gym-toggle-sub" id="gymModeSub">No-equipment — bodyweight only (floor + wall)</div>
+        </div>
+        <button id="gymToggleBtn" class="gym-btn">Switch to Gym</button>
+      </div>
+      <div class="gym-toggle-note">Every session has <b>two versions that hit the same muscles</b>: a <b>No-equipment</b> version (truly just your body, floor, and a wall — plus a grip trainer if you have one) and a <b>Gym</b> version (different movements using equipment). Flip this when you have gym access; it changes <i>how</i> you train, not <i>what</i> muscles, so it never affects your recovery schedule. Default is No-equipment — the whole week works with zero gear. Suggested rotation: <b>mostly no-equipment, use the gym version when you're actually at one.</b></div>
+    </div>
+
+    <div class="gym-toggle" id="weatherPick">
+      <div class="gym-toggle-row">
+        <div>
+          <div class="gym-toggle-label">Weather (outdoor work)</div>
+          <div class="gym-toggle-sub" id="weatherSub">Clear — outdoor runs as planned</div>
+        </div>
+      </div>
+      <div class="weather-btns" id="weatherBtns"></div>
+      <div class="gym-toggle-note">Set the conditions and the <b>No-equipment plan swaps outdoor work for indoor alternatives</b> — runs become in-place cardio circuits, outdoor sprints become hallway/burpee intervals. Same muscles and effort, just inside. In <b>Gym</b> mode this does nothing (you're already indoors). Tap <b>Clear</b> when it's fine to head back outside.</div>
+    </div>
+    <div class="phase" style="background:rgba(127,174,107,.08);border-color:#3c5230">🌱 <b style="color:var(--jade)">Lean &amp; bodyweight focus.</b> This plan builds relative strength and lean muscle — the kind that helps your run and push-up scores, not bulk that slows them. The trick: get stronger by making bodyweight moves <i>harder</i> (tougher leverage, slower tempo, more reps, less rest), not by adding mass. External load stays minimal and only where the AFT demands it (deadlift + carries).</div>
+
+    <div class="phase">🎯 <b>Your priorities (from your AFT history):</b> Your <b>deadlift</b> is your lowest event (70 pts, stuck at 200 lbs) and the closest to the 60-pt floor — it's your standing risk, so load it up. Your <b>Sprint-Drag-Carry</b> has slipped four tests running (79→74→69→65) — attack it with the AFT circuit. Push-ups, plank, and run are solid; maintain them. Banking those two weak events is your path from ~385 to 450+.</div>
+
+    <details class="wk" open><summary><span class="wk-day">📅 Week</span> Your 7-day plan · something every day, no overload</summary>
+      <div class="wk-body">
+        <p class="wk-target">The rule that prevents overload: <b>never two hard days on the same muscles back-to-back.</b> Hard days alternate upper / lower / full so each muscle group gets ~48h to recover, and the in-between days are easy on purpose (mobility, an easy run, a walk). You move every day, but only 4 days are truly hard.</p>
+        <table class="week-tbl">
+          <tr><th>Day</th><th>Focus</th><th>Intensity</th></tr>
+          <tr><td><b>Mon</b></td><td>Session 1 — Lower + Push (legs, chest, deadlift)</td><td><span class="i-hard">Hard</span></td></tr>
+          <tr><td><b>Tue</b></td><td>Session 2 — Run (easy/tempo, not all-out)</td><td><span class="i-mod">Moderate</span></td></tr>
+          <tr><td><b>Wed</b></td><td>Session 3 — Upper + Core (pull, push, core)</td><td><span class="i-hard">Hard</span></td></tr>
+          <tr><td><b>Thu</b></td><td>Session 5 — Mobility + Balance</td><td><span class="i-easy">Easy / recovery</span></td></tr>
+          <tr><td><b>Fri</b></td><td>Session 4 — AFT Circuit (your weak events)</td><td><span class="i-hard">Hard</span></td></tr>
+          <tr><td><b>Sat</b></td><td>Session 2 — Run (intervals OR long easy run)</td><td><span class="i-hard">Hard</span></td></tr>
+          <tr><td><b>Sun</b></td><td>Active recovery — 20–40 min easy walk + Session 5 stretch block</td><td><span class="i-easy">Easy / recovery</span></td></tr>
+        </table>
+        <p class="wk-target"><b>Why this won't overload you:</b> Mon (lower/push) and Wed (upper/pull) hit different muscles, so neither is worked two days running. Tue's run is kept easy so it doesn't tax your legs before Wed. Thu and Sun are deliberately light — recovery is when you actually get stronger. If you have ROTC PT that day, count it as that day's session and don't double up.</p>
+        <p class="wk-target"><b>If you're sore, sick, or wrecked:</b> swap any hard day for the Thu mobility/balance day or a walk. Missing one day won't hurt; grinding through real fatigue will. The 7th day is rest by design — taking it is part of the plan, not a failure.</p>
+        <p class="wk-target"><b>How hard is "hard"?</b> Leave 1–2 reps in the tank on strength moves (you could do 1–2 more with good form). "Easy" run = you can hold a conversation. That margin is what keeps this sustainable for months instead of burning out in three weeks.</p>
+
+        <div class="missed-note">
+          <div class="missed-h">⏭️ Missed a day? Don't restart the week.</div>
+          <p>Pick up on <b>today's</b> slot and roll forward — never "make up" a missed session by doubling the next day, because that stacks two hard days on the same muscles and breaks the 48h recovery spacing.</p>
+          <ul class="gl" style="margin-top:6px">
+            <li><b>Missed 1 day:</b> just do today's scheduled session and carry on. One skip costs you almost nothing — let it go.</li>
+            <li><b>The missed day was a hard strength day:</b> only do the next hard day if it hits <i>different</i> muscles. If catching up would mean two hard sessions on the same muscles back-to-back, put the Mobility + Balance day or a walk between them instead.</li>
+            <li><b>Missed 2–3 days:</b> restart from the <b>current weekday's slot</b>, not from Monday. If it's Thursday, do Thursday (Mobility + Balance) and roll on — don't cram Mon–Wed into the back half.</li>
+            <li><b>Missed a week or more:</b> this is the one time to truly restart — and come back <b>lighter</b> for the first 2–3 sessions (fewer sets, more left in the tank). Detraining is real; jumping back to old loads is how people get hurt.</li>
+          </ul>
+          <p style="margin-top:6px"><b>The mindset that matters:</b> consistency over months beats any single perfect week. Resuming smoothly keeps your real streak intact — the all-or-nothing "I blew it, I'll restart Monday" instinct is what makes people quit.</p>
+          <p class="wk-target" style="margin-top:6px">⚠️ If you missed days because you were sick or hurt (not just busy), ease back in rather than resuming at full intensity, and check with cadre or a coach for anything specific to your body.</p>
+        </div>
+      </div>
+    </details>
+
+    <details class="wk" open><summary><span class="wk-day">Session 1</span> Strength A · Lower + Push</summary>
+      <div class="wk-body">
+        <p class="wk-target">Targets: legs, push (chest/shoulders), core. Aim ~3–4 sets each, leaving 1–2 reps in the tank.</p>
+        <div class="sess-ex" data-sess="s1"></div>
+        <p class="wk-target">Progression (bodyweight): when a move gets easy, make it <i>harder</i> — slower lowering, more reps, less rest, or a tougher variation — instead of needing weight.</p>
+      </div>
+    </details>
+
+    <details class="wk"><summary><span class="wk-day">Session 2</span> Conditioning · Run</summary>
+      <div class="wk-body">
+        <p class="wk-target">Targets: 2-Mile Run (your weak spot — this is the priority). <b>Pick ONE of these per run day</b> — you don't do all four in one session. The plan rotates them for you (a faster quality run midweek, a longer or test run on the weekend).</p>
+        <div class="sess-ex" data-sess="s2"></div>
+        <p class="wk-target">Every 2–3 weeks the weekend run becomes a timed 2-mile — run it and log it to measure progress. Keep the other runs easy (conversational) so they don't bleed into your strength days.</p>
+      </div>
+    </details>
+
+    <details class="wk"><summary><span class="wk-day">Session 3</span> Strength B · Upper + Core</summary>
+      <div class="wk-body">
+        <p class="wk-target">Targets: pull (back/biceps), push, core. ~3–4 sets each.</p>
+        <div class="sess-ex" data-sess="s3"></div>
+        <p class="wk-target">Pulling is the piece most no-gym plans miss — the doorway/towel rows and grip work cover it until you have a bar.</p>
+      </div>
+    </details>
+
+    <details class="wk"><summary><span class="wk-day">Session 4</span> AFT Circuit · Test Sim</summary>
+      <div class="wk-body">
+        <p class="wk-target">The "group PT" energy — 3–4 rounds, rest 2 min between, race the clock and beat it next week.</p>
+        <div class="sess-ex" data-sess="s4"></div>
+        <p class="wk-target">This is the one to lean on when motivation's low — fast, competitive against yourself, and it directly trains your two weak events.</p>
+      </div>
+    </details>
+
+    <details class="wk"><summary><span class="wk-day">Session 5</span> Mobility + Balance · Recovery day</summary>
+      <div class="wk-body">
+        <p class="wk-target">A real, low-intensity session — not a throwaway. Flexibility and balance are trainable skills, and this day pays off in every other lift, your run economy, and injury resistance. Slot it on a rest/easy day; it won't add fatigue.</p>
+
+        <b>🤸 Flexibility block (~15 min)</b>
+        <p>Warm up first — <b>never static-stretch cold muscles</b>. Then hold each stretch <b>30 seconds, 2 rounds per side</b>, to mild tension and never sharp pain. Breathe out as you ease deeper.</p>
+        <ul>
+          <li>5-min easy cardio (jog/jumping jacks/bike) to warm up</li>
+          <li>World's-greatest-stretch — 5 slow reps/side (full-body opener)</li>
+          <li>Hamstrings — 30s ×2/side</li>
+          <li>Hip flexors (kneeling lunge) — 30s ×2/side <span class="wk-target">(key for posture & deadlift)</span></li>
+          <li>Figure-4 glutes — 30s ×2/side</li>
+          <li>Quads — 30s ×2/side</li>
+          <li>Calves, straight + bent knee — 30s/side <span class="wk-target">(run & ankle health)</span></li>
+          <li>Doorway chest/shoulder — 30s ×2 <span class="wk-target">(undoes push-up & desk hunch)</span></li>
+          <li>Thoracic rotations + cat-cow — 8–10 slow reps</li>
+        </ul>
+        <p class="wk-target">Consistency beats intensity: 3–4× a week moves your flexibility far more than one hard session. Progress = a little more range, or holding the same depth more comfortably.</p>
+
+        <b>⚖️ Balance block (~10 min)</b>
+        <p>Balance improves fast because it's mostly neural. Train it <b>progressively</b> — only advance a level when you can hold the current one steadily. Do it barefoot, near a wall or sturdy chair so you can catch yourself. Work each leg; your weaker side will lag — give it an extra set.</p>
+        <ul>
+          <li><b>Level 1</b> — Single-leg stand, <b>eyes open</b>: build to 45s/leg, steady.</li>
+          <li><b>Level 2</b> — Single-leg stand, <b>eyes closed</b>: 15→30s/leg (removing vision is a big jump — expect to wobble).</li>
+          <li><b>Level 3</b> — Single-leg stand on a <b>cushion/pillow</b> (unstable surface): 20–30s/leg.</li>
+          <li><b>Level 4</b> — <b>Single-leg RDL reach</b>: hinge forward on one leg, reach hands toward the floor, stand back tall — 8–10/leg. Add a light weight once smooth.</li>
+          <li><b>Level 5</b> — <b>Y-balance reach</b>: stand on one leg, reach the free foot as far as you can to the front, side, and back without touching down — 5 reaches/direction/leg.</li>
+          <li><b>Carryover</b> — Tandem (heel-to-toe) walk 10–20 steps; try it eyes-closed once solid.</li>
+        </ul>
+        <p class="wk-target">Why it matters for you: better single-leg stability transfers directly to lunges, the Sprint-Drag-Carry, rucking on uneven ground, and land nav — and it's a documented way to cut ankle/knee injury risk.</p>
+        <p class="wk-target">⚠️ Always within reach of something to grab. If you have an injury or dizziness, keep eyes open and skip the unstable-surface levels.</p>
+      </div>
+    </details>
+
+    <details class="wk"><summary><span class="wk-day">📖 Glossary</span> How to perform every exercise (by session)</summary>
+      <div class="wk-body">
+        <p class="wk-target">Don't know a name? Find the session below and read the plain-language how-to. Each session lists its <b>No-equipment</b> moves and its <b>Gym</b> moves separately — they train the same muscles. "Reps" = one full movement; "each side/leg" = full count one side then the other.</p>
+
+        <p class="gl-h">Session 1 — Lower + Push</p>
+        <p class="wk-target">No-equipment:</p>
+        <ul class="gl">
+          <li><b>Reverse lunge (no support):</b> From standing, step one foot straight back and lower until both knees are about 90°, then drive through the front heel back to standing. No bench needed — you control the depth. Alternate or finish one leg then switch.</li>
+          <li><b>Single-leg glute bridge:</b> Lie on your back, knees bent, one foot flat and the other leg extended. Push through the planted heel to lift your hips into a straight line, squeeze the glute at the top, lower. Trains the same posterior chain a deadlift does, with zero gear.</li>
+          <li><b>Hand-release push-ups:</b> A push-up where, at the bottom, you lower fully to the floor and lift your hands off for a moment, then place them and press up. The AFT version — stops you bouncing out of the bottom.</li>
+          <li><b>Pike push-ups:</b> From a push-up position, walk your feet in and raise your hips into an upside-down V. Bend your elbows to lower the top of your head toward the floor between your hands, then press up. Bodyweight overhead-press for the shoulders.</li>
+          <li><b>Shrimp / split squat (floor):</b> A single-leg squat done flat on the floor — no bench. Stand on one leg, hold the other foot behind you (shrimp) or just keep it lifted, and lower under control as far as you can, then stand. Scale by holding a wall. Builds single-leg strength without a bench's "just-right height."</li>
+          <li><b>Hollow-body hold:</b> Lie on your back, press your lower back into the floor, lift shoulders and legs a few inches so your body makes a shallow banana. Hold and breathe. Bend knees or keep arms down to make it easier.</li>
+          <li><b>Single-leg hip hinge (airplane):</b> Stand on one leg, slight knee bend. Hinge at the hip — tip your torso forward and float the free leg straight behind you, arms out like wings — then stand tall. Hamstrings, glutes, and balance, no weight needed.</li>
+        </ul>
+        <p class="wk-target">Gym (equipment):</p>
+        <ul class="gl">
+          <li><b>Bulgarian split squat (bench):</b> Rest the top of your back foot on a bench behind you, lower the front leg until the thigh is ~parallel, drive back up through the front heel. Needs a bench of the right height — that's why it's the gym version.</li>
+          <li><b>Single-leg RDL (dumbbells):</b> The airplane hinge holding a dumbbell, for added load on the hamstrings/glutes.</li>
+          <li><b>Barbell / DB bench press:</b> Lying on a bench, press the bar or dumbbells from your chest to straight arms. The loaded chest press.</li>
+          <li><b>Overhead press:</b> Standing, press a barbell or dumbbells from your shoulders to overhead. The loaded version of the pike push-up.</li>
+          <li><b>Leg press or goblet squat:</b> Leg press = push a weighted platform with your legs on the machine. Goblet squat = hold a dumbbell at your chest and squat. Either loads the legs.</li>
+          <li><b>Cable / machine crunch:</b> Loaded core flexion on a cable or ab machine.</li>
+          <li><b>Trap-bar / barbell deadlift:</b> Lift a loaded bar from the floor — hinge with a flat back, grip it, stand tall driving the hips forward, bar close to the body, never round the lower back. Trap-bar (hexagon you stand in) is the back-friendly version. This directly trains your weakest AFT event.</li>
+        </ul>
+
+        <p class="gl-h">Session 2 — Run</p>
+        <p class="wk-target">No-equipment:</p>
+        <ul class="gl">
+          <li><b>Intervals (sprint reps):</b> Short fast efforts with rest between — e.g. sprint ~400m or 60–90s hard, walk/jog 90s, repeat 4–6×. Any open ground works. Builds speed.</li>
+          <li><b>Tempo run:</b> A sustained "comfortably hard" pace (only a few words at a time) held 15–25 min. Builds your ability to hold a fast pace.</li>
+          <li><b>Long easy run:</b> Slow conversational-pace run, longer than usual (30–50 min). Builds the aerobic base behind the 2-mile.</li>
+          <li><b>Timed 2-mile:</b> Run 2 miles as fast as you can sustain and record the time — the AFT run, used as a test, not weekly.</li>
+        </ul>
+        <p class="wk-target">Gym (equipment):</p>
+        <ul class="gl">
+          <li><b>Treadmill intervals/tempo:</b> Same run workouts on a treadmill; add incline to build power and protect your joints.</li>
+          <li><b>Rower or bike intervals:</b> Hard/easy bursts on a rowing machine or stationary bike — cardio that spares your legs for lifting days.</li>
+        </ul>
+
+        <p class="gl-h">Session 3 — Upper + Core</p>
+        <p class="wk-target">No-equipment:</p>
+        <ul class="gl">
+          <li><b>Doorway/towel rows (isometric pull):</b> Loop a towel around a sturdy doorknob (both sides of a door) or a fixed post, lean back holding the ends with arms straight, then pull your chest toward your hands and squeeze your shoulder blades. No bar needed — it covers the pulling muscles a pull-up would.</li>
+          <li><b>Towel pull-aparts / Y-T-W raises:</b> Hold a towel at shoulder width and pull it apart hard — the tension works your back. Or lie face-down and lift your arms off the floor tracing a Y, then a T, then a W, squeezing the upper back each time. A second pulling movement so the day isn't push-heavy.</li>
+          <li><b>Decline push-ups:</b> Push-ups with your feet up on a step/ledge so you're angled head-down. Shifts load to the upper chest and shoulders.</li>
+          <li><b>Plank:</b> Forearms under shoulders, body a straight line head to heels, abs and glutes tight. Hold without sagging or piking.</li>
+          <li><b>Side plank:</b> On one forearm, body sideways in a straight line, hips lifted and stacked. Hold, switch sides. Trains the obliques.</li>
+          <li><b>Superman / back extension:</b> Lie face-down, arms ahead. Lift arms, chest, and legs together (like flying), hold, lower. Strengthens the lower back.</li>
+          <li><b>Grip squeeze:</b> Squeeze a grip trainer (or a rolled towel) hard for 20–40s, repeat. Builds the grip that carries the Sprint-Drag-Carry — the one small tool you said you'd have.</li>
+        </ul>
+        <p class="wk-target">Gym (equipment):</p>
+        <ul class="gl">
+          <li><b>Pull-ups / lat pulldown:</b> Pull-up = hang from a bar (palms away) and pull until your chin clears it. Lat pulldown = the seated machine version, pulling a bar down to your chest. The main back/biceps builder.</li>
+          <li><b>Seated cable / barbell row:</b> Pull a cable handle or barbell toward your stomach, squeezing the shoulder blades. Horizontal pulling for the mid-back.</li>
+          <li><b>Incline DB press:</b> Dumbbell press on an inclined bench — upper chest and shoulders.</li>
+          <li><b>Cable face pulls:</b> Pull a rope to your face with elbows high — strengthens the rear shoulders and posture muscles.</li>
+          <li><b>Hanging knee raises:</b> Hang from a bar and raise your knees to your chest — core.</li>
+          <li><b>Back extension (machine/bench):</b> Hinge over a back-extension bench and raise your torso — loaded lower back.</li>
+          <li><b>Farmer's carry (dumbbells):</b> Hold a heavy dumbbell in each hand and walk tall and braced — grip, core, and carry strength for the SDC.</li>
+        </ul>
+
+        <p class="gl-h">Session 4 — AFT Circuit</p>
+        <p class="wk-target">No-equipment:</p>
+        <ul class="gl">
+          <li><b>Shuttle sprints (SDC substitute):</b> Sprint to a line ~25m away, touch it, sprint back, repeat. Mimics the change-of-direction of the Sprint-Drag-Carry without a sled.</li>
+          <li><b>Bear crawl (drag substitute):</b> On hands and feet, knees just off the floor, crawl forward keeping your back flat. Replaces the SDC drag — taxes the same legs, shoulders, and core.</li>
+          <li><b>Hand-release push-ups:</b> (see Session 1) — 20 per round.</li>
+          <li><b>Squat jumps:</b> Drop into a squat, explode straight up, land soft with bent knees, immediately repeat. Explosive leg power.</li>
+          <li><b>Plank:</b> 30–60s hold per round.</li>
+          <li><b>200m run:</b> A half-lap at a hard pace — a short conditioning burst.</li>
+        </ul>
+        <p class="wk-target">Gym (equipment):</p>
+        <ul class="gl">
+          <li><b>Sled push/pull or SDC sim:</b> Push or drag a weighted sled — the closest thing to the real Sprint-Drag-Carry.</li>
+          <li><b>Loaded carry (kettlebells):</b> Carry heavy kettlebells a set distance — the carry portion of the SDC.</li>
+          <li><b>Box jumps:</b> Jump from a squat onto a sturdy box, step down, repeat. Explosive power with a target.</li>
+          <li><b>Rower 200m sprint:</b> An all-out 200m on the rowing machine — full-body conditioning burst.</li>
+        </ul>
+
+        <p class="gl-h">Session 5 — Mobility + Balance</p>
+        <ul class="gl">
+          <li><b>World's-greatest-stretch:</b> Step into a deep forward lunge. Place both hands inside your front foot, then rotate your torso and reach the inside arm up toward the ceiling, following it with your eyes. Return, switch legs. Opens hips, back, and shoulders at once.</li>
+          <li><b>Hamstring stretch:</b> Standing, put one heel out in front with the leg straight, toes up; hinge forward at the hips with a flat back until you feel the back of the thigh. Hold 30s, switch.</li>
+          <li><b>Hip-flexor stretch (kneeling lunge):</b> Kneel on one knee with the other foot flat in front (like proposing). Tuck your hips under and gently push them forward until you feel a stretch in the front of the kneeling-leg hip. Hold 30s, switch.</li>
+          <li><b>Figure-4 glute stretch:</b> Lie on your back, cross one ankle over the opposite knee (making a "4"), then pull that opposite thigh toward your chest until you feel the glute of the crossed leg stretch. Hold 30s, switch.</li>
+          <li><b>Quad stretch:</b> Standing (hold a wall), grab one ankle behind you and pull your heel toward your butt, knees together, hips forward. Feel the front of the thigh. Hold 30s, switch.</li>
+          <li><b>Calf stretch:</b> Hands on a wall, one foot back with the leg straight and heel pressed down — feel the upper calf. Then slightly bend that back knee to shift the stretch lower toward the Achilles. Hold each, switch.</li>
+          <li><b>Doorway chest/shoulder stretch:</b> Put your forearm on a door frame, elbow about shoulder height, and step through gently until you feel a stretch across the chest/front shoulder. Hold 30s, switch arms.</li>
+          <li><b>Thoracic rotations + cat-cow:</b> <b>Cat-cow:</b> on hands and knees, slowly arch your back up (cat) then let it sag and lift your head (cow), flowing between them. <b>Thoracic rotation:</b> on hands and knees, hand behind your head, rotate that elbow down toward the opposite arm then open it up to the ceiling. Loosens the mid-back.</li>
+          <li><b>Single-leg stand:</b> Stand on one leg near a wall. Progress: eyes open → eyes closed → standing on a pillow/cushion. Hold for time, switch legs.</li>
+          <li><b>Single-leg RDL reach (balance version):</b> The seesaw hinge from Session 1, done slowly for balance — hinge forward on one leg reaching toward the floor, then stand tall. Control beats speed here.</li>
+          <li><b>Tandem (heel-to-toe) walk:</b> Walk a straight line placing the heel of each step directly against the toe of the other foot, like a tightrope. Arms out for balance. Try it eyes-closed once it's easy.</li>
+          <li><b>Y-balance reach:</b> Stand on one leg. With the free foot, reach as far as you can to the front, then the side, then behind you (tracing a Y on the floor) without touching down or losing balance. Return to center between reaches.</li>
+        </ul>
+        <p class="wk-target">⚠️ These are descriptions to get you started — for the loaded lifts (deadlift, squat, pistol) have a coach or cadre check your form before going heavy. Text can't see your back rounding.</p>
+      </div>
+    </details>
+
+    <div class="plan-intro" style="margin-top:14px">
+      <b>How to use this with the app:</b> Each morning, your "Today's training session" daily points here — just do whichever session is next in the rotation. Check it off to earn XP, build your streak, and chip away at the AFT objective. The streak is your accountability when there's no one running PT next to you.
+    </div>
+  </section>

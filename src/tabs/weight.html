@@ -1,0 +1,26 @@
+  <section class="view" id="view-weight">
+    <div class="weight-head">
+      <div class="weight-title">THE WEIGHT</div>
+      <div class="weight-sub">A mirror of your ledger. Promises are bound, kept, and broken in the Weight app — this is the standing record, shown here.</div>
+      <div class="weight-carry" id="weightCarry"></div>
+    </div>
+    <div class="weight-keystone" id="weightKeystone"></div>
+
+    <div class="weight-jars" id="weightJars"></div>
+
+    <div class="weight-section-label">Memorial</div>
+    <div class="weight-memorial" id="weightMemorial"></div>
+
+    <div class="weight-mirror">
+      <div class="wm-nudge" id="wmNudge"></div>
+      <div class="wm-row">
+        <button class="wm-btn" id="wmOpen">⚖️ Open the Weight app</button>
+        <button class="wm-btn ghost" id="wmImport">↻ Update mirror</button>
+      </div>
+      <input type="file" id="wmFile" accept="application/json" style="display:none">
+      <a id="wmLinkEdit" class="wm-edit">set / change the Weight app link</a>
+      <div class="wb-note" id="wmStatus">This view is read-only. To refresh it, export your ledger from the Weight app and tap "Update mirror." Binding and keeping happen there, where the rituals live.</div>
+    </div>
+
+    <div class="weight-ledger" id="weightLedger"></div>
+  </section>

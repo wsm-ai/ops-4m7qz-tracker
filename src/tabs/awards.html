@@ -1,0 +1,87 @@
+  <section class="view" id="view-awards">
+    <div class="sec-h"><h2>The Wall</h2><span class="hint">your record</span></div>
+    <div class="wall-subnav">
+      <button class="wsub on" data-wsub="awards">🏆 Awards</button>
+      <button class="wsub" data-wsub="memberships">🎟️ Memberships</button>
+      <button class="wsub" data-wsub="events">📅 Events</button>
+      <button class="wsub" data-wsub="volunteer">🫙 Volunteer</button>
+    </div>
+
+    <!-- AWARDS sub-section -->
+    <div class="wall-sec on" id="wsec-awards">
+      <div class="adder">
+        <div class="row" style="gap:9px">
+          <select id="awKind" style="flex:0 0 42%">
+            <option value="award">🎖️ Award / Ribbon</option>
+            <option value="coin">🪙 Challenge Coin</option>
+            <option value="cert">📜 Certification</option>
+            <option value="badge">🏅 Badge / Tab</option>
+            <option value="milestone">⭐ Milestone</option>
+            <option value="memento">📦 Memorabilia</option>
+          </select>
+          <input id="awTitle" placeholder="Title — e.g. Air Assault Badge" maxlength="70" style="flex:1">
+        </div>
+        <div class="row" style="gap:9px;margin-top:9px">
+          <input id="awYear" type="number" placeholder="Year" min="1990" max="2100" style="flex:0 0 30%">
+          <input id="awOrg" placeholder="Organization / person it's from" maxlength="60" style="flex:1">
+        </div>
+        <input id="awNote" placeholder="Note / story (optional)" maxlength="140" style="margin-top:9px">
+        <button class="btn-add" id="awAdd">Add to the Wall</button>
+      </div>
+      <div id="awallGrid"></div>
+    </div>
+
+    <!-- MEMBERSHIPS sub-section -->
+    <div class="wall-sec" id="wsec-memberships">
+      <div class="adder">
+        <input id="mbOrg" placeholder="Organization — e.g. Pershing Rifles" maxlength="70">
+        <div class="row" style="gap:9px;margin-top:9px">
+          <input id="mbStart" type="number" placeholder="Start year" min="1990" max="2100" style="flex:1">
+          <input id="mbEnd" type="number" placeholder="End year (blank = present)" min="1990" max="2100" style="flex:1">
+        </div>
+        <label class="lg-label" style="margin-top:9px">Member type</label>
+        <select id="mbType">
+          <option value="founder">★ Founding member</option>
+          <option value="charter">Charter member</option>
+          <option value="regular" selected>Regular member</option>
+          <option value="honorary">Honorary member</option>
+        </select>
+        <div class="mb-roles-label">Leadership positions held (optional)</div>
+        <div id="mbRoleInputs"></div>
+        <button class="sk-addlevel" id="mbAddRole">+ add a leadership position</button>
+        <input id="mbNote" placeholder="Note (optional)" maxlength="140" style="margin-top:9px">
+        <button class="btn-add" id="mbSave" style="margin-top:10px">Add membership</button>
+      </div>
+      <div id="mbList"></div>
+    </div>
+
+    <!-- EVENTS sub-section -->
+    <div class="wall-sec" id="wsec-events">
+      <div class="adder">
+        <input id="evTitle" placeholder="Event — e.g. Ranger Challenge Competition" maxlength="80">
+        <div class="row" style="gap:9px;margin-top:9px">
+          <input id="evYear" type="number" placeholder="Year" min="1990" max="2100" style="flex:0 0 32%">
+          <input id="evOrg" placeholder="Host / organization" maxlength="60" style="flex:1">
+        </div>
+        <input id="evRole" placeholder="Your role — e.g. Competitor, Volunteer, Lead" maxlength="60" style="margin-top:9px">
+        <input id="evNote" placeholder="Note / result (optional)" maxlength="140" style="margin-top:9px">
+        <button class="btn-add" id="evSave">Add event</button>
+      </div>
+      <div id="evList"></div>
+    </div>
+
+    <!-- VOLUNTEER sub-section -->
+    <div class="wall-sec" id="wsec-volunteer">
+      <div class="adder">
+        <div class="pt-intro">Log volunteer hours. They collect into a jar for each year — watch the years fill up.</div>
+        <div class="row" style="gap:9px">
+          <input id="volYear" type="number" placeholder="Year" min="1990" max="2100" style="flex:0 0 30%">
+          <input id="volHours" type="number" placeholder="Hours" min="0" step="0.5" style="flex:0 0 28%">
+          <input id="volOrg" placeholder="Where / what" maxlength="50" style="flex:1">
+        </div>
+        <button class="btn-add" id="volSave" style="margin-top:9px">Add hours</button>
+      </div>
+      <div class="volunteer-jars" id="volJars"></div>
+      <div id="volLog"></div>
+    </div>
+  </section>

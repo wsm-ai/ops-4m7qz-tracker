@@ -2,7 +2,7 @@
 
 **Purpose:** Full context for anyone (human or AI) continuing the build. This captures the state, architecture, conventions, standing decisions, and history so nothing has to be re-decided. If you are an AI assistant, also read **CLAUDE.md** — it has the hard operating rules.
 
-**Current shipped version: v88.** Single-file HTML/JS Progressive Web App, fully offline, no external runtime dependencies.
+**Current shipped version: v89.** Single-file HTML/JS Progressive Web App, fully offline, no external runtime dependencies.
 
 ---
 
@@ -24,34 +24,59 @@ A fully functional, offline-capable PWA that meaningfully tracks measurable skil
 ## 2. FILE LAYOUT & THE BUILD/PACKAGE ROUTINE
 
 **Working files (the app):**
-- `index.html` (~8,200 lines — the entire app: HTML + CSS + JS in one file)
+- `index.html` (~8,200 lines — **assembled output**, never edit directly)
+- `src/` — source files (CSS, tab HTML, core JS, tab JS) — **edit these**
 - `quizbank.js` (the 16 ROTC quiz banks, loaded via `<script src>`)
 - `sw.js` (service worker; holds the cache version string)
 - `manifest.json`, `HOW TO INSTALL.txt`
 - `icon-192.png`, `icon-512.png` (regenerated each package via a PIL chevron script)
 
+**Source layout (`src/`):**
+```
+src/
+  _shell.html              outer HTML frame with @@INJECT_*@@ placeholders
+  styles/main.css          all CSS (~920 lines)
+  core/
+    constants.js           DEFAULT, TRACKS, VALUES, SESSIONS
+    training.js            WEATHER, WEEK_PLAN, EX_HOWTO, PT_AREAS
+    state.js               KEY, load, save, render, simple renderers
+    events.js              nav/body events, backup, toast, showLevelUp
+    aft-scoring.js         AFT_TABLES, aftLookup, clampScore
+    app-setup.js           skills-UI wiring, cloud file system
+    skills-data.js         SK_CAT, SEED_SKILLS (~1,800 lines), seedSkillsIfEmpty
+    migration.js           SKILL_LADDER_VER, RENAMES, mergeNewSeedSkills
+    auto-level.js          syncSkillsFromActivity, integrityLevel, rhrToLevel
+    skills-core.js         skSubsOf, skRolledLevel, skEffectiveLevel, skReachLevel…
+    tree.js                Yggdrasil SVG renderer, pan/zoom
+    init.js                SW register, seedSkillsIfEmpty(), render()
+  tabs/
+    <tab>.html             HTML <section> block for each tab (16 tabs)
+    <tab>.js               Render logic + handlers for each tab
+```
+
 **State:** `localStorage` key `KEY="operations_v2"`; state object is `let S=load()`; `DEFAULT` object defines the seed/initial state. `save()` persists; `render()` re-renders the active tab.
 
 **Build/test tooling (dev-only — the app ships as static files):**
-- `npm run check` → `scripts/check_syntax.js` — syntax-check the main `<script>` via `new Function` with stubbed globals. Fast, no browser.
-- `npm run regress` → `scripts/regress.js` — Playwright headless chromium: serve the repo, load the app, clear localStorage, reload, click all 16 tabs, assert **no `pageerror`**. `--shot` also screenshots the skill tree. Auto-detects the local Chromium from `npx playwright install chromium`.
-- `npm run verify` — check + regress.
-- `npm run package` → `scripts/package.js` — bump nothing automatically (you bump `sw.js` yourself), regenerate icons, zip the app to `dist/operations.zip`, and build `dist/operations-preview.html` (quizbank.js inlined for instant single-file preview).
-- `scripts/build_preview.py`, `scripts/make_icons.py` — used by package.js / runnable directly.
+- `python scripts/build.py` — assemble `src/` → `index.html`. **Run after every source edit.**
+- `npm run check` → `scripts/check_syntax.js` — syntax-check the assembled `<script>` via `new Function` with stubbed globals. Fast, no browser. (Requires Node.js)
+- `npm run regress` → `scripts/regress.js` — Playwright headless chromium: serve the repo, load the app, clear localStorage, reload, click all 16 tabs, assert **no `pageerror`**. `--shot` also screenshots the skill tree. (Requires Node.js + `npx playwright install chromium`)
+- `npm run verify` — build + check + regress. (Requires Node.js)
+- `npm run package` → build + `scripts/package.js` — regenerate icons, zip the app to `dist/operations.zip`, build `dist/operations-preview.html`. (Requires Node.js)
+- `scripts/build_preview.py`, `scripts/make_icons.py` — used by package.js / runnable directly with Python.
+- `scripts/extract.py` — one-time extraction: reads a monolithic `index.html` and splits it into `src/`. Only needed if merging a legacy single-file version.
 
 **Deliverables produced by packaging:**
 - `dist/operations.zip` — the installable app
 - `dist/operations-preview.html` — a single self-contained file for instant browser preview
 
 **Release checklist for any shipped change:**
-1. Make the change in `index.html` (and/or `quizbank.js`, `sw.js`).
-2. If any skill ladder/tier/guidance changed, **bump `SKILL_LADDER_VER`** in `index.html`.
-3. **Bump the SW cache** in `sw.js`: `const CACHE="operations-vNN"` → increment.
-4. `npm run verify` (syntax + 16-tab regression, zero `pageerror`).
-5. `npm run package` (regenerates icons, builds the zip + preview into `dist/`).
-6. Remind the user to **hard-refresh / reopen** after installing so the new SW + any migration take effect.
-
-**Editing note:** after a text replacement in `index.html`, line numbers shift — re-read before further edits to the same region.
+1. Edit the appropriate file in `src/` (and/or `quizbank.js`, `sw.js`).
+2. `python scripts/build.py` to rebuild `index.html`.
+3. If any skill ladder/tier/guidance changed, **bump `SKILL_LADDER_VER`** in `src/core/migration.js`.
+4. **Bump the SW cache** in `sw.js`: `const CACHE="operations-vNN"` → increment.
+5. `npm run verify` (build + syntax + 16-tab regression, zero `pageerror`).
+6. `npm run package` (rebuild + regenerate icons + build the zip + preview into `dist/`).
+7. Remind the user to **hard-refresh / reopen** after installing so the new SW + any migration take effect.
 
 ---
 
@@ -164,19 +189,20 @@ There is also a manual **"resync skill trees"** link (Profile tab settings row, 
 
 ## 8. HOW TO RESUME (for the next session / Claude Code)
 
-1. Open the repo in VS Code (see SETUP.md). `npm install && npx playwright install chromium` once.
-2. Confirm version: `grep operations-v sw.js` (currently v88).
-3. Read **CLAUDE.md** for the operating rules, then make the requested change in `index.html`.
-4. `npm run verify` (syntax + 16-tab regression, zero `pageerror`); screenshot tree changes with `npm run regress -- --shot`.
-5. If a ladder changed, bump `SKILL_LADDER_VER`; always bump the `sw.js` cache version; `npm run package`.
+1. Open the repo in VS Code. `npm install && npx playwright install chromium` once (requires Node.js).
+2. Confirm version: `grep operations-v sw.js` (currently v89).
+3. Read **CLAUDE.md** for the operating rules, then edit the appropriate file in `src/`.
+4. `python scripts/build.py` to rebuild `index.html`.
+5. `npm run verify` (build + syntax + 16-tab regression, zero `pageerror`); screenshot tree changes with `npm run regress -- --shot`.
+6. If a ladder changed, bump `SKILL_LADDER_VER` in `src/core/migration.js`; always bump the `sw.js` cache version; `npm run package`.
 6. Remind the user to **hard-refresh / reopen** after installing so the new SW + migration take effect.
 
 ---
 
 ## 9. STATUS & HISTORY
 
-- **v88 is current and clean.** No outstanding bugs.
-- **Recent arc:** full audit & bug fixes → sub-path branching across all Paths → **Yggdrasil tree redesign** (worlds as realms, deterministic spacing, no cross-path overlap, limbs plugged into worlds) → **two new ROOT paths** (Hearth 🔥, Roots 🪶) added with full measurable ladders → **Integrity** skill wired read-only to the Weight ledger (tier-weighted, can move down) → **migration hardening**: `SKILL_LADDER_VER` force-resync, history-based peak recovery, network-first SW, manual resync button, and a **rename-merge** map that fixed duplicate old-named skills (the "Push-ups stuck at 6 levels" bug).
+- **v89 is current and clean.** No outstanding bugs.
+- **Recent arc:** full audit & bug fixes → sub-path branching → Yggdrasil tree redesign → two new ROOT paths (Hearth 🔥, Roots 🪶) → Integrity skill wired to Weight ledger → migration hardening → **v89: full source split** — `index.html` is now assembled from `src/` (CSS, 16 tab HTML, 12 core JS, 13 tab JS files) via `python scripts/build.py`. The monolithic file is gone; all edits happen in `src/`.
 - **Possible next directions** (only if the user asks): richer History/Trends views; more ROTC quiz banks (extends the ROTC-knowledge ladder); per-device tree canopy framing tuning; growing the Hearth/Roots paths.
 
 *Maintain the standing decisions in §6 and the user's emphasis on honesty, measurability, and symbolism. The codebase is well-engineered and defensive; keep it that way.*

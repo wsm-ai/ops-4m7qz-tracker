@@ -1,0 +1,36 @@
+  <section class="view" id="view-log">
+    <div id="baselinePrompt"></div>
+    <div class="sec-h"><h2>Log Cadre PT</h2><span class="hint">recovery-aware</span></div>
+    <div class="adder">
+      <div class="pt-intro">Type what PT actually did — e.g. "2-mile run, walking lunges, water jug carries, flutter kicks." The app figures out which muscles that hit and eases the FM plan off them for the week. (Or just tap the areas below.) PT never touches your streak.</div>
+      <textarea id="ptText" rows="2" placeholder="What did PT do today? e.g. 2-mile run, lunges, jug carries, push-ups" maxlength="300"></textarea>
+      <div id="ptDetected" class="pt-detected"></div>
+      <div class="pt-areas-label">Areas worked <span id="ptAreasHint">(auto-detected from text, or tap to set)</span></div>
+      <div class="pt-areas" id="ptAreas"></div>
+      <label class="lg-label" style="margin-top:10px">How hard?</label>
+      <select id="ptIntensity">
+        <option value="light">Light — easy / technique</option>
+        <option value="moderate" selected>Moderate — solid effort</option>
+        <option value="hard">Hard — smoked, max effort</option>
+      </select>
+      <button class="btn-add" id="ptSave" style="margin-top:11px">Log PT session</button>
+    </div>
+    <div id="ptRecent"></div>
+    <div class="sec-h"><h2>Monthly Baseline</h2><span class="hint">max-effort test</span></div>
+    <div id="baselineArea"></div>
+
+    <div class="sec-h" style="margin-top:18px"><h2>Workout Log</h2><span class="hint">track real sets</span></div>
+    <div class="adder">
+      <label class="lg-label">Which session?</label>
+      <select id="lgSession"></select>
+      <div class="row" style="margin-top:9px">
+        <label class="lg-label" style="flex:1">Duration (min)<input id="lgDur" type="number" min="1" max="300" placeholder="e.g. 45"></label>
+      </div>
+      <div id="lgExercises" style="margin-top:12px"></div>
+      <button class="btn-add" id="lgSave" style="margin-top:12px">Save Workout</button>
+    </div>
+    <div class="sec-h" style="margin-top:18px"><h2>Progress by Exercise</h2><span class="hint">spot stalls</span></div>
+    <div id="lgProgress"></div>
+    <div class="sec-h" style="margin-top:18px"><h2>Recent Workouts</h2></div>
+    <div id="lgHistory"></div>
+  </section>

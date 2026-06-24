@@ -4,12 +4,13 @@
   "private": true,
   "description": "Operations — a gamified ROTC + life-tracker Progressive Web App (single-file, offline).",
   "scripts": {
+    "build": "python scripts/build.py",
     "check": "node scripts/check_syntax.js",
     "regress": "node scripts/regress.js",
-    "preview": "python3 scripts/build_preview.py",
-    "package": "node scripts/package.js",
+    "verify": "npm run build && npm run check && npm run regress",
+    "package": "npm run build && node scripts/package.js",
     "icons": "python3 scripts/make_icons.py",
-    "verify": "npm run check && npm run regress"
+    "preview": "python3 scripts/build_preview.py"
   },
   "devDependencies": {
     "playwright": "^1.45.0"

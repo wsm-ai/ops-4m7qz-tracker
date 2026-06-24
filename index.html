@@ -7,7 +7,7 @@
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta name="apple-mobile-web-app-title" content="Operations">
-<title>OPORD — Mission Tracker</title>
+<title>OPERATIONS · Carved at the Root</title>
 <link rel="manifest" href="manifest.json">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -63,13 +63,15 @@
     pointer-events:none;
   }
   .crest{display:flex;align-items:center;gap:14px}
+  /* The sigil — the cadet's mark at the root of the world tree */
   .sigil{
     width:54px;height:54px;flex:none;border-radius:8px;
-    background:linear-gradient(160deg,#2a2e1d,#1a1d12);
+    background:linear-gradient(160deg,#2e3220,#1a1d12);
     border:1px solid var(--gold);
     display:grid;place-items:center;
     font-size:15px;font-weight:700;letter-spacing:.08em;color:var(--gold-bright);
-    box-shadow:inset 0 1px 0 rgba(255,255,255,.06),0 4px 12px rgba(0,0,0,.4);
+    box-shadow:inset 0 1px 0 rgba(255,255,255,.06),0 4px 16px rgba(0,0,0,.5),0 0 10px rgba(184,160,106,.12);
+    position:relative;
   }
   .who{flex:1;min-width:0}
   .lvl-line{display:flex;align-items:baseline;gap:8px;flex-wrap:wrap}
@@ -80,14 +82,6 @@
   .rankrow{display:flex;align-items:center;gap:7px;margin-top:6px;flex-wrap:wrap}
   .rank-badge{font-size:12px;letter-spacing:.06em;text-transform:uppercase;color:#14160f;background:var(--gold);padding:3px 9px;border-radius:5px;font-weight:700}
   .pos-badge{font-size:12px;color:var(--ink-dim);letter-spacing:.04em}
-
-  /* ---- Skill tracks ---- */
-  .skills{display:grid;grid-template-columns:1fr 1fr;gap:10px 14px;margin-top:16px}
-  .skill-top{display:flex;justify-content:space-between;align-items:baseline;margin-bottom:4px}
-  .skill-name{font-size:12px;letter-spacing:.04em;color:var(--ink-dim);font-weight:600}
-  .skill-lvl{font-size:11px;color:var(--ink-faint);letter-spacing:.06em;text-transform:uppercase}
-  .skbar{height:8px;border-radius:5px;background:#0e0f09;border:1px solid var(--line);overflow:hidden}
-  .skfill{height:100%;width:0;transition:width .6s cubic-bezier(.2,.8,.2,1)}
 
   .stats{display:flex;gap:10px;margin-top:16px}
   /* ---- Readiness (loss-aversion) bar ---- */
@@ -123,6 +117,12 @@
   nav.tabs button.on{background:linear-gradient(180deg,var(--gold),#b3801f);color:#1a1208;border-color:var(--gold-bright);box-shadow:0 3px 10px rgba(184,160,106,.25)}
   nav.tabs .nav-toggle{color:var(--ink-faint);background:transparent;border-style:dashed;margin-bottom:3px}
   nav.tabs .nav-toggle:hover{color:var(--gold);border-color:var(--gold)}
+  /* More/Less toggle */
+  .nav-more-toggle{color:var(--ink-faint);background:transparent;border-style:dashed;border-color:var(--line);font-size:12px;letter-spacing:.06em}
+  .nav-more-toggle:hover{color:var(--gold);border-color:var(--gold)}
+  /* Secondary tabs — shown when More is expanded */
+  .nav-more{display:none;flex-direction:column;gap:5px;margin-top:2px}
+  .nav-more.open{display:flex}
   /* On narrow screens, the rail becomes a top icon strip again */
   @media(max-width:560px){
     .main-row{flex-direction:column;gap:0;width:100%;max-width:100%;min-width:0}
@@ -135,6 +135,8 @@
     nav.tabs button .lbl{white-space:nowrap}
     nav.tabs.icons-only button .lbl{display:block}  /* labels always wrap on mobile strip */
     nav.tabs .nav-toggle{display:none}  /* toggle is desktop-only */
+    .nav-more-toggle{display:none}      /* no collapse on mobile — strip scrolls */
+    .nav-more{display:flex !important;flex-direction:row}  /* always show all tabs in strip */
     .content-col{width:100%;min-width:0}
   }
 
@@ -227,13 +229,24 @@
   #levelup{position:fixed;inset:0;background:rgba(10,7,4,.82);z-index:60;display:none;
     place-items:center;backdrop-filter:blur(3px);animation:fade .3s}
   #levelup.show{display:grid}
-  .lu-card{text-align:center;padding:30px}
-  .lu-burst{font-size:64px;animation:pop .6s cubic-bezier(.2,1.6,.4,1)}
+  .lu-card{
+    text-align:center;padding:34px 28px;
+    border:1px solid rgba(184,160,106,.35);
+    background:linear-gradient(180deg,#1f2218,#14160f);
+    border-radius:16px;
+    box-shadow:0 0 40px rgba(184,160,106,.18), inset 0 1px 0 rgba(255,255,255,.06);
+  }
+  .lu-burst{font-size:64px;animation:pop .6s cubic-bezier(.2,1.6,.4,1);display:block;margin-bottom:4px}
   @keyframes pop{0%{transform:scale(0) rotate(-30deg)}100%{transform:scale(1) rotate(0)}}
-  .lu-card h2{font-size:30px;color:var(--gold-bright);margin:10px 0 4px;letter-spacing:.05em}
-  .lu-card p{color:var(--ink-dim);font-size:15px}
-  .lu-card button{margin-top:22px;background:linear-gradient(180deg,var(--gold),#b3801f);color:#1a1208;
-    border:none;padding:12px 30px;border-radius:9px;font-family:inherit;font-weight:700;font-size:15px;cursor:pointer}
+  .lu-card h2{font-size:28px;color:var(--gold-bright);margin:10px 0 6px;letter-spacing:.08em;text-transform:uppercase}
+  .lu-card p{color:var(--ink-dim);font-size:14px;line-height:1.6;font-style:italic;max-width:280px;margin:0 auto}
+  .lu-card button{
+    margin-top:24px;
+    background:linear-gradient(180deg,var(--gold),#9a7018);
+    color:#1a1208;border:none;padding:12px 34px;border-radius:9px;
+    font-family:inherit;font-weight:700;font-size:15px;cursor:pointer;
+    letter-spacing:.06em;text-transform:uppercase;
+  }
 
   .foot{text-align:center;color:var(--ink-faint);font-size:11px;margin-top:26px;line-height:1.7}
   .foot a{cursor:pointer}
@@ -593,7 +606,15 @@
   .sk-info-body .sk-recover b{color:var(--violet)}
   /* Today / dashboard */
   .td-grid{display:grid;grid-template-columns:1fr 1fr;gap:11px}
-  .td-creed{display:flex;align-items:center;gap:10px;background:linear-gradient(135deg,rgba(184,160,106,.10),rgba(111,158,84,.06));border:1px solid var(--line);border-left:3px solid var(--jade);border-radius:11px;padding:13px 16px;margin-bottom:13px;font-style:italic;color:var(--ink);font-size:14px;line-height:1.5}
+  /* The creed card feels carved — the Yggdrasil tree is the through-symbol */
+  .td-creed{
+    display:flex;align-items:center;gap:12px;
+    background:linear-gradient(135deg,rgba(184,160,106,.12),rgba(111,158,84,.07));
+    border:1px solid rgba(184,160,106,.25);border-left:3px solid var(--gold);
+    border-radius:11px;padding:15px 17px;margin-bottom:14px;
+    font-style:italic;color:var(--ink);font-size:14px;line-height:1.6;
+    box-shadow:inset 0 1px 0 rgba(255,255,255,.04);
+  }
   .td-creed span{flex:1}
   @media(max-width:640px){.td-grid{grid-template-columns:1fr}}
   .td-card{background:var(--panel);border:1px solid var(--line);border-radius:11px;padding:13px}
@@ -608,6 +629,85 @@
   .td-more{font-size:11.5px;color:var(--ink-faint);margin-top:4px;font-style:italic}
   .td-go{margin-top:9px;background:rgba(124,147,168,.12);border:1px solid #5a4d72;color:var(--violet);padding:6px 11px;border-radius:7px;font-family:inherit;font-size:12px;font-weight:600;cursor:pointer;width:100%}
   .td-go:hover{background:rgba(124,147,168,.2)}
+  /* ---- Dawn session card ---- */
+  .dawn-sess{
+    background:linear-gradient(160deg,var(--panel-2),var(--panel));
+    border:1px solid var(--line);border-radius:12px;padding:14px 16px;
+  }
+  .dawn-sess.rest-day{background:rgba(110,116,89,.07);border-color:rgba(110,116,89,.3);padding:12px 16px}
+  .ds-top{display:flex;align-items:baseline;justify-content:space-between;gap:10px;margin-bottom:10px;flex-wrap:wrap}
+  .ds-name{font-size:14.5px;font-weight:700;color:var(--ink)}
+  .ds-badges{font-size:11.5px;color:var(--ink-dim);display:flex;gap:7px;align-items:center;flex-wrap:wrap}
+  .ds-mode{background:rgba(255,255,255,.05);padding:1px 6px;border-radius:4px;font-size:11px}
+  .ds-note{font-size:12.5px;color:var(--ink-dim);line-height:1.55;margin-top:2px}
+  .ds-exlist{display:flex;flex-direction:column;gap:3px;margin-bottom:11px}
+  .ds-ex{font-size:12.5px;color:var(--ink-dim);padding:3px 0;border-bottom:1px solid rgba(255,255,255,.04)}
+  .ds-ex:last-child{border-bottom:none}
+  .ds-ex.ds-more{color:var(--ink-faint);font-style:italic}
+  .ds-swap{font-size:11px;color:var(--ember)}
+  .ds-done{font-size:13px;color:var(--jade);font-weight:600;padding:4px 0}
+  .ds-actions{display:flex;gap:8px}
+  .ds-log-btn{flex:2;margin-top:0;background:rgba(111,158,84,.12);border-color:rgba(111,158,84,.35);color:var(--jade)}
+  .ds-log-btn:hover{background:rgba(111,158,84,.2)}
+  .ds-plan-btn{flex:1;margin-top:0;font-size:11px;opacity:.7}
+  .ds-plan-btn:hover{opacity:1}
+  /* ---- Getting started card (new users) ---- */
+  .start-card{
+    background:linear-gradient(160deg,rgba(111,158,84,.1),rgba(111,158,84,.04));
+    border:1px solid rgba(111,158,84,.35);border-left:3px solid var(--jade);
+    border-radius:12px;padding:16px 18px;
+  }
+  .start-h{font-size:14px;font-weight:700;color:var(--jade);margin-bottom:8px}
+  .start-intro{font-size:12.5px;color:var(--ink-dim);margin-bottom:12px;line-height:1.55}
+  .start-step{display:flex;align-items:center;gap:10px;padding:7px 0;border-bottom:1px solid rgba(255,255,255,.05);font-size:13px;color:var(--ink-dim)}
+  .start-step:last-child{border-bottom:none;padding-bottom:0}
+  .start-num{width:22px;height:22px;flex:none;border-radius:50%;background:var(--jade);color:#0e1409;font-size:12px;font-weight:700;display:grid;place-items:center}
+  .start-step span:nth-child(2){flex:1}
+  /* ---- Dawn tab — linear guided flow ---- */
+  .td-flow{display:flex;flex-direction:column;gap:11px}
+  /* The single warrior's focus — what to do right now */
+  .focus-card{
+    background:linear-gradient(160deg,#1e2118,#171a12);
+    border:1px solid var(--gold);border-radius:13px;padding:18px 20px;
+    box-shadow:0 0 20px rgba(184,160,106,.1);
+    position:relative;overflow:hidden;
+  }
+  .focus-card::before{content:"";position:absolute;inset:0;background:repeating-linear-gradient(135deg,rgba(255,255,255,.008) 0 2px,transparent 2px 8px);pointer-events:none}
+  .focus-label{font-size:10px;letter-spacing:.2em;text-transform:uppercase;color:var(--gold);opacity:.7;margin-bottom:6px}
+  .focus-main{font-size:18px;font-weight:700;color:var(--ink);line-height:1.3;margin-bottom:4px}
+  .focus-sub{font-size:12.5px;color:var(--ink-dim);margin-bottom:10px}
+  .focus-go{margin-top:0;width:100%;background:rgba(184,160,106,.12);border:1px solid rgba(184,160,106,.35);color:var(--gold-bright)}
+  .focus-go:hover{background:rgba(184,160,106,.2)}
+  /* Commissioning countdown */
+  .commission-bar{
+    background:rgba(156,74,52,.12);border:1px solid rgba(156,74,52,.35);border-left:3px solid var(--blood);
+    border-radius:10px;padding:11px 15px;font-size:13px;color:var(--ink);
+  }
+  .commission-bar b{color:var(--gold-bright);font-size:17px}
+  .commission-sub{color:var(--ink-dim);font-size:12px}
+  .commission-bar.radiant{background:rgba(184,160,106,.15);border-color:var(--gold);border-left-color:var(--gold-bright);color:var(--gold)}
+  /* Adaptive training note */
+  .adapt-note{
+    background:rgba(200,119,46,.08);border:1px solid rgba(200,119,46,.3);border-left:3px solid var(--ember);
+    border-radius:9px;padding:10px 13px;font-size:12.5px;color:var(--ink-dim);line-height:1.55;
+  }
+  /* Neglected path */
+  .path-alert{
+    display:flex;align-items:center;gap:10px;flex-wrap:wrap;
+    background:var(--panel);border:1px solid var(--line);border-left:3px solid var(--violet);
+    border-radius:9px;padding:10px 13px;font-size:12.5px;color:var(--ink-dim);
+  }
+  .path-alert-go{margin-left:auto;flex:none}
+  /* Field notes card — compact secondary info */
+  .fn-card{padding:11px 14px}
+  .fn-h{margin-bottom:7px;font-size:11.5px;letter-spacing:.1em;text-transform:uppercase;color:var(--ink-faint);font-weight:700}
+  .fn-row{display:flex;align-items:center;gap:8px;font-size:12.5px;color:var(--ink-dim);padding:3px 0;border-bottom:1px solid rgba(255,255,255,.04)}
+  .fn-row:last-child{border-bottom:none}
+  .fn-dot{flex:none;font-size:12px;width:18px;text-align:center}
+  .fn-row span:nth-child(2){flex:1}
+  /* Small arrow button for secondary rows */
+  .td-go-sm{background:none;border:1px solid var(--line);color:var(--ink-faint);padding:2px 8px;border-radius:5px;font-family:inherit;font-size:11px;cursor:pointer;margin-left:auto;flex:none}
+  .td-go-sm:hover{border-color:var(--gold);color:var(--gold)}
   /* History */
   .hist-grid{display:grid;grid-template-columns:1fr 1fr;gap:11px}
   @media(max-width:640px){.hist-grid{grid-template-columns:1fr}}
@@ -934,7 +1034,79 @@
   .missed-h{font-weight:700;color:var(--violet);font-size:13.5px;margin-bottom:5px}
   .missed-note b{color:var(--ink)}
   .foot a{color:var(--ink-dim);cursor:pointer;text-decoration:underline}
+
+  /* ---- Garden / Grove of the World Tree ---- */
+  .garden-intro{font-size:13px;color:var(--ink-dim);line-height:1.55;margin-bottom:18px;border-left:2px solid var(--line);padding-left:12px;font-style:italic}
+  .garden-grid{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+  @media(max-width:520px){.garden-grid{grid-template-columns:1fr}}
+  .garden-card{
+    background:var(--panel);border:1px solid var(--line);border-radius:14px;
+    padding:16px 14px;display:flex;flex-direction:column;align-items:center;
+    gap:8px;text-align:center;position:relative;overflow:hidden;
+    transition:border-color .4s, box-shadow .4s;
+  }
+  .garden-card.lit{border-color:var(--path-color,var(--gold));box-shadow:0 0 18px rgba(var(--path-rgb,184,160,106),.18)}
+  .garden-card.radiant{border-color:var(--path-color,var(--gold));box-shadow:0 0 32px rgba(var(--path-rgb,184,160,106),.35);animation:garden-pulse 4s ease-in-out infinite}
+  @keyframes garden-pulse{0%,100%{box-shadow:0 0 32px rgba(var(--path-rgb,184,160,106),.35)}50%{box-shadow:0 0 48px rgba(var(--path-rgb,184,160,106),.55)}}
+  .garden-idol{font-size:48px;line-height:1;filter:grayscale(var(--idol-gray,70%)) opacity(var(--idol-opacity,.5));transition:filter .5s;margin-bottom:2px}
+  .garden-card.lit .garden-idol{filter:grayscale(var(--idol-gray,0%)) opacity(1)}
+  .garden-card.radiant .garden-idol{filter:none;animation:idol-glow 3s ease-in-out infinite}
+  @keyframes idol-glow{0%,100%{transform:scale(1)}50%{transform:scale(1.08)}}
+  .garden-idol-name{font-size:10px;letter-spacing:.12em;text-transform:uppercase;color:var(--path-color,var(--ink-faint));font-weight:700}
+  .garden-path-name{font-size:15px;font-weight:700;color:var(--ink);letter-spacing:.02em}
+  .garden-level{font-size:11px;letter-spacing:.08em;text-transform:uppercase;color:var(--ink-faint)}
+  .garden-bar{width:100%;height:7px;background:#0a0b06;border:1px solid var(--line);border-radius:5px;overflow:hidden;margin-top:2px}
+  .garden-bar-fill{height:100%;transition:width .7s cubic-bezier(.2,.8,.2,1);background:var(--path-color,var(--gold))}
+  .garden-lore{font-size:11.5px;color:var(--ink-faint);line-height:1.5;font-style:italic;margin-top:4px;min-height:44px}
+  .garden-skills{display:flex;flex-wrap:wrap;gap:5px;justify-content:center;margin-top:6px;width:100%}
+  .garden-dot{font-size:11px;padding:2px 7px;border-radius:10px;border:1px solid var(--line);color:var(--ink-faint);background:#0d0e09}
+  .garden-dot.active{color:var(--path-color,var(--gold));border-color:var(--path-color,var(--gold));background:rgba(var(--path-rgb,184,160,106),.1)}
+  .garden-dot.dormant{opacity:.45;font-style:italic}
+  .garden-more{font-size:11px;color:var(--ink-faint);margin-top:4px}
+  .tag.path-tag{border:1px solid currentColor;opacity:.85}
+
+  /* ── v95: Inline daily orders on Dawn ── */
+  .dawn-orders-card{padding:12px 14px}
+  .dawn-order-row{display:flex;align-items:center;gap:9px;padding:6px 0;border-bottom:1px solid rgba(255,255,255,.04)}
+  .dawn-order-row:last-child{border-bottom:none}
+  .dawn-order-row.done .dawn-order-name{color:var(--ink-faint);text-decoration:line-through}
+  .dawn-ck{width:26px;height:26px;border-radius:6px;border:1px solid var(--line);background:transparent;color:var(--ink-faint);cursor:pointer;font-size:13px;flex:none;display:flex;align-items:center;justify-content:center;transition:background .15s,border-color .15s}
+  .dawn-ck:hover{border-color:var(--jade);color:var(--jade)}
+  .dawn-ck.done{background:rgba(101,160,97,.18);border-color:var(--jade);color:var(--jade)}
+  .dawn-order-name{font-size:13.5px;flex:1;line-height:1.3}
+
+  /* ── v95: Streak protection alert ── */
+  .streak-alert{background:rgba(255,140,0,.1);border-left:3px solid #ff8c00;border-radius:8px;padding:10px 13px;font-size:13px;color:#ffaa44;line-height:1.4}
+
+  /* ── v95: Week training bar ── */
+  .ds-week{font-size:11px;color:var(--ink-dim);letter-spacing:.05em;padding:5px 0 3px;font-family:ui-monospace,monospace}
+
+  /* ── v95: AFT sparkline chart ── */
+  .aft-spark{background:var(--panel);border:1px solid var(--line);border-radius:8px;padding:10px 8px 6px;margin-bottom:10px}
+  .aft-spark svg text{font-family:ui-monospace,monospace;fill:var(--ink-faint)}
+
+  /* ── v95: Quick-add floating button ── */
+  .quick-add-btn{position:fixed;bottom:24px;right:20px;width:52px;height:52px;border-radius:50%;background:var(--gold);color:#14160f;border:none;font-size:28px;font-weight:700;cursor:pointer;z-index:900;box-shadow:0 4px 16px rgba(0,0,0,.5);line-height:1;display:flex;align-items:center;justify-content:center;transition:transform .15s,background .15s}
+  .quick-add-btn:hover{background:#e0b340;transform:scale(1.08)}
+  @media(min-width:700px){.quick-add-btn{bottom:28px;right:28px}}
+
+  /* ── v95: Quick-add modal ── */
+  #quickModal{display:none;position:fixed;inset:0;background:rgba(0,0,0,.65);z-index:1000;align-items:center;justify-content:center}
+  #quickModal.open{display:flex}
+  .qa-inner{background:#1a1d14;border:1px solid var(--line);border-radius:14px;padding:20px;width:min(360px,92vw);display:flex;flex-direction:column;gap:10px}
+  .qa-bar{display:flex;align-items:center;justify-content:space-between;margin-bottom:2px}
+  .qa-bar span{font-size:15px;font-weight:600;letter-spacing:.05em;text-transform:uppercase;color:var(--gold)}
+  .qa-close{background:none;border:none;color:var(--ink-faint);font-size:18px;cursor:pointer;padding:2px 6px}
+  .qa-close:hover{color:var(--ink)}
+  .qa-inner input,.qa-inner select{background:#0e0f09;border:1px solid var(--line);color:var(--ink);padding:10px 12px;border-radius:8px;font-family:inherit;font-size:14px;width:100%;box-sizing:border-box}
+  .qa-inner input:focus,.qa-inner select:focus{outline:none;border-color:var(--gold)}
+
+  /* ── v95: Battle buddy report button ── */
+  .rpt-btn{background:rgba(201,162,75,.12);border:1px solid #c9a06a;color:#d8b06a;padding:9px 16px;border-radius:8px;font-family:inherit;font-size:13px;cursor:pointer;margin-bottom:12px;letter-spacing:.04em}
+  .rpt-btn:hover{background:rgba(201,162,75,.22)}
+
   @media (prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
+
 </style>
 </head>
 <body>
@@ -955,43 +1127,47 @@
         </div>
       </div>
     </div>
-    <div class="skills" id="skillBars"></div>
     <div class="readiness" id="readinessBar">
       <div class="rd-top"><span class="rd-label" id="rdLabel">READY</span><span class="rd-pct" id="rdPct">0/0 orders</span></div>
       <div class="rd-track"><div class="rd-fill" id="rdFill"></div></div>
       <div class="rd-warn" id="rdWarn"></div>
     </div>
     <div class="stats">
-      <div class="stat gold"><div class="v" id="sGold">0</div><div class="l">Merit Pts</div></div>
-      <div class="stat streak"><div class="v" id="sStreak">0</div><div class="l">Day Streak</div></div>
-      <div class="stat"><div class="v" id="sBest">0</div><div class="l">Best Streak</div></div>
+      <div class="stat gold"><div class="v" id="sGold">0</div><div class="l">Merit</div></div>
+      <div class="stat streak"><div class="v" id="sStreak">0</div><div class="l">Streak</div></div>
+      <div class="stat"><div class="v" id="sBest">0</div><div class="l">Peak Streak</div></div>
     </div>
   </header>
 
   <div class="main-row">
   <nav class="tabs" id="sideNav">
     <button class="nav-toggle" id="navToggle" title="Toggle labels"><span class="ic">≡</span><span class="lbl">Menu</span></button>
-    <button data-tab="today" class="on"><span class="ic">🧭</span><span class="lbl">Today</span></button>
-    <button data-tab="quests"><span class="ic">🎯</span><span class="lbl">Missions</span></button>
-    <button data-tab="profile"><span class="ic">🪪</span><span class="lbl">Profile</span></button>
-    <button data-tab="test"><span class="ic">🧪</span><span class="lbl">Test</span></button>
+    <!-- Primary — always visible -->
+    <button data-tab="today" class="on"><span class="ic">🌅</span><span class="lbl">Dawn</span></button>
+    <button data-tab="quests"><span class="ic">🎯</span><span class="lbl">Oaths</span></button>
     <button data-tab="dailies"><span class="ic">📋</span><span class="lbl">Orders</span></button>
-    <button data-tab="quizzes"><span class="ic">📚</span><span class="lbl">Quiz</span></button>
+    <button data-tab="plan"><span class="ic">📕</span><span class="lbl">FM Plan</span></button>
     <button data-tab="aft"><span class="ic">💪</span><span class="lbl">AFT</span></button>
     <button data-tab="log"><span class="ic">🏋️</span><span class="lbl">Log</span></button>
-    <button data-tab="skills"><span class="ic">🧠</span><span class="lbl">Skills</span></button>
-    <button data-tab="bosses"><span class="ic">⭐</span><span class="lbl">Objectives</span></button>
-    <button data-tab="board"><span class="ic">📈</span><span class="lbl">Board</span></button>
-    <button data-tab="plan"><span class="ic">📕</span><span class="lbl">FM</span></button>
-    <button data-tab="shop"><span class="ic">🏅</span><span class="lbl">R&amp;R</span></button>
-    <button data-tab="awards"><span class="ic">🏆</span><span class="lbl">The Wall</span></button>
-    <button data-tab="records"><span class="ic">📊</span><span class="lbl">Records</span></button>
-    <button data-tab="weight"><span class="ic">⚖️</span><span class="lbl">Weight</span></button>
+    <button data-tab="skills"><span class="ic">🌳</span><span class="lbl">The Tree</span></button>
+    <!-- More toggle -->
+    <button class="nav-more-toggle" id="navMoreBtn"><span class="ic">···</span><span class="lbl">More</span></button>
+    <!-- Secondary — hidden until More is tapped -->
+    <div class="nav-more" id="navMore">
+      <button data-tab="profile"><span class="ic">🪪</span><span class="lbl">Profile</span></button>
+      <button data-tab="quizzes"><span class="ic">📚</span><span class="lbl">Quiz</span></button>
+      <button data-tab="test"><span class="ic">🧪</span><span class="lbl">Test</span></button>
+      <button data-tab="garden"><span class="ic">🌿</span><span class="lbl">The Grove</span></button>
+      <button data-tab="bosses"><span class="ic">⚔️</span><span class="lbl">Trials</span></button>
+      <button data-tab="board"><span class="ic">📈</span><span class="lbl">Muster</span></button>
+      <button data-tab="shop"><span class="ic">🍺</span><span class="lbl">Mead Hall</span></button>
+      <button data-tab="awards"><span class="ic">🏆</span><span class="lbl">The Wall</span></button>
+      <button data-tab="records"><span class="ic">📖</span><span class="lbl">Saga</span></button>
+      <button data-tab="weight"><span class="ic">⚖️</span><span class="lbl">Weight</span></button>
+    </div>
   </nav>
   <div class="content-col">
 
-  <!-- MISSIONS -->
-  <!-- TODAY / DASHBOARD -->
   <section class="view on" id="view-today">
     <div class="sec-h"><h2 id="todayGreeting">Today</h2><span class="hint" id="todayDate"></span></div>
     <div id="todayDash"></div>
@@ -999,21 +1175,32 @@
 
   <section class="view" id="view-quests">
     <div class="adder">
-      <input id="qName" placeholder="New mission — e.g. Finish history essay" maxlength="80">
+      <input id="qName" placeholder="Swear an oath — e.g. Finish history essay" maxlength="80">
       <div class="row">
         <select id="qDiff">
           <option value="easy">Routine · 15 XP · 5 pts</option>
           <option value="med" selected>Priority · 35 XP · 12 pts</option>
           <option value="hard">High-Risk · 70 XP · 28 pts</option>
         </select>
+        <select id="qPath">
+          <option value="tactical">⚔️ Path of War</option>
+          <option value="physical">🌿 Path of the Body</option>
+          <option value="cognitive">🌀 Path of the Mind</option>
+          <option value="physiological">💧 Path of Vitality</option>
+          <option value="technical">🔨 Path of the Craft</option>
+          <option value="leadership">🏴 Path of Command</option>
+          <option value="academic">📜 Path of Knowledge</option>
+          <option value="personal">🪞 Path of the Self</option>
+          <option value="hearth">🔥 Path of the Hearth</option>
+          <option value="roots">🌳 Path of Roots</option>
+        </select>
       </div>
-      <button class="btn-add" id="qAdd">Assign Mission</button>
+      <button class="btn-add" id="qAdd">Swear the Oath</button>
     </div>
-    <div class="sec-h"><h2>Active Missions</h2><span class="hint">one-off tasks</span></div>
+    <div class="sec-h"><h2>Active Oaths</h2><span class="hint">sworn and unfinished — each one a debt</span></div>
     <ul class="list" id="qList"></ul>
   </section>
 
-  <!-- ORDERS -->
   <section class="view" id="view-dailies">
     <div class="sec-h"><h2>Daily Habits</h2><span class="hint" id="habitStreakHint">build the routine</span></div>
     <div class="plan-intro">Habits are recurring daily quests with their own streaks. Completing one feeds its linked skill (refreshes its fade timer). Miss a day and your streak uses a one-time <b>grace day</b> before it resets — so a single slip doesn't erase months.</div>
@@ -1041,28 +1228,38 @@
           <option value="med" selected>Priority · 20 XP · 8 pts</option>
           <option value="hard">High-Risk · 40 XP · 16 pts</option>
         </select>
+        <select id="dPath">
+          <option value="tactical">⚔️ Path of War</option>
+          <option value="physical">🌿 Path of the Body</option>
+          <option value="cognitive">🌀 Path of the Mind</option>
+          <option value="physiological">💧 Path of Vitality</option>
+          <option value="technical">🔨 Path of the Craft</option>
+          <option value="leadership">🏴 Path of Command</option>
+          <option value="academic">📜 Path of Knowledge</option>
+          <option value="personal">🪞 Path of the Self</option>
+          <option value="hearth">🔥 Path of the Hearth</option>
+          <option value="roots">🌳 Path of Roots</option>
+        </select>
       </div>
       <button class="btn-add" id="dAdd">Add Order</button>
     </div>
     <ul class="list" id="dList"></ul>
   </section>
 
-  <!-- OBJECTIVES -->
   <section class="view" id="view-bosses">
     <div class="adder">
-      <input id="bName" placeholder="New objective — e.g. Pass the certification exam" maxlength="80">
+      <input id="bName" placeholder="Name the trial — e.g. Pass the certification exam" maxlength="80">
       <div class="row">
-        <input id="bHp" type="number" min="2" max="200" value="10" placeholder="Steps to secure">
+        <input id="bHp" type="number" min="2" max="200" value="10" placeholder="Steps to endure">
       </div>
-      <button class="btn-add" id="bAdd">Set Objective</button>
+      <button class="btn-add" id="bAdd">Set the Trial</button>
     </div>
-    <div class="sec-h"><h2>Major Objectives</h2><span class="hint">big multi-step goals</span></div>
+    <div class="sec-h"><h2>Trials</h2><span class="hint">great tests — endured one step at a time</span></div>
     <ul class="list" id="bList"></ul>
   </section>
 
-  <!-- BOARD / BRANCH PREP -->
   <section class="view" id="view-board">
-    <div class="sec-h"><h2>Branch &amp; Board Prep</h2><span class="hint" id="branchGoalHint">goal: Cyber</span></div>
+    <div class="sec-h"><h2>The Muster</h2><span class="hint" id="branchGoalHint">branch &amp; board prep · goal: Cyber</span></div>
 
     <div class="adapt-card" style="border-color:var(--violet);background:linear-gradient(180deg,#1b1d28,#15171f)">
       <h3 style="color:var(--violet)">💻 Cyber Branch (17-series) — Your Target</h3>
@@ -1091,20 +1288,18 @@
     </div>
   </section>
 
-  <!-- R&R -->
   <section class="view" id="view-shop">
     <div class="adder">
-      <input id="rName" placeholder="New R&R — e.g. 1 episode of my show" maxlength="60">
+      <input id="rName" placeholder="Hard-won rest — e.g. 1 episode of my show" maxlength="60">
       <div class="row">
         <input id="rCost" type="number" min="1" max="9999" value="30" placeholder="Merit point cost">
       </div>
-      <button class="btn-add" id="rAdd">Add R&amp;R</button>
+      <button class="btn-add" id="rAdd">Add to the Hall</button>
     </div>
-    <div class="sec-h"><h2>R&amp;R — Earned Downtime</h2><span class="hint">spend merit points, no guilt</span></div>
+    <div class="sec-h"><h2>The Mead Hall</h2><span class="hint">earned rest — claim it without guilt</span></div>
     <ul class="list" id="rList"></ul>
   </section>
 
-  <!-- QUIZZES -->
   <section class="view" id="view-quizzes">
     <div class="sec-h"><h2>Officer Knowledge Quizzes</h2><span class="hint">study, then test</span></div>
     <div class="plan-intro" id="quizIntro">Pass a quiz to earn merit points and convert it into a daily review order — that's how knowledge sticks. Passing all of them secures the Knowledge objective.
@@ -1117,7 +1312,6 @@
 
   </section>
 
-  <!-- AFT -->
   <section class="view" id="view-aft">
     <div class="sec-h"><h2>AFT Scorecard</h2><span class="hint">input scores, auto-tune plan</span></div>
     <div id="aftStandardBar"></div>
@@ -1137,8 +1331,6 @@
     <div id="aftHistory"></div>
   </section>
 
-  <!-- WORKOUT LOG -->
-  <!-- PROFILE -->
   <section class="view" id="view-profile">
     <div class="sec-h"><h2>Profile</h2><span class="hint">your record & dimensions</span></div>
     <div class="adder">
@@ -1148,6 +1340,8 @@
         <label>MS year / rank<input id="pfRank" type="text" maxlength="40" placeholder="e.g. MS2 Cadet"></label>
         <label>Leadership role<input id="pfPos" type="text" maxlength="40" placeholder="e.g. Squad Leader"></label>
         <label>Branch goal<input id="pfBranch" type="text" maxlength="40" placeholder="e.g. Cyber (17-series)"></label>
+        <label>Commission date<input id="pfCommission" type="date" title="Your expected commissioning date — powers the countdown on Dawn"></label>
+        <label>GPA (current)<input id="pfGpa" type="number" min="0" max="4.0" step="0.01" placeholder="e.g. 3.42" title="OML factor — shown in Field Notes"></label>
       </div>
       <div class="bl-grid" style="margin-top:9px">
         <label>Birthdate<input id="pfDob" type="date"></label>
@@ -1214,7 +1408,6 @@
     </div>
   </section>
 
-  <!-- TEST -->
   <section class="view" id="view-test">
     <div class="sec-h"><h2>Test &amp; Train</h2><span class="hint">measure → level up</span></div>
     <div class="plan-intro">Each test measures a cognitive skill, updates that skill's level, and gives improvement suggestions. <b>Honest note:</b> these run in your browser, so device and input lag affect them — treat them as <i>relative</i> progress trackers, not clinical or IQ measurements. Tap "ℹ️ Why &amp; how" on any test before your first run.</div>
@@ -1236,7 +1429,6 @@
     </div>
   </section>
 
-  <!-- LOG -->
   <section class="view" id="view-log">
     <div id="baselinePrompt"></div>
     <div class="sec-h"><h2>Log Cadre PT</h2><span class="hint">recovery-aware</span></div>
@@ -1274,7 +1466,6 @@
     <div id="lgHistory"></div>
   </section>
 
-  <!-- SKILLS -->
   <section class="view" id="view-skills">
     <div class="sk-jumpbar" id="skJumpbar"></div>
     <div class="sec-h"><h2>Paths</h2><span class="hint">grow the tree · keep it alive</span></div>
@@ -1322,7 +1513,16 @@
     <div id="skList"></div>
   </section>
 
-  <!-- PLAN -->
+  <section class="view" id="view-garden">
+    <div class="sec-h"><h2>Grove of the World Tree</h2><span class="hint">the Sacred Paths</span></div>
+    <p class="garden-intro">
+      Every deed you complete is offered to a Path. As a Path receives your efforts,
+      its sacred idol stirs — dim at first, then lit, then radiant. New skills
+      awaken within each Path as it deepens. Invest wisely. The Tree grows where you tend it.
+    </p>
+    <div class="garden-grid" id="gardenGrid"></div>
+  </section>
+
   <section class="view" id="view-plan">
     <div class="sec-h"><h2>FM — Training</h2><span class="hint">AFT field manual</span></div>
     <div id="coachToday"></div>
@@ -1560,7 +1760,6 @@
     </div>
   </section>
 
-  <!-- AWARDS — the "I Love Me" wall -->
   <section class="view" id="view-awards">
     <div class="sec-h"><h2>The Wall</h2><span class="hint">your record</span></div>
     <div class="wall-subnav">
@@ -1649,10 +1848,9 @@
     </div>
   </section>
 
-  <!-- THE WEIGHT — read-only mirror of the standalone Weight app -->
-  <!-- RECORDS: history, counseling log, checklists -->
   <section class="view" id="view-records">
-    <div class="sec-h"><h2>History &amp; Trends</h2><span class="hint">the long arc</span></div>
+    <div class="sec-h"><h2>Your Saga</h2><span class="hint">the long arc — where you have been</span></div>
+    <button class="rpt-btn" id="battleBuddyBtn">📋 Generate Battle Buddy Report</button>
     <div id="historyArea"></div>
 
     <div class="sec-h" style="margin-top:20px"><h2>Counseling Log</h2><span class="hint">leadership events (4856-style)</span></div>
@@ -1729,11 +1927,12 @@
     <div class="weight-ledger" id="weightLedger"></div>
   </section>
 
+
   </div><!-- /content-col -->
   </div><!-- /main-row -->
 
   <div class="foot">
-    <span id="footStatus">OPERATIONS · all data lives only on this device</span><br>
+    <span id="footStatus">OPERATIONS · carved on this device alone — no cloud, no witness but you</span><br>
     <a id="cloudBtn">link cloud file</a> &nbsp;·&nbsp; <a id="exportBtn">export backup</a> &nbsp;·&nbsp; <a id="importBtn">import backup</a> &nbsp;·&nbsp; <a id="resyncBtn">resync skill trees</a> &nbsp;·&nbsp; <a id="resetBtn">reset everything</a>
     <input type="file" id="importFile" accept="application/json" style="display:none">
     <div id="cloudHint" class="cloud-hint"></div>
@@ -1742,8 +1941,8 @@
 
 <div id="toast"></div>
 <div id="levelup"><div class="lu-card">
-  <div class="lu-burst">🎖️</div>
-  <h2 id="luTitle">Promoted!</h2>
+  <div class="lu-burst">🌳</div>
+  <h2 id="luTitle">The Path Deepens</h2>
   <p id="luSub"></p>
   <button id="luClose">Press On</button>
 </div></div>
@@ -1757,26 +1956,66 @@
   <div class="qm-body" id="qmBody"></div>
 </div>
 
+<button class="quick-add-btn" id="quickAddBtn" title="Quick oath">+</button>
+<div id="quickModal">
+  <div class="qa-inner">
+    <div class="qa-bar">
+      <span>Quick Oath</span>
+      <button class="qa-close" id="quickModalClose">✕</button>
+    </div>
+    <input id="qaName" placeholder="Oath / mission name" maxlength="80" autocomplete="off">
+    <select id="qaPath">
+      <option value="tactical">Tactical</option>
+      <option value="physical">Physical</option>
+      <option value="cognitive">Cognitive</option>
+      <option value="leadership">Leadership</option>
+      <option value="academic">Academic</option>
+      <option value="personal">Personal</option>
+      <option value="technical">Technical</option>
+    </select>
+    <select id="qaDiff">
+      <option value="easy">Easy</option>
+      <option value="med">Medium</option>
+      <option value="hard">Hard</option>
+    </select>
+    <button class="btn-add" id="qaAdd">Swear it</button>
+  </div>
+</div>
+
 <script src="quizbank.js"></script>
 <script>
 "use strict";
+/* ── The Ten Sacred Paths — keys match SK_CAT_ORDER ──────────────────────────
+   Each Path absorbs XP from quests/dailies/bosses tagged to it. As a Path
+   levels up its idol in the Garden glows brighter and dormant skills awaken.
+   The Norse idol names root each Path in the Yggdrasil mythology. */
+const PATH_META = {
+  tactical:      {name:"Path of War",          idol:"Brazier of Fólkvangr",   lore:"Where warriors consecrate their edge. War demands totality — precision, nerve, and the will to prevail under chaos.",          icon:"⚔️",  color:"var(--blood)"},
+  physical:      {name:"Path of the Body",     idol:"Stones of Midgard",      lore:"The realm made flesh — what you build here endures. The body is the first weapon and the last fortress.",                      icon:"🌿",  color:"var(--jade)"},
+  cognitive:     {name:"Path of the Mind",     idol:"Well of Mimir",          lore:"Wisdom costs something. Odin surrendered his eye to drink here. What are you willing to give for clarity?",                    icon:"🌀",  color:"var(--violet)"},
+  physiological: {name:"Path of Vitality",     idol:"Spring of Hvergelmir",   lore:"The primordial well — source of all living rivers. Health is the ground on which all else is built.",                         icon:"💧",  color:"var(--violet)"},
+  technical:     {name:"Path of the Craft",    idol:"Forge of Sindri",        lore:"The dwarven smith whose fire shaped Mjölnir. Mastery is made, not granted — one strike at a time.",                           icon:"🔨",  color:"var(--ember)"},
+  leadership:    {name:"Path of Command",      idol:"Throne of Hliðskjálf",   lore:"From here, Odin sees all nine worlds. Command demands sight — of terrain, of people, of consequence.",                        icon:"🏴",  color:"var(--gold)"},
+  academic:      {name:"Path of Knowledge",    idol:"Runes of the Hanging",   lore:"Odin hung nine days on Yggdrasil, wounded and fasting, to earn the runes. Knowledge demands sacrifice.",                      icon:"📜",  color:"var(--gold)"},
+  personal:      {name:"Path of the Self",     idol:"Mirror of Vanir",        lore:"The Vanir gods understood things the Aesir had to learn. Know yourself before you can lead others.",                          icon:"🪞",  color:"var(--jade)"},
+  hearth:        {name:"Path of the Hearth",   idol:"Heartstone of Ásgarðr",  lore:"Even Odin's hall has its fire. The people you tend are the roots that anchor the World Tree.",                                 icon:"🔥",  color:"var(--ember)"},
+  roots:         {name:"Path of Roots",        idol:"Well of Urðr",           lore:"The Well of Fate, tended by the Norns. They water Yggdrasil with its clay. Your past shapes what grows.",                     icon:"🌳",  color:"var(--jade)"},
+};
+/* ── Track → Path migration map (old save field) ─────────────────────────── */
+const TRACK_TO_PATH = {fitness:"physical", tactics:"tactical", knowledge:"academic", discipline:"personal"};
+
 /* ---------------- State ---------------- */
 const DEFAULT = {
   name:"Cadet", rank:"MS2 Cadet", position:"No leadership role",
   gold:0, streak:0, lastDaily:null, totalDone:0,
   bestStreak:0, perfectDays:0, lastPerfect:null, missedYesterday:false,
-  skills:{ fitness:{xp:0}, tactics:{xp:0}, knowledge:{xp:0}, discipline:{xp:0} },
-  aft:[
-    {date:"Oct 1, 2025",  raw:{dl:160,hrp:37,sdc:114,plank:90,run:1090}, scores:{dl:63,hrp:80,sdc:79,plank:60,run:72}, total:354},
-    {date:"Nov 19, 2025", raw:{dl:200,hrp:51,sdc:119,plank:124,run:1051}, scores:{dl:70,hrp:94,sdc:74,plank:70,run:77}, total:385},
-    {date:"Feb 18, 2026", raw:{dl:200,hrp:48,sdc:124,plank:123,run:1149}, scores:{dl:70,hrp:92,sdc:69,plank:70,run:66}, total:367},
-    {date:"Apr 22, 2026", raw:{dl:200,hrp:46,sdc:129,plank:160,run:1043}, scores:{dl:70,hrp:90,sdc:65,plank:81,run:78}, total:384},
-  ],
+  pathXP:{tactical:0,physical:0,cognitive:0,physiological:0,technical:0,leadership:0,academic:0,personal:0,hearth:0,roots:0},
+  aft:[],
   quizzes:{},        // { topicKey: {passed:bool, bestPct, attempts} }
   workouts:[],       // [{date, session, duration, exercises:[{name, type, sets:[{reps,weight} | {time} | {dist}]}], notes}]
   baselines:[],      // [{date, ts, month:"2026-06", results:{exKey:{type, value:{...}}}}]
   lastBaselineMonth:null,
-  branchGoal:"Cyber (17-series)",
+  branchGoal:"",
   weight:{ nextDisc:1, promises:[], memorial:[] },  // The Weight — read-only mirror of the standalone Weight app
   weightAppUrl:"https://wsm-ai.github.io/tw-9f3kx-ledger/",   // hosted URL of the standalone Weight app (portal link)
   lastMirrorUpdate:null,   // toDateString() of the last mirror refresh, for the daily nudge
@@ -1787,7 +2026,9 @@ const DEFAULT = {
   lifeSkills:[],     // {id, name, cat, fadeDays, currentLevel, lastQuestTs, levels:[{n, ability}], history:[]}
   ptLog:[],          // cadre PT sessions: {id, ts, date, areas:[...], intensity}
   navLabels:true,    // side rail shows labels (true) or icons only (false)
-  profile:{ birthdate:null, heightIn:null, heightDate:null, weightLb:null, weightDate:null, sex:null, bloodType:null, units:"imperial", notes:"" },
+  navExpanded:false, // whether the "More" nav section is open
+  missedTraining:[], // [{date:"YYYY-MM-DD", session:"s1"}] — auto-tracked missed sessions, last 28 days
+  profile:{ birthdate:null, heightIn:null, heightDate:null, weightLb:null, weightDate:null, sex:null, bloodType:null, units:"imperial", notes:"", commissionDate:null, gpa:null },
   lifts:{ deadliftLb:null, squatLb:null, benchLb:null, liftDate:null },  // best lifts for bodyweight-relative skills
   aftStandard:"general",  // "general" (sex+age normed, 300 min) or "combat" (sex-neutral, 350 min)
   hasGym:false,           // equipment mode: false = no-equipment (bodyweight) plans, true = gym versions
@@ -1809,33 +2050,33 @@ const DEFAULT = {
     {id:id(), name:"Create / verify your CC IMS (Cadet Command) & TBB account", done:false},
     {id:id(), name:"Build your Talent-Based Branching (TBB) accessions file", done:false},
     {id:id(), name:"Write & polish your branch résumé", done:false},
-    {id:id(), name:"Draft 'Why Cyber?' talking points for branch interviews", done:false},
-    {id:id(), name:"Request branch interviews with Cyber", done:false},
+    {id:id(), name:"Research your top branch choices and their OML requirements", done:false},
+    {id:id(), name:"Request branch interviews with your top-choice branch(es)", done:false},
     {id:id(), name:"Enter & rank your branch preferences in TBB", done:false},
     {id:id(), name:"Decide on BrADSO (Branch Active Duty Service Obligation) strategy", done:false},
-    {id:id(), name:"Max your OML inputs: GPA, AFT, leadership eval (CDT OER)", done:false},
-    {id:id(), name:"Knock out Cyber-relevant certs / coursework (security+, etc.)", done:false},
-    {id:id(), name:"Confirm clearance eligibility (Cyber requires TS/SCI)", done:false},
+    {id:id(), name:"Max your OML inputs: GPA, AFT score, leadership eval (CDT OER)", done:false},
+    {id:id(), name:"Research branch-relevant certifications and coursework", done:false},
+    {id:id(), name:"Confirm your clearance eligibility for your desired branch", done:false},
   ],
   quests:[
-    {id:id(), name:"Find your baseline: test 2-mile run time", diff:"med", track:"fitness", done:false},
-    {id:id(), name:"Find your baseline: max push-ups in 2 min", diff:"easy", track:"fitness", done:false},
-    {id:id(), name:"Find your baseline: max plank hold", diff:"easy", track:"fitness", done:false},
-    {id:id(), name:"Set a phone reminder for morning meditation", diff:"easy", track:"discipline", done:false},
-    {id:id(), name:"Pick a book for your reward shelf", diff:"easy", track:"discipline", done:false},
+    {id:id(), name:"Find your baseline: test 2-mile run time", diff:"med", path:"physical", done:false},
+    {id:id(), name:"Find your baseline: max push-ups in 2 min", diff:"easy", path:"physical", done:false},
+    {id:id(), name:"Find your baseline: max plank hold", diff:"easy", path:"physical", done:false},
+    {id:id(), name:"Set a phone reminder for morning meditation", diff:"easy", path:"personal", done:false},
+    {id:id(), name:"Pick a book for your reward shelf", diff:"easy", path:"personal", done:false},
   ],
   dailies:[
-    {id:id(), name:"🧘 Meditate 20–30 min (morning)", diff:"med", track:"discipline", done:false, best:0},
-    {id:id(), name:"💪 Today's training session (see FM tab)", diff:"hard", track:"fitness", done:false, best:0},
-    {id:id(), name:"📚 Study for an officer-knowledge quiz", diff:"med", track:"knowledge", done:false, best:0},
-    {id:id(), name:"📋 Plan top 3 priorities for the day", diff:"easy", track:"discipline", done:false, best:0},
-    {id:id(), name:"🎯 Deep-work block: 60 min, no phone", diff:"med", track:"discipline", done:false, best:0},
-    {id:id(), name:"📵 Phone away 30 min before bed", diff:"easy", track:"discipline", done:false, best:0},
-    {id:id(), name:"💧 Hydrate + 7+ hrs sleep target", diff:"easy", track:"fitness", done:false, best:0},
+    {id:id(), name:"🧘 Meditate 20–30 min (morning)", diff:"med", path:"personal", done:false, best:0},
+    {id:id(), name:"💪 Today's training session (see FM tab)", diff:"hard", path:"physical", done:false, best:0},
+    {id:id(), name:"📚 Study for an officer-knowledge quiz", diff:"med", path:"academic", done:false, best:0},
+    {id:id(), name:"📋 Plan top 3 priorities for the day", diff:"easy", path:"tactical", done:false, best:0},
+    {id:id(), name:"🎯 Deep-work block: 60 min, no phone", diff:"med", path:"cognitive", done:false, best:0},
+    {id:id(), name:"📵 Phone away 30 min before bed", diff:"easy", path:"personal", done:false, best:0},
+    {id:id(), name:"💧 Hydrate + 7+ hrs sleep target", diff:"easy", path:"physiological", done:false, best:0},
   ],
   bosses:[
-    {id:id(), name:"Hit 450+ AFT (raise DL & SDC)", hp:20, maxhp:20, track:"fitness"},
-    {id:id(), name:"Pass all 16 officer-knowledge quizzes", hp:16, maxhp:16, track:"knowledge", auto:"quizzes"},
+    {id:id(), name:"Hit 450+ AFT (raise DL & SDC)", hp:20, maxhp:20, path:"physical"},
+    {id:id(), name:"Pass all 16 officer-knowledge quizzes", hp:16, maxhp:16, path:"academic", auto:"quizzes"},
   ],
   rewards:[
     {id:id(), name:"Read 1 chapter of your book", cost:15},
@@ -1845,12 +2086,6 @@ const DEFAULT = {
     {id:id(), name:"One episode of your show", cost:30},
     {id:id(), name:"Full rest/recovery day, no guilt", cost:60},
   ]
-};
-const TRACKS = {
-  fitness:{name:"Fitness",icon:"💪",color:"var(--jade)"},
-  tactics:{name:"Tactics",icon:"🗺️",color:"var(--ember)"},
-  knowledge:{name:"Knowledge",icon:"📚",color:"var(--violet)"},
-  discipline:{name:"Discipline",icon:"🎯",color:"var(--gold)"},
 };
 const VALUES = {
   quest:{easy:{xp:15,g:5},med:{xp:35,g:12},hard:{xp:70,g:28}},
@@ -1974,6 +2209,7 @@ const SESSIONS = {
 };
 // resolve a session's exercise list for the current equipment mode
 // Weather conditions. "outdoorBad" = conditions where you'd skip outdoor work.
+
 const WEATHER={
   clear:{label:"Clear / fine", icon:"☀️", bad:false},
   rain:{label:"Rain", icon:"🌧️", bad:true},
@@ -2204,6 +2440,59 @@ function parsePT(text){
   });
   return {moves:found, areas:[...areas]};
 }
+// ===== Adaptive training: missed-session tracking =====
+// Scans the past 7 days, records any scheduled session that had no matching workout.
+// Deduplicates — safe to call on every render. Trims to last 28 days automatically.
+function trackMissedSessions(){
+  if(!S.missedTraining) S.missedTraining=[];
+  const now=new Date();
+  for(let i=1;i<=7;i++){
+    const d=new Date(now); d.setDate(now.getDate()-i);
+    const plan=planForDay(d);
+    if(!plan||!plan.session) continue;
+    const dayStr=localYMD(d);
+    if(S.missedTraining.some(m=>m.date===dayStr)) continue;
+    if(!workoutOnDay(d)) S.missedTraining.push({date:dayStr, session:plan.session});
+  }
+  const cutoff=localYMD(new Date(now.getTime()-28*864e5));
+  S.missedTraining=S.missedTraining.filter(m=>m.date>=cutoff);
+}
+
+// Sessions missed in the past N days (most-recent first).
+function recentMissed(days){
+  if(!S.missedTraining) return [];
+  const cutoff=localYMD(new Date(Date.now()-days*864e5));
+  return S.missedTraining.filter(m=>m.date>=cutoff).slice().reverse();
+}
+
+// Short coaching paragraph based on recent missed sessions.
+function getAdaptiveNote(){
+  const missed=recentMissed(7);
+  if(!missed.length) return null;
+  const names=[...new Set(missed.map(m=>(SESSIONS[m.session]?SESSIONS[m.session].name.split("·").slice(-1)[0].trim():"a session")))];
+  if(missed.length===1){
+    return `You missed ${names[0]} last week. Don't double up to compensate — just don't let it happen twice in a row. One missed session means nothing; a habit of skipping one type of work shows up in your score.`;
+  }
+  return `Last week you missed ${names.join(" and ")} (${missed.length} session${missed.length!==1?'s':''}). The plan keeps rolling — don't try to cram missed work in. Pick back up from today and hit the sessions you tend to skip hardest next week.`;
+}
+
+// How many training sessions have been completed vs scheduled this week (Mon–Sun).
+function weekTrainingStats(){
+  const now=new Date();
+  const dFromMon=(now.getDay()+6)%7;
+  const mon=new Date(now); mon.setDate(now.getDate()-dFromMon); mon.setHours(0,0,0,0);
+  let sched=0,done=0;
+  for(let i=0;i<7;i++){
+    const d=new Date(mon); d.setDate(mon.getDate()+i);
+    const plan=planForDay(d);
+    if(!plan||!plan.session) continue;
+    sched++;
+    const dayEnd=new Date(d); dayEnd.setHours(23,59,59,999);
+    if(dayEnd<=now && workoutOnDay(d)) done++;
+  }
+  return {done,sched};
+}
+
 // Monthly baseline = one max-effort set per key movement. These map to AFT
 // events + the plan's core lifts so the updater can re-anchor each month.
 const BASELINE_TEST = [
@@ -2215,6 +2504,7 @@ const BASELINE_TEST = [
   {key:"run_2mi",     name:"Timed 2-mile run", type:"dist", aft:"run", lowerBetter:true},
   {key:"sdc_sim",     name:"Sprint-Drag-Carry sim (time)", type:"time", aft:"sdc", lowerBetter:true},
 ];
+
 const KEY="operations_v2";
 let S = load();
 try{ if(typeof window!=="undefined") window.S = S; }catch(_){}  // expose for tests/devtools; harmless in app
@@ -2226,7 +2516,19 @@ function load(){
     if(!r) return structuredClone(DEFAULT);
     const merged=Object.assign(structuredClone(DEFAULT),r);
     // ensure nested structures exist after upgrades
-    merged.skills=Object.assign(structuredClone(DEFAULT.skills),r.skills||{});
+    const defaultPXP={tactical:0,physical:0,cognitive:0,physiological:0,technical:0,leadership:0,academic:0,personal:0,hearth:0,roots:0};
+    merged.pathXP=Object.assign({...defaultPXP},r.pathXP||{});
+    // Migrate old skills.{fitness,tactics,knowledge,discipline} XP → pathXP (one-time, old saves)
+    if(r.skills && !r.pathXP){
+      if(r.skills.fitness)    merged.pathXP.physical  =(merged.pathXP.physical||0) +(r.skills.fitness.xp||0);
+      if(r.skills.tactics)    merged.pathXP.tactical  =(merged.pathXP.tactical||0) +(r.skills.tactics.xp||0);
+      if(r.skills.knowledge)  merged.pathXP.academic  =(merged.pathXP.academic||0) +(r.skills.knowledge.xp||0);
+      if(r.skills.discipline) merged.pathXP.personal  =(merged.pathXP.personal||0) +(r.skills.discipline.xp||0);
+    }
+    // Migrate old track → path field in quests/dailies/bosses
+    [...(merged.quests||[]),...(merged.dailies||[]),...(merged.bosses||[])].forEach(item=>{
+      if(!item.path && item.track) item.path=TRACK_TO_PATH[item.track]||item.track;
+    });
     merged.quizzes=r.quizzes||{};
     merged.aft=r.aft||[];
     merged.workouts=r.workouts||[];
@@ -2253,7 +2555,9 @@ function load(){
     // backfill peakLevel (all-time high) for any skill missing it
     merged.lifeSkills.forEach(s=>{ s.peakLevel=Math.max(s.peakLevel||0, s.currentLevel||0); });
     merged.navLabels=r.navLabels!==undefined?r.navLabels:true;
-    merged.profile=Object.assign({birthdate:null,heightIn:null,heightDate:null,weightLb:null,weightDate:null,sex:null,bloodType:null,units:"imperial",notes:""}, r.profile||{});
+    merged.navExpanded=r.navExpanded!==undefined?r.navExpanded:false;
+    merged.missedTraining=r.missedTraining||[];
+    merged.profile=Object.assign({birthdate:null,heightIn:null,heightDate:null,weightLb:null,weightDate:null,sex:null,bloodType:null,units:"imperial",notes:"",commissionDate:null,gpa:null}, r.profile||{});
     merged.lifts=Object.assign({deadliftLb:null,squatLb:null,benchLb:null,liftDate:null}, r.lifts||{});
     merged.aftStandard=r.aftStandard||"general";
     merged.donations=r.donations||[];
@@ -2302,16 +2606,18 @@ function readiness(){
 }
 
 /* ---------------- XP / rewards ---------------- */
-function grant(xp,gold,label,track){
+function grant(xp,gold,label,path){
   S.gold+=gold; S.totalDone++;
-  track=track||"discipline";
-  if(!S.skills[track]) S.skills[track]={xp:0};
-  const before=skillLevel(S.skills[track].xp).lvl;
-  S.skills[track].xp+=xp;
-  const after=skillLevel(S.skills[track].xp).lvl;
+  path=path||"tactical";
+  if(!S.pathXP) S.pathXP={};
+  if(!S.pathXP[path]) S.pathXP[path]=0;
+  const before=skillLevel(S.pathXP[path]).lvl;
+  S.pathXP[path]+=xp;
+  const after=skillLevel(S.pathXP[path]).lvl;
   save(); render();
-  if(after>before) showLevelUp(track,after);
-  else toast(`<span class="t-xp">+${xp} ${TRACKS[track].name} XP &nbsp;+${gold} pts</span> &nbsp;·&nbsp; ${label}`);
+  const pm=PATH_META[path];
+  if(after>before) showLevelUp(path,after);
+  else toast(`<span class="t-xp">+${xp} XP → ${pm?pm.name:path} &nbsp;+${gold} pts</span> &nbsp;·&nbsp; ${label}`);
 }
 
 // Perfect day = all dailies cleared. Escalating dopamine + streak milestones.
@@ -2325,8 +2631,8 @@ function onPerfectDay(){
   // bonus merit scales with streak (loss aversion: the longer the streak, the more you'd lose)
   const bonus=20+Math.min(80,pending*3);
   S.gold+=bonus;
-  if(!S.skills.discipline)S.skills.discipline={xp:0};
-  S.skills.discipline.xp+=40;
+  if(!S.pathXP) S.pathXP={};
+  S.pathXP.personal=(S.pathXP.personal||0)+40;
   save();render();
   // milestone celebrations
   const milestones={3:"3-day streak — momentum building.",7:"7 days straight. One week locked in.",14:"Two weeks. This is becoming who you are.",30:"30 DAYS. Discipline is now a habit, not a choice.",60:"60 days. Most people never get here.",100:"100 DAYS. Elite consistency."};
@@ -2368,7 +2674,6 @@ function render(){
   } else {
     warn.className="rd-warn"; warn.innerHTML="";
   }
-  renderSkills();
   renderQuests(); renderDailies(); renderBosses(); renderShop();
   if(typeof renderQuizzes==="function") renderQuizzes();
   if(typeof renderAft==="function") renderAft();
@@ -2397,20 +2702,14 @@ function render(){
   if(typeof renderBoard==="function") renderBoard();
   if(typeof renderWeight==="function") renderWeight();
   if(typeof renderAwards==="function") renderAwards();
+  if(typeof renderGarden==="function") renderGarden();
 }
 
-function renderSkills(){
-  const el=document.getElementById("skillBars");
-  el.innerHTML=Object.keys(TRACKS).map(k=>{
-    const s=skillLevel(S.skills[k]?S.skills[k].xp:0);
-    const pct=Math.round(s.into/s.need*100);
-    return `<div class="skill">
-      <div class="skill-top"><span class="skill-name">${TRACKS[k].icon} ${TRACKS[k].name}</span><span class="skill-lvl">Lvl ${s.lvl}</span></div>
-      <div class="skbar"><div class="skfill" style="width:${pct}%;background:${TRACKS[k].color}"></div></div>
-    </div>`;
-  }).join("");
+function pathTag(path){
+  const pm=PATH_META[path];
+  if(!pm) return "";
+  return `<span class="tag path-tag" style="color:${pm.color}">${pm.icon} ${pm.name}</span>`;
 }
-
 function diffTag(scope,diff){
   const cls=diff==="easy"?"diff-easy":diff==="hard"?"diff-hard":"diff-med";
   const labels={easy:"routine",med:"priority",hard:"high-risk"};
@@ -2420,84 +2719,105 @@ function diffTag(scope,diff){
 
 function renderQuests(){
   const el=document.getElementById("qList");
-  if(!S.quests.length){el.innerHTML=`<div class="empty"><span class="big">🎯</span>No active missions. Assign one above to begin.</div>`;return}
+  if(!S.quests.length){el.innerHTML=`<div class="empty"><span class="big">🎯</span>The board is clear. Swear an oath above and carry it forward.</div>`;return}
   el.innerHTML=S.quests.map(q=>`
     <li class="card ${q.done?'done':''}">
       <div class="check" data-q="${q.id}">${q.done?'✓':''}</div>
       <div class="c-body"><div class="c-name">${esc(q.name)}</div>
-        <div class="c-meta">${diffTag('quest',q.diff)}</div></div>
+        <div class="c-meta">${diffTag('quest',q.diff)}${pathTag(q.path)}</div></div>
       <button class="del" data-dq="${q.id}">✕</button>
     </li>`).join("");
 }
 function renderDailies(){
   const el=document.getElementById("dList");
-  if(!S.dailies.length){el.innerHTML=`<div class="empty"><span class="big">📋</span>No daily orders yet. Add habits to execute every day.</div>`;return}
+  if(!S.dailies.length){el.innerHTML=`<div class="empty"><span class="big">📋</span>No orders standing. Lay your daily oaths — executed at dawn, every dawn.</div>`;return}
   el.innerHTML=S.dailies.map(d=>`
     <li class="card ${d.done?'done':''}">
       <div class="check" data-d="${d.id}">${d.done?'✓':''}</div>
       <div class="c-body"><div class="c-name">${esc(d.name)}</div>
-        <div class="c-meta">${diffTag('daily',d.diff)}${d.best?`<span class="tag streakt">🔥 best ${d.best}</span>`:''}</div></div>
+        <div class="c-meta">${diffTag('daily',d.diff)}${pathTag(d.path)}${d.best?`<span class="tag streakt">🔥 best ${d.best}</span>`:''}</div></div>
       <button class="del" data-dd="${d.id}">✕</button>
     </li>`).join("");
 }
 function renderBosses(){
   const el=document.getElementById("bList");
-  if(!S.bosses.length){el.innerHTML=`<div class="empty"><span class="big">⭐</span>No objectives set. Break a big goal into steps and secure it.</div>`;return}
+  if(!S.bosses.length){el.innerHTML=`<div class="empty"><span class="big">⚔️</span>No trials set. Name what you must endure and begin the reckoning.</div>`;return}
   el.innerHTML=S.bosses.map(b=>{
     const pct=Math.max(0,b.hp/b.maxhp*100);
     const dead=b.hp<=0;
     return `<li class="card boss">
       <div class="boss-top">
-        <div class="boss-skull">${dead?'✅':'⭐'}</div>
-        <div class="boss-name">${esc(b.name)}${dead?' — Secured!':''}</div>
+        <div class="boss-skull">${dead?'🏆':'⚔️'}</div>
+        <div class="boss-name">${esc(b.name)}${dead?' — Conquered.':''}</div>
         <button class="del" data-db="${b.id}">✕</button>
       </div>
       ${dead?'':`
       <div class="hpbar"><div class="hpfill" style="width:${pct}%"></div></div>
-      <div class="hp-meta"><span>${b.hp} / ${b.maxhp} steps left</span><span>+${b.maxhp*8} XP · ${b.maxhp*4} pts total</span></div>
+      <div class="hp-meta"><span>${b.hp} / ${b.maxhp} steps remaining</span><span>+${b.maxhp*8} XP · ${b.maxhp*4} pts when conquered</span></div>
       <div class="boss-actions">
-        <button class="hit" data-hit="${b.id}">✔ Log progress</button>
+        <button class="hit" data-hit="${b.id}">⚔️ Strike it</button>
       </div>`}
     </li>`}).join("");
 }
 function renderShop(){
   const el=document.getElementById("rList");
-  if(!S.rewards.length){el.innerHTML=`<div class="empty"><span class="big">🏅</span>No R&R set. Add real downtime to spend merit points on.</div>`;return}
+  if(!S.rewards.length){el.innerHTML=`<div class="empty"><span class="big">🍺</span>The Mead Hall is empty. Name your earned rest so victory has a destination.</div>`;return}
   el.innerHTML=S.rewards.map(r=>`
     <li class="card">
       <div class="c-body reward">
         <div style="flex:1"><div class="c-name">${esc(r.name)}</div>
-          <div class="c-meta"><span class="cost">🎖️ ${r.cost} merit pts</span></div></div>
-        <button class="btn-buy" data-buy="${r.id}" ${S.gold<r.cost?'disabled':''}>Claim</button>
+          <div class="c-meta"><span class="cost">🎖️ ${r.cost} merit</span></div></div>
+        <button class="btn-buy" data-buy="${r.id}" ${S.gold<r.cost?'disabled':''}>Claim Rest</button>
       </div>
       <button class="del" data-dr="${r.id}">✕</button>
     </li>`).join("");
 }
 function esc(s){return String(s==null?"":s).replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]))}
 
+
 /* ---------------- Events ---------------- */
+// Apply the More/Less collapsed state of the secondary nav section
+function applyNavMore(){
+  const nm=document.getElementById("navMore");
+  const btn=document.getElementById("navMoreBtn");
+  const open=!!(S.navExpanded);
+  if(nm) nm.classList.toggle("open",open);
+  if(btn){
+    const lbl=btn.querySelector(".lbl");
+    if(lbl) lbl.textContent=open?"Less":"More";
+  }
+}
+
 document.querySelectorAll("nav.tabs button[data-tab]").forEach(b=>b.onclick=()=>{
   document.querySelectorAll("nav.tabs button").forEach(x=>x.classList.remove("on"));
   document.querySelectorAll(".view").forEach(x=>x.classList.remove("on"));
   b.classList.add("on");
   document.getElementById("view-"+b.dataset.tab).classList.add("on");
   const jb=document.getElementById("skJumpbar"); if(jb) jb.classList.toggle("show", b.dataset.tab==="skills");
+  // if a secondary tab was clicked, ensure More section is open so it shows as active
+  if(b.closest("#navMore") && !S.navExpanded){ S.navExpanded=true; save(); applyNavMore(); }
   window.scrollTo(0,0);
 });
 // side-rail label toggle (desktop)
 function applyNavMode(){ document.getElementById("sideNav").classList.toggle("icons-only", !S.navLabels); }
 const _navToggle=document.getElementById("navToggle");
 if(_navToggle) _navToggle.onclick=()=>{ S.navLabels=!S.navLabels; save(); applyNavMode(); };
+// More/Less toggle for secondary nav tabs
+const _navMoreBtn=document.getElementById("navMoreBtn");
+if(_navMoreBtn) _navMoreBtn.onclick=()=>{ S.navExpanded=!S.navExpanded; save(); applyNavMore(); };
 applyNavMode();
+applyNavMore();
 
 document.getElementById("qAdd").onclick=()=>{
   const n=document.getElementById("qName").value.trim();if(!n)return;
-  S.quests.unshift({id:id(),name:n,diff:document.getElementById("qDiff").value,done:false});
+  const path=document.getElementById("qPath").value||"tactical";
+  S.quests.unshift({id:id(),name:n,diff:document.getElementById("qDiff").value,path:path,done:false});
   document.getElementById("qName").value="";save();render();
 };
 document.getElementById("dAdd").onclick=()=>{
   const n=document.getElementById("dName").value.trim();if(!n)return;
-  S.dailies.unshift({id:id(),name:n,diff:document.getElementById("dDiff").value,done:false,best:0});
+  const path=document.getElementById("dPath").value||"tactical";
+  S.dailies.unshift({id:id(),name:n,diff:document.getElementById("dDiff").value,path:path,done:false,best:0});
   document.getElementById("dName").value="";save();render();
 };
 document.getElementById("bAdd").onclick=()=>{
@@ -2516,18 +2836,30 @@ document.getElementById("rAdd").onclick=()=>{
 document.body.addEventListener("click",e=>{
   const t=e.target;
   // complete quest
-  if(t.dataset.q){const q=S.quests.find(x=>x.id===t.dataset.q);if(q&&!q.done){q.done=true;const v=VALUES.quest[q.diff];grant(v.xp,v.g,"Mission complete",q.track);setTimeout(()=>{S.quests=S.quests.filter(x=>x.id!==q.id||!x.done);},900);}return}
+  if(t.dataset.q){const q=S.quests.find(x=>x.id===t.dataset.q);if(q&&!q.done){q.done=true;const v=VALUES.quest[q.diff];grant(v.xp,v.g,"Mission complete",q.path||"tactical");setTimeout(()=>{S.quests=S.quests.filter(x=>x.id!==q.id||!x.done);},900);}return}
   // complete daily
-  if(t.dataset.d){const d=S.dailies.find(x=>x.id===t.dataset.d);if(d&&!d.done){d.done=true;const v=VALUES.daily[d.diff];grant(v.xp,v.g,"Order executed",d.track);const allNow=S.dailies.every(x=>x.done);if(allNow){onPerfectDay();}}else if(d&&d.done){d.done=false;save();render();}return}
+  if(t.dataset.d){const d=S.dailies.find(x=>x.id===t.dataset.d);if(d&&!d.done){d.done=true;const v=VALUES.daily[d.diff];grant(v.xp,v.g,"Order executed",d.path||"tactical");const allNow=S.dailies.every(x=>x.done);if(allNow){onPerfectDay();}}else if(d&&d.done){d.done=false;save();render();}return}
   // boss hit
-  if(t.dataset.hit){const b=S.bosses.find(x=>x.id===t.dataset.hit);if(b&&b.hp>0){b.hp--;grant(8,4,"Progress logged",b.track);if(b.hp<=0){setTimeout(()=>{toast(`<span class="t-xp">✅ ${esc(b.name)} secured! Bonus awarded</span>`);S.gold+=b.maxhp*2;save();render();},400);}}return}
+  if(t.dataset.hit){const b=S.bosses.find(x=>x.id===t.dataset.hit);if(b&&b.hp>0){b.hp--;grant(8,4,"Progress logged",b.path||"tactical");if(b.hp<=0){setTimeout(()=>{toast(`<span class="t-xp">✅ ${esc(b.name)} secured! Bonus awarded</span>`);S.gold+=b.maxhp*2;save();render();},400);}}return}
   // buy reward
-  if(t.dataset.buy){const r=S.rewards.find(x=>x.id===t.dataset.buy);if(r&&S.gold>=r.cost){S.gold-=r.cost;save();render();toast(`🏅 Claimed: ${esc(r.name)} — you earned it.`);}return}
+  if(t.dataset.buy){const r=S.rewards.find(x=>x.id===t.dataset.buy);if(r&&S.gold>=r.cost){S.gold-=r.cost;save();render();toast(`🍺 Rest claimed: ${esc(r.name)} — you earned this. Take it fully.`);}return}
   // deletes
   if(t.dataset.dq){S.quests=S.quests.filter(x=>x.id!==t.dataset.dq);save();render();return}
   if(t.dataset.dd){S.dailies=S.dailies.filter(x=>x.id!==t.dataset.dd);save();render();return}
   if(t.dataset.db){S.bosses=S.bosses.filter(x=>x.id!==t.dataset.db);save();render();return}
   if(t.dataset.dr){S.rewards=S.rewards.filter(x=>x.id!==t.dataset.dr);save();render();return}
+  // global tab navigation — any button with data-gototab anywhere in the app
+  const goBtn=t.closest("[data-gototab]");
+  if(goBtn){
+    const tab=goBtn.dataset.gototab;
+    const nb=document.querySelector(`#sideNav button[data-tab="${tab}"]`); if(nb) nb.click();
+    // preload a session in Log tab if requested (e.g. dawn session card "Log done" button)
+    if(goBtn.dataset.logsess){
+      const sess=goBtn.dataset.logsess;
+      setTimeout(()=>{ const sel=document.getElementById("lgSession"); if(sel&&sel.value!==sess){sel.value=sess;if(sel.onchange)sel.onchange();} }, 80);
+    }
+    return;
+  }
 });
 
 document.getElementById("renameBtn").onclick=()=>{
@@ -2548,10 +2880,10 @@ document.getElementById("editRankBtn").onclick=()=>{
 /* ---------------- Toast & skill-up ---------------- */
 let toastT;
 function toast(html){const el=document.getElementById("toast");el.innerHTML=html;el.classList.add("show");clearTimeout(toastT);toastT=setTimeout(()=>el.classList.remove("show"),2200);}
-function showLevelUp(track,lvl){
-  const tr=TRACKS[track];
-  document.getElementById("luTitle").textContent=tr.icon+" "+tr.name+" — Level "+lvl;
-  document.getElementById("luSub").textContent="Your "+tr.name+" skill leveled up. Keep stacking reps. Drive on.";
+function showLevelUp(path,lvl){
+  const pm=PATH_META[path]||{icon:"⭐",name:path,idol:path};
+  document.getElementById("luTitle").textContent=pm.icon+" "+pm.name+" — Level "+lvl;
+  document.getElementById("luSub").textContent=pm.idol+" grows stronger. "+pm.lore.split(".")[0]+". Drive on.";
   document.getElementById("levelup").classList.add("show");
 }
 document.getElementById("luClose").onclick=()=>document.getElementById("levelup").classList.remove("show");
@@ -2603,6 +2935,46 @@ document.getElementById("resyncBtn").onclick=()=>{
   save(); render();
   toast("✅ Skill trees resynced to the latest version");
 };
+
+// ── Swipe left/right between tabs on mobile
+{
+  let _sx=0,_sy=0;
+  document.addEventListener("touchstart",e=>{_sx=e.touches[0].clientX;_sy=e.touches[0].clientY;},{passive:true});
+  document.addEventListener("touchend",e=>{
+    const dx=e.changedTouches[0].clientX-_sx;
+    const dy=e.changedTouches[0].clientY-_sy;
+    if(Math.abs(dx)<50||Math.abs(dx)<Math.abs(dy)*1.5) return;
+    const tabs=Array.from(document.querySelectorAll("#sideNav button[data-tab]"));
+    const cur=tabs.findIndex(b=>b.classList.contains("on"));
+    if(cur===-1) return;
+    const next=dx<0?cur+1:cur-1;
+    if(next>=0&&next<tabs.length) tabs[next].click();
+  },{passive:true});
+}
+
+// ── Quick-add oath modal
+{
+  const _qaBtn=document.getElementById("quickAddBtn");
+  const _qaMod=document.getElementById("quickModal");
+  const _qaClose=document.getElementById("quickModalClose");
+  const _qaAdd=document.getElementById("qaAdd");
+  const _qaName=document.getElementById("qaName");
+  if(_qaBtn) _qaBtn.onclick=()=>{_qaMod.classList.add("open");_qaName&&_qaName.focus();};
+  if(_qaClose) _qaClose.onclick=()=>_qaMod.classList.remove("open");
+  if(_qaMod) _qaMod.addEventListener("click",e=>{if(e.target===_qaMod)_qaMod.classList.remove("open");});
+  if(_qaAdd) _qaAdd.onclick=()=>{
+    const n=_qaName?_qaName.value.trim():""; if(!n) return;
+    const path=document.getElementById("qaPath").value||"tactical";
+    const diff=document.getElementById("qaDiff").value||"easy";
+    S.quests.unshift({id:id(),name:n,diff,path,done:false});
+    if(_qaName) _qaName.value="";
+    save();render();
+    _qaMod.classList.remove("open");
+    toast("Oath sworn.");
+  };
+  if(_qaName) _qaName.addEventListener("keydown",e=>{if(e.key==="Enter"&&_qaAdd)_qaAdd.click();});
+}
+
 
 /* ---------------- QUIZZES ---------------- */
 function renderQuizzes(){
@@ -2722,6 +3094,7 @@ function parseTime(str){ // "m:ss" or "mm:ss" -> seconds
   if(p.length===2 && !isNaN(p[0]) && !isNaN(p[1])) return p[0]*60+p[1];
   return null;
 }
+
 // ===== AFT scoring — OFFICIAL tables (HQDA EXORD 218-25 Annex B, eff 1 Jun 2025) =====
 // Anchor points transcribed from the official Army AFT score tables; lookup interpolates
 // linearly between printed anchors. Self-tested against the chart (DL/HRP/SDC/PLK/2MR).
@@ -2826,6 +3199,30 @@ function score_plank(sec){ if(sec==null)return null; const c=aftCtx(); return af
 function score_run(sec){ if(sec==null)return null; const c=aftCtx(); return aftLookup("run",c.band,aftScale(c),sec); }
 function clampScore(x){return Math.max(0,Math.min(100,Math.round(x)));}
 
+
+function aftSparkline(){
+  const entries=S.aft||[]; if(entries.length<2) return "";
+  const vals=entries.map(a=>a.total);
+  const W=280,H=60,PAD=6;
+  const mn=Math.min(...vals,270),mx=Math.max(...vals,350);
+  const rng=(mx-mn)||1;
+  const cx=i=>PAD+Math.round((i/(vals.length-1))*(W-PAD*2));
+  const cy=v=>H-PAD-Math.round(((v-mn)/rng)*(H-PAD*2));
+  const pts=vals.map((v,i)=>`${cx(i)},${cy(v)}`).join(" ");
+  const lastVal=vals[vals.length-1];
+  const color=lastVal>=350?"var(--jade)":lastVal>=300?"var(--gold)":"var(--ember)";
+  const ty=cy(300);
+  const lines=[300,350].filter(t=>t>=mn&&t<=mx).map(t=>{
+    const y=cy(t);
+    return `<line x1="${PAD}" y1="${y}" x2="${W-PAD}" y2="${y}" stroke="var(--ink-faint)" stroke-width="1" stroke-dasharray="4,3"/>
+    <text x="${W-PAD+2}" y="${y+3}" font-size="8" fill="var(--ink-faint)">${t}</text>`;
+  }).join("");
+  return `<div class="aft-spark"><svg viewBox="0 0 ${W+16} ${H}" style="width:100%;height:${H}px">
+    ${lines}
+    <polyline points="${pts}" fill="none" stroke="${color}" stroke-width="2" stroke-linejoin="round"/>
+    ${vals.map((v,i)=>`<circle cx="${cx(i)}" cy="${cy(v)}" r="3" fill="${color}"/>`).join("")}
+  </svg></div>`;
+}
 function renderAftStandardBar(){
   const el=document.getElementById("aftStandardBar"); if(!el) return;
   const c=aftCtx();
@@ -2860,7 +3257,8 @@ function renderAft(){
   if(!S.aft.length){hist.innerHTML=`<div class="empty"><span class="big">💪</span>No AFT logged yet. Enter your scores above.</div>`;}
   else{
     const rev=S.aft.slice().reverse();
-    hist.innerHTML=rev.map((a,i)=>{
+    const sparkHtml=S.aft.length>=2?aftSparkline():"";
+    hist.innerHTML=sparkHtml+rev.map((a,i)=>{
       const older=rev[i+1];
       let tr="";
       if(older){const d=a.total-older.total; tr=d>0?`<span style="color:var(--jade);font-size:12px"> ▲${d}</span>`:d<0?`<span style="color:var(--ember);font-size:12px"> ▼${Math.abs(d)}</span>`:`<span style="color:var(--ink-faint);font-size:12px"> —</span>`;}
@@ -2973,14 +3371,15 @@ document.getElementById("aftSave").onclick=()=>{
   const total=Object.values(scores).reduce((s,v)=>s+(v||0),0);
   const entry={date:new Date().toLocaleDateString(),raw:{dl,hrp,sdc,plank,run},scores,total};
   S.aft.push(entry);
-  if(!S.skills.fitness)S.skills.fitness={xp:0};
-  S.skills.fitness.xp+=30;
+  if(!S.pathXP) S.pathXP={};
+  S.pathXP.physical=(S.pathXP.physical||0)+30;
   save();render();
   ["aDl","aHrp","aSdc","aPlank","aRun"].forEach(i=>document.getElementById(i).value="");
   toast(`<span class="t-xp">AFT logged: ${total} pts</span> · plan re-tuned`);
 };
 
 /* ---------------- WORKOUT LOG ---------------- */
+
 let LG=null; // current draft {session, exercises:[{name,type,w,sets:[...]}]}
 function initLogTab(){
   const sel=document.getElementById("lgSession");
@@ -3063,8 +3462,8 @@ document.getElementById("lgSave").onclick=()=>{
   })).filter(ex=>ex.sets.length>0 && ex.name && ex.name!=="Custom exercise");
   if(!exercises.length){toast("Log at least one set first");return;}
   S.workouts.push({id:id(), date:new Date().toLocaleDateString(), ts:Date.now(), session:LG.session, duration:dur, exercises});
-  if(!S.skills.fitness)S.skills.fitness={xp:0};
-  S.skills.fitness.xp+=25; S.gold+=8; S.totalDone++;
+  if(!S.pathXP) S.pathXP={};
+  S.pathXP.physical=(S.pathXP.physical||0)+25; S.gold+=8; S.totalDone++;
   save();
   document.getElementById("lgDur").value="";
   buildLogForm(document.getElementById("lgSession").value);
@@ -3326,6 +3725,45 @@ function renderAdaptiveTargets(){
 
 const AREA_LABEL={legs:"legs",push:"push (chest/shoulders)",pull:"pull (back)",core:"core",cardio:"cardio/running"};
 // Reads every Physical leaf skill, finds laggards vs strengths, and builds whole-body guidance.
+
+// Compact session card for the Dawn tab — exercise names only (no descriptions).
+// Returns an HTML string; Dawn embeds it directly in the guided flow.
+function dawnSessionHtml(){
+  if(typeof todaysPlan!=="function") return "";
+  const p=todaysPlan();
+  const dayName=p.now.toLocaleDateString(undefined,{weekday:"long"});
+  if(!p.sessionKey){
+    const dp=p.dayPlan;
+    if(dp.intensity==="rest"){
+      return `<div class="dawn-sess rest-day">
+        <div class="ds-top"><span class="ds-name">💤 ${esc(dayName)} · Rest day</span></div>
+        <div class="ds-note">${esc(dp.note||dp.label||"")}</div>
+      </div>`;
+    }
+    return "";
+  }
+  const sess=SESSIONS[p.sessionKey];
+  const intensity=p.dayPlan.intensity;
+  const intLabel={hard:"🔴 Hard",moderate:"🟠 Moderate",easy:"🟢 Easy"}[intensity]||"";
+  const modeTag=S.hasGym?"🏋️ Gym":(weatherBad()?`${WEATHER[(S.weather)||"clear"].icon} Indoor`:"🤸 Bodyweight");
+  const exList=p.exercises.slice(0,sess.pickOne?4:7).map(e=>`<div class="ds-ex">${esc(e.n)}${e._swapped?' <span class="ds-swap">· indoor</span>':''}</div>`).join("");
+  const more=p.exercises.length>(sess.pickOne?4:7)?`<div class="ds-ex ds-more">+${p.exercises.length-(sess.pickOne?4:7)} more</div>`:"";
+  const action=p.todayLogged
+    ? `<div class="ds-done">✓ Logged — well done.</div>`
+    : `<button class="td-go ds-log-btn" data-gototab="log" data-logsess="${p.sessionKey}">Log this session →</button>`;
+  const ws=typeof weekTrainingStats==="function"?weekTrainingStats():{done:0,sched:0};
+  const weekBar=ws.sched>0?`<div class="ds-week">Week · ${ws.done}/${ws.sched} ${'▓'.repeat(ws.done)}${'░'.repeat(Math.max(0,ws.sched-ws.done))}</div>`:"";
+  return `<div class="dawn-sess">
+    <div class="ds-top">
+      <span class="ds-name">${esc(dayName)} · ${esc(sess.name.split("·").slice(-1)[0].trim())}</span>
+      <span class="ds-badges">${intLabel} <span class="ds-mode">${modeTag}</span></span>
+    </div>
+    <div class="ds-exlist">${exList}${more}</div>
+    ${weekBar}
+    <div class="ds-actions">${action}<button class="td-go ds-plan-btn" data-gototab="plan">Full plan →</button></div>
+  </div>`;
+}
+
 function renderSkillBalance(){
   const el=document.getElementById("skillBalance"); if(!el) return;
   if(!S.lifeSkills||!S.lifeSkills.length){ el.innerHTML=""; return; }
@@ -3404,6 +3842,8 @@ function renderRecoveryAdvisory(){
 // The coached "today" block: yesterday's read + today's session, fully explained, in order.
 function renderCoachToday(){
   const el=document.getElementById("coachToday"); if(!el) return;
+  // auto-track any sessions missed in the past week (safe to call every render)
+  if(typeof trackMissedSessions==="function") trackMissedSessions();
   const p=todaysPlan();
   const dayName=p.now.toLocaleDateString(undefined,{weekday:"long"});
   // ---- Yesterday read ----
@@ -3598,14 +4038,15 @@ function saveBaseline(){
   S.baselines=S.baselines.filter(b=>b.month!==m);
   S.baselines.push({date:new Date().toLocaleDateString(),ts:Date.now(),month:m,results});
   S.lastBaselineMonth=m;
-  if(!S.skills.fitness)S.skills.fitness={xp:0};
-  S.skills.fitness.xp+=60; S.gold+=25; // baseline is a big effort — reward it
+  if(!S.pathXP) S.pathXP={};
+  S.pathXP.physical=(S.pathXP.physical||0)+60; S.gold+=25;
   BL_DRAFT=null;
   save();render();
   toast(`<span class="t-xp">Baseline logged · +60 Fitness XP +25 pts</span> · targets re-anchored`);
 }
 
 /* ---------------- BRANCH / BOARD PREP ---------------- */
+
 function renderBoard(){
   const list=document.getElementById("boardList");
   if(!list) return;
@@ -3629,6 +4070,7 @@ if(_btAdd) _btAdd.onclick=()=>{
   S.boardTasks.push({id:id(),name:n,done:false});
   document.getElementById("btName").value="";save();render();
 };
+
 
 /* ================= THE WEIGHT (promise ledger — solemn, no game mechanics) ============= */
 const W_WEIGHTS={open:1,standing:3,kept:1,broken:1};
@@ -3742,6 +4184,7 @@ function importWeightLedger(obj){
 }
 
 /* ================= AWARDS — the "I Love Me" wall ================= */
+
 const AW_IC={award:"🎖️",coin:"🪙",cert:"📜",badge:"🏅",milestone:"⭐",memento:"📦"};
 function renderAwards(){
   const el=document.getElementById("awallGrid"); if(!el) return;
@@ -3887,6 +4330,7 @@ document.body.addEventListener("click",e=>{
   const skjump=e.target.closest("[data-skjump]"); if(skjump){ const t=document.getElementById("skcat-"+skjump.dataset.skjump); if(t) t.scrollIntoView({behavior:"smooth",block:"start"}); return; }
   const aftstd=e.target.closest("[data-aftstd]"); if(aftstd){ S.aftStandard=aftstd.dataset.aftstd; save(); render(); return; }
 });
+
 const _ptSave=document.getElementById("ptSave"); if(_ptSave) _ptSave.onclick=savePT;
 // Body & Lifts profile
 function ageFromDob(dob){
@@ -3909,6 +4353,7 @@ function renderProfile(){
   const p=S.profile||{}, l=S.lifts||{};
   const setv=(id,v)=>{const el=document.getElementById(id); if(el&&document.activeElement!==el) el.value=(v??"");};
   setv("pfName",S.name); setv("pfRank",S.rank); setv("pfPos",S.position); setv("pfBranch",S.branchGoal);
+  setv("pfCommission",p.commissionDate||""); setv("pfGpa",p.gpa||"");
   setv("pfDob",p.birthdate||""); setv("pfSex",p.sex||""); setv("pfBlood",p.bloodType||"");
   setv("pfHt",p.heightIn); setv("pfHtDate",p.heightDate||""); setv("pfWt",p.weightLb); setv("pfWtDate",p.weightDate||"");
   setv("pfDl",l.deadliftLb); setv("pfSq",l.squatLb); setv("pfBn",l.benchLb); setv("pfLiftDate",l.liftDate||"");
@@ -3935,6 +4380,8 @@ if(_pfSave) _pfSave.onclick=()=>{
   const rk=str("pfRank"); if(rk) S.rank=rk;
   S.position=str("pfPos")||"No leadership role";
   const br=str("pfBranch"); if(br) S.branchGoal=br;
+  S.profile.commissionDate=document.getElementById("pfCommission").value||null;
+  const gpaRaw=parseFloat(document.getElementById("pfGpa").value); S.profile.gpa=isNaN(gpaRaw)?null:Math.round(gpaRaw*100)/100;
   // dimensions
   S.profile.birthdate=document.getElementById("pfDob").value||null;
   S.profile.sex=document.getElementById("pfSex").value||null;
@@ -4249,6 +4696,7 @@ function applyAppleHealth(latest, me){
 }
 
 
+
 // ===== Habits (daily quests, per-habit streaks, skill feed, grace day) =====
 const HABIT_STARTERS=[
   {name:"Sleep 7+ hours", skill:null},
@@ -4336,6 +4784,7 @@ if(_hbAdd) _hbAdd.onclick=()=>{
   save(); render();
   toast("📋 Habit added");
 };
+
 
 // ===== TEST tab: cognitive tests/trainers =====
 // Each test: id, name, the skill it feeds, and scoreToLevel(raw)->1..N.
@@ -4934,6 +5383,7 @@ function renderStudy(){
   });
 }
 function studyDaysLeft(pl){ return Math.ceil((new Date(pl.testDate)-Date.now())/864e5); }
+
 // ===== History / Trends =====
 function trendLine(vals, w, h, color, lowerBetter){
   const nums=vals.filter(v=>v!=null); if(nums.length<2) return `<div class="hist-nodata">Need 2+ data points</div>`;
@@ -5059,130 +5509,271 @@ function renderSectionPicker(){
   sel.innerHTML=Object.keys(SECTIONS).map(k=>`<option value="${k}">${esc(SECTIONS[k].label)}</option>`).join("");
 }
 
+function exportBattleBuddyReport(){
+  const p=S.profile||{};
+  const name=S.name||"Cadet";
+  const now=new Date().toLocaleDateString();
+  const aftArr=S.aft||[];
+  const aftRows=aftArr.slice(-5).reverse().map(a=>`<tr><td>${a.date}</td><td>${a.total}</td><td>${a.scores.dl||"—"}</td><td>${a.scores.hrp||"—"}</td><td>${a.scores.sdc||"—"}</td><td>${a.scores.plank||"—"}</td><td>${a.scores.run||"—"}</td></tr>`).join("");
+  const topSkills=(S.lifeSkills||[]).filter(s=>!s.group&&skEffectiveLevel(s)>0).sort((a,b)=>skEffectiveLevel(b)-skEffectiveLevel(a)).slice(0,12);
+  const skillRows=topSkills.map(s=>`<li>${s.name} — Level ${skEffectiveLevel(s)} / ${s.levels&&s.levels.length}</li>`).join("");
+  const awardRows=(S.awards||[]).map(a=>`<li>${a.n}</li>`).join("");
+  const volHours=(S.events||[]).reduce((s,e)=>s+(e.hours||0),0);
+  const counselRows=(S.counseling||[]).slice(-5).reverse().map(c=>`<li><b>${c.date}</b> [${c.type}]${c.people?" · "+c.people:""} — ${c.summary||""}</li>`).join("");
+  const html=`<!DOCTYPE html><html><head><meta charset="UTF-8"><title>Battle Buddy Report — ${name}</title>
+<style>body{font-family:Arial,sans-serif;color:#111;max-width:720px;margin:20px auto;padding:0 20px}h1{font-size:22px;border-bottom:3px solid #333;padding-bottom:8px;margin-bottom:4px}h2{font-size:15px;margin-top:20px;border-bottom:1px solid #ccc;padding-bottom:4px}table{border-collapse:collapse;width:100%;font-size:13px;margin-top:8px}th,td{border:1px solid #ccc;padding:5px 8px;text-align:left}th{background:#f5f5f5}ul{margin:6px 0;padding-left:20px;font-size:13px}li{margin-bottom:3px}.meta{font-size:12px;color:#777;margin-bottom:16px}p{font-size:13px}@media print{body{margin:0;padding:12px}}</style>
+</head><body>
+<h1>Battle Buddy Report</h1>
+<div class="meta">Generated: ${now} · All data from your device only — nothing was transmitted.</div>
+<h2>Identity</h2>
+<p><b>Name:</b> ${name} &nbsp;|&nbsp; <b>Rank/MS:</b> ${S.rank||"—"} &nbsp;|&nbsp; <b>Position:</b> ${S.position||"—"}</p>
+${p.commissionDate?`<p><b>Commission date:</b> ${p.commissionDate}</p>`:""}
+${p.gpa?`<p><b>GPA:</b> ${p.gpa}</p>`:""}
+${S.branchGoal?`<p><b>Branch goal:</b> ${S.branchGoal}</p>`:""}
+<h2>AFT History (last 5)</h2>
+${aftRows?`<table><thead><tr><th>Date</th><th>Total</th><th>DL</th><th>HRP</th><th>SDC</th><th>Plank</th><th>Run</th></tr></thead><tbody>${aftRows}</tbody></table>`:"<p>No AFT scores recorded.</p>"}
+<h2>Top Skills</h2>
+${skillRows?`<ul>${skillRows}</ul>`:"<p>No skills leveled yet.</p>"}
+<h2>Awards &amp; Recognitions</h2>
+${awardRows?`<ul>${awardRows}</ul>`:"<p>None recorded.</p>"}
+<p>Volunteer hours logged: ${volHours}</p>
+${counselRows?`<h2>Counseling Log (last 5)</h2><ul>${counselRows}</ul>`:""}
+<p style="margin-top:28px;font-size:11px;color:#999;">Operations · offline cadet tool · no data transmitted</p>
+</body></html>`;
+  const w=window.open("","_blank");
+  if(w){w.document.write(html);w.document.close();setTimeout(()=>w.print(),400);}
+  else toast("Allow pop-ups to generate the report.");
+}
+const _rptBtn=document.getElementById("battleBuddyBtn");
+if(_rptBtn) _rptBtn.onclick=exportBattleBuddyReport;
 
-// ===== Today / Dashboard — aggregates everything actionable today =====
+
+// ===== Dawn / Dashboard — one focus at a time, guide not overwhelm =====
+
+// Determine the single most important action right now.
+function getWarriorsFocus(){
+  const p=typeof todaysPlan==="function"?todaysPlan():null;
+  // 1. Scheduled training session not yet logged — session is already shown above, so action = log it
+  if(p&&p.sessionKey&&!p.todayLogged){
+    return {icon:"💪", action:"Complete today's training — then log it.", sub:"Session details are above.", btn:"Open Log to record it →", tab:"log", logsess:p.sessionKey};
+  }
+  // 2. Hardest incomplete daily order
+  for(const diff of ["hard","med","easy"]){
+    const d=(S.dailies||[]).find(x=>!x.done && x.diff===diff);
+    if(d) return {icon:"🎯", action:d.name, sub:"Daily order", btn:"All orders →", tab:"dailies"};
+  }
+  // 3. Habits due today
+  const habitDue=(S.habits||[]).find(h=>!habitDoneToday(h));
+  if(habitDue) return {icon:"📋", action:habitDue.name, sub:"Habit due today", btn:"All habits →", tab:"dailies"};
+  // 4. Fading skill
+  const fading=(S.lifeSkills||[]).filter(s=>!s.group).map(s=>({s,q:typeof skQuest==="function"?skQuest(s):null})).filter(x=>x.q&&x.q.type==="decay")[0];
+  if(fading) return {icon:"🌳", action:`Reclaim ${fading.s.name}`, sub:"A branch fades — address it before it drops further", btn:"Tend the Tree →", tab:"skills"};
+  // 5. SRS cards due
+  const srsDue=typeof srsTotalDue==="function"?srsTotalDue():0;
+  if(srsDue>0) return {icon:"📚", action:`${srsDue} SRS card${srsDue!==1?"s":""} ready for review`, sub:"Spaced repetition keeps knowledge from fading", btn:"Review now →", tab:"test"};
+  // 6. Everything clear
+  if(p&&p.todayLogged&&p.sessionKey) return {icon:"✅", action:"Training logged. All clear.", sub:"The ring is carved. Well done.", btn:null, tab:null};
+  return null;
+}
+
+// Find the single most neglected path — only if genuinely out of balance.
+function getNeglectedPath(){
+  const pxp=S.pathXP||{};
+  const entries=Object.keys(pxp).map(k=>({k,xp:pxp[k]||0})).filter(e=>e.xp>0);
+  if(entries.length<2) return null;
+  entries.sort((a,b)=>a.xp-b.xp);
+  const avg=entries.reduce((s,e)=>s+e.xp,0)/entries.length;
+  const lowest=entries[0];
+  if(lowest.xp>avg*0.35) return null; // only flag when meaningfully neglected
+  const pm=PATH_META[lowest.k]; if(!pm) return null;
+  return {name:pm.name, icon:pm.icon, color:pm.color, idol:pm.idol};
+}
+
+// Inline daily orders card for Dawn — check off right here without switching tabs.
+function dawnOrdersHtml(){
+  const dailies=S.dailies||[];
+  if(!dailies.length) return "";
+  const done=dailies.filter(d=>d.done).length;
+  const allDone=done===dailies.length;
+  const sorted=dailies.slice().sort((a,b)=>(a.done?1:0)-(b.done?1:0));
+  const show=sorted.slice(0,5);
+  const extra=sorted.length>5?sorted.length-5:0;
+  const rows=show.map(d=>`<div class="dawn-order-row${d.done?" done":""}"><button class="dawn-ck${d.done?" done":""}" data-d="${d.id}">${d.done?"✓":""}</button><span class="dawn-order-name">${esc(d.name)}</span></div>`).join("");
+  const header=allDone
+    ?`<div class="td-h fn-h" style="color:var(--jade)">✓ All orders complete</div>`
+    :`<div class="td-h fn-h">Daily Orders <span style="color:var(--ember);font-size:12px">${done}/${dailies.length}</span></div>`;
+  const moreLink=extra?`<div class="fn-row"><span class="fn-dot">+${extra} more</span><button class="td-go-sm" data-gototab="dailies">See all →</button></div>`:"";
+  return `<div class="td-card fn-card dawn-orders-card">${header}${rows}${moreLink}</div>`;
+}
+
 function renderToday(){
   const el=document.getElementById("todayDash"); if(!el) return;
   const hour=new Date().getHours();
-  const greet = hour<12?"Good morning":hour<17?"Good afternoon":"Good evening";
-  const g=document.getElementById("todayGreeting"); if(g) g.textContent=`${greet}, ${esc((S.name||"Cadet").split(" ").slice(-1)[0])}`;
+  const firstName=esc((S.name||"Cadet").split(" ")[0]);
+  const greet = hour<5  ? `Before dawn, ${firstName}. The tree does not sleep.`
+              : hour<12 ? `At dawn, ${firstName}.`
+              : hour<17 ? `Midday, ${firstName}. Hold the ground.`
+              : hour<21 ? `The day closes, ${firstName}. What was carved today?`
+              :            `Night watch, ${firstName}. Rest is part of the work.`;
+  const g=document.getElementById("todayGreeting"); if(g) g.textContent=greet;
   const dd=document.getElementById("todayDate"); if(dd) dd.textContent=new Date().toLocaleDateString(undefined,{weekday:"long",month:"short",day:"numeric"});
-  const cards=[];
 
-  // 0) The day's creed — a rotating line of meaning. The tree is the through-symbol:
-  //    growth is daily, slow, and compounding; a neglected branch fades but never dies.
+  // ── Creed — one line of hard-won truth, drawn fresh each day
   const CREEDS=[
     "A tree is grown one season at a time. Tend yours today.",
-    "Discipline is the root; everything you want grows from it.",
     "The branch you neglect sheds its leaves — but it never dies. Tend it and it returns.",
     "Rings form in the quiet years. Show up when no one is watching.",
     "Deep roots are not reached by the frost. Build your base.",
-    "You are not behind. You are growing. Growth has no shortcut.",
-    "The strongest wood grows against the wind. Lean into the hard thing.",
-    "Small daily reps are the rings of the trunk — invisible, then unbreakable.",
-    "Standards are met in private long before they are tested in public.",
-    "Mind, body, and will are one tree. Starve none of them.",
-    "What you do today, you become. Choose the next ring well.",
+    "Small daily reps are the rings of the trunk — invisible now, unbreakable later.",
     "The seed doesn't see the forest. Plant anyway.",
     "A leader is a tree others shelter under. Grow tall, stay rooted.",
     "Consistency over intensity. The oak outlasts the storm by being there every day.",
     "Reclaiming lost ground is faster than breaking new — you have done it before.",
+    "You cannot see the crown of Yggdrasil from its roots. Grow anyway.",
+    "Every path on the tree costs something. Invest where it matters.",
+    "Discipline is the root; everything you want grows from it.",
+    "The strongest wood grows against the wind. Lean into the hard thing.",
+    "Standards are met in private long before they are tested in public.",
+    "Mind, body, and will are one tree. Starve none of them.",
+    "What you do today, you become. Choose the next ring well.",
+    "You are not behind. You are growing. Growth has no shortcut.",
+    "You do not need motivation. You need the next rep. Just that one.",
+    "The warrior who sleeps well is the warrior who trained hard. Do the work that earns the rest.",
+    "Your rank is a seed, not a crown. Water it.",
+    "Discipline is not the enemy of freedom — it is the price of it. Pay daily.",
+    "Odin did not receive the runes — he earned them. Nine days. No food. No water. What will you endure for wisdom?",
+    "Mjölnir was forged by those who refused to stop. The work was imperfect; it still split mountains.",
+    "An oath made and kept is a ring in the trunk. An oath broken rots at the root.",
+    "The Einherjar do not wait for worthy opponents. They train until worthy opponents arise.",
+    "The three wells of Yggdrasil water fate, wisdom, and power. Which are you tending today?",
+    "The Norns weave your thread. You choose how it runs.",
+    "Hel does not take you because you are old. She takes you because you stopped growing.",
+    "A cadet who knows why they are training is harder to exhaust than one who doesn't.",
+    "Your ancestors built something harder than this with fewer tools. Less excuses, more reps.",
+    "Every tree that grew tall once grew in the dark, reaching for light it could not yet see.",
   ];
-  // deterministic per-day pick so it's stable all day, changes at midnight
   const ymd=localYMD(); const seed=ymd.split("-").reduce((a,n)=>a+parseInt(n),0);
   const creed=CREEDS[seed % CREEDS.length];
-  cards.push(`<div class="td-creed">🌲 <span>${creed}</span></div>`);
 
-  // 1) Habits due today
-  const habitsDue=(S.habits||[]).filter(h=>!habitDoneToday(h));
-  const habitsDone=(S.habits||[]).length-habitsDue.length;
-  if((S.habits||[]).length){
-    cards.push(`<div class="td-card"><div class="td-h">📋 Habits <span class="td-count">${habitsDone}/${S.habits.length}</span></div>
-      ${habitsDue.length?habitsDue.slice(0,6).map(h=>`<div class="td-row"><button class="hb-check" data-hbdo="${h.id}"></button><span>${esc(h.name)}</span>${h.streak>0?`<span class="td-streak">🔥${h.streak}</span>`:''}</div>`).join(""):'<div class="td-done">✓ All habits done today</div>'}
-      ${habitsDue.length>6?`<div class="td-more">+${habitsDue.length-6} more on the Orders tab</div>`:''}</div>`);
-  }
-
-  // 2) Daily orders remaining
-  const ordersLeft=(S.dailies||[]).filter(d=>!d.done);
-  if((S.dailies||[]).length){
-    cards.push(`<div class="td-card"><div class="td-h">🎯 Daily Orders <span class="td-count">${(S.dailies.length-ordersLeft.length)}/${S.dailies.length}</span></div>
-      ${ordersLeft.length?ordersLeft.slice(0,5).map(d=>`<div class="td-row"><span class="td-bullet">•</span><span>${esc(d.name)}</span></div>`).join(""):'<div class="td-done">✓ All orders complete</div>'}
-      ${ordersLeft.length>5?`<div class="td-more">+${ordersLeft.length-5} more</div>`:''}
-      <button class="td-go" data-gototab="dailies">Open Orders →</button></div>`);
-  }
-
-  // 3) Skill quests due (decayed or fading soon)
-  const skillsDue=(S.lifeSkills||[]).filter(s=>!s.group).map(s=>({s,q:skQuest(s)})).filter(x=>x.q && (x.q.type==="decay"||x.q.type==="maintain")).slice(0,5);
-  if(skillsDue.length){
-    cards.push(`<div class="td-card"><div class="td-h">🧠 Skills needing attention</div>
-      ${skillsDue.map(x=>`<div class="td-row"><span class="td-bullet ${x.q.type==='decay'?'warn':''}">${x.q.type==='decay'?'↓':'•'}</span><span>${esc(x.s.name)} — ${x.q.type==='decay'?'reclaim L'+x.q.level:'maintain L'+x.q.level}</span></div>`).join("")}
-      <button class="td-go" data-gototab="skills">Open Skills →</button></div>`);
-  }
-
-  // 4) Spaced-repetition due
-  const srsDue=srsTotalDue();
-  if(srsDue>0){
-    cards.push(`<div class="td-card"><div class="td-h">📚 Spaced repetition</div>
-      <div class="td-row"><span>${srsDue} card${srsDue!==1?'s':''} due for review</span></div>
-      <button class="td-go" data-gototab="test">Review now →</button></div>`);
-  }
-
-  // 5) Study plan reviews due today
-  const today=todayStr();
-  const studyToday=[];
-  (S.studyPlans||[]).forEach(pl=>{ (pl.schedule||[]).filter(s=>s.date===today && !(pl.done||[]).includes(s.date+"|"+s.topic)).forEach(s=>studyToday.push({pl,s})); });
-  if(studyToday.length){
-    const bank=window.QUIZ_BANK||{};
-    cards.push(`<div class="td-card"><div class="td-h">📅 Study reviews due</div>
-      ${studyToday.slice(0,5).map(x=>`<div class="td-row"><span class="td-bullet">•</span><span>${esc(x.pl.title)}: ${esc(bank[x.s.topic]?bank[x.s.topic].name:x.s.topic)}</span></div>`).join("")}
-      <button class="td-go" data-gototab="quizzes">Open study plans →</button></div>`);
-  }
-
-  // 6) FM training advisory (what to train) + recovery readiness from Health import
-  const rec = typeof recoveryReadiness==="function" ? recoveryReadiness() : null;
-  const vo2 = typeof vo2Benchmark==="function" ? vo2Benchmark() : null;
-  if(typeof fmFocusLine==="function" || rec || vo2){
-    const fl = typeof fmFocusLine==="function" ? fmFocusLine() : null;
-    if(fl || rec || vo2){
-      const recIcon = rec ? (rec.level==="easy"?"🟠":rec.level==="caution"?"🟡":"🟢") : "";
-      let body="";
-      if(rec) body+=`<div class="td-row"><span>${recIcon} ${esc(rec.line)}</span></div>`;
-      if(fl) body+=`<div class="td-row"><span>${esc(fl)}</span></div>`;
-      if(vo2) body+=`<div class="td-row"><span>🫁 ${esc(vo2.line)}</span></div>`;
-      cards.push(`<div class="td-card"><div class="td-h">💪 Training focus</div>${body}<button class="td-go" data-gototab="plan">Open FM →</button></div>`);
+  // ── Commissioning countdown
+  let commissionHtml="";
+  const cd=S.profile&&S.profile.commissionDate;
+  if(cd){
+    const daysLeft=Math.ceil((new Date(cd+`T12:00:00`)-Date.now())/864e5);
+    if(daysLeft>0){
+      const weeks=Math.floor(daysLeft/7);
+      const sub=weeks>0?`${weeks} week${weeks!==1?"s":""} and ${daysLeft%7} day${daysLeft%7!==1?"s":""}`:
+        `${daysLeft} day${daysLeft!==1?"s":""}`;
+      commissionHtml=`<div class="commission-bar">⚔️ <b>${daysLeft}</b> days to commissioning <span class="commission-sub">· ${sub} remaining · The long march continues, ${firstName}.</span></div>`;
+    } else if(daysLeft<=0){
+      commissionHtml=`<div class="commission-bar radiant">⚔️ ${firstName} — today is the day. You made it.</div>`;
     }
   }
 
-  // 7) Reminders: AFT status, donation eligibility, stale weight/vitals
-  const reminders=[];
-  // AFT
-  const lastAft=(S.aft||[])[S.aft.length-1];
-  if(lastAft){ const c=aftCtx(); const minT=c.standard==="combat"?350:300; const pass=lastAft.total>=minT && [lastAft.scores.dl,lastAft.scores.hrp,lastAft.scores.sdc,lastAft.scores.plank,lastAft.scores.run].every(v=>v==null||v>=60); reminders.push(`AFT: ${lastAft.total} (${pass?'passing':'below'} ${c.standard==='combat'?'Combat':'General'})`); }
-  else reminders.push("No AFT logged yet — set a baseline in the AFT tab.");
-  // donation
-  if(S.profile && S.profile.bloodType){
-    const last=(S.donations||[]).slice().sort((a,b)=>new Date(b.date)-new Date(a.date))[0];
-    if(last){ const next=new Date(last.date); next.setDate(next.getDate()+56); const d=Math.ceil((next-Date.now())/864e5); reminders.push(d<=0?"Blood donation: eligible now":`Blood donation: eligible in ${d} day${d!==1?'s':''}`); }
-  }
-  // stale weight
-  if(S.profile && S.profile.weightDate){ const wd=Math.floor((Date.now()-new Date(S.profile.weightDate))/864e5); if(wd>30) reminders.push(`Weight last logged ${wd} days ago — update it in Profile.`); }
-  if(reminders.length) cards.push(`<div class="td-card"><div class="td-h">📌 Status &amp; reminders</div>${reminders.map(r=>`<div class="td-row"><span class="td-bullet">›</span><span>${esc(r)}</span></div>`).join("")}</div>`);
+  // ── Orders counts (used by both the inline card and streak protection)
+  const ordersLeft=(S.dailies||[]).filter(d=>!d.done).length;
+  const ordersTotal=(S.dailies||[]).length;
 
-  const creedCard = cards.shift(); // the creed renders full-width above the grid
-  el.innerHTML = cards.length ? `${creedCard}<div class="td-grid">${cards.join("")}</div>`
-    : `${creedCard}<div class="aw-empty"><span class="big">🌱</span>Nothing queued yet. Add habits and daily orders, log an AFT, and this becomes your daily command center — the ground your tree grows from.</div>`;
+  // ── Today's training session (always shown; compact card from plan.js)
+  const sessHtml=typeof dawnSessionHtml==="function"?dawnSessionHtml():"";
+
+  // ── Inline daily orders card
+  const ordersHtml=dawnOrdersHtml();
+
+  // ── Streak protection — evening warning if streak is alive but orders remain
+  const atRisk=S.streak>0 && ordersLeft>0 && ordersTotal>0 && hour>=17;
+  const streakHtml=atRisk
+    ?`<div class="streak-alert">🔥 ${S.streak}-day streak at risk — ${ordersLeft} order${ordersLeft!==1?"s":""} left before midnight.</div>`
+    :"";
+
+  // ── Warrior's Focus — the one non-training thing to do right now
+  const focus=getWarriorsFocus();
+  const focusLogsess=focus&&focus.logsess?` data-logsess="${focus.logsess}"`:"";
+  const focusHtml=focus?`<div class="focus-card">
+    <div class="focus-label">Today's Focus</div>
+    <div class="focus-main">${focus.icon} ${esc(focus.action)}</div>
+    ${focus.sub?`<div class="focus-sub">${esc(focus.sub)}</div>`:""}
+    ${focus.btn?`<button class="td-go focus-go" data-gototab="${focus.tab}"${focusLogsess}>${focus.btn}</button>`:""}
+  </div>`:"";
+
+  // ── Adaptive training note (missed sessions last 7 days)
+  const adaptNote=typeof getAdaptiveNote==="function"?getAdaptiveNote():null;
+  const adaptHtml=adaptNote?`<div class="adapt-note">⚠️ ${esc(adaptNote)}</div>`:"";
+
+  // ── Neglected path (only the worst one, only if genuinely behind)
+  const neglected=getNeglectedPath();
+  const neglectHtml=neglected?`<div class="path-alert" style="border-left-color:${neglected.color}">
+    ${neglected.icon} <b>${esc(neglected.name)}</b> grows dim — ${esc(neglected.idol)} dims in your absence.
+    <button class="td-go-sm path-alert-go" data-gototab="garden">Tend →</button>
+  </div>`:"";
+
+  // ── Field Notes — compact secondary info (orders now shown in their own card above)
+  const notes=[];
+  const srsDue=typeof srsTotalDue==="function"?srsTotalDue():0;
+  if(srsDue>0) notes.push(`<div class="fn-row"><span class="fn-dot">📚</span><span>${srsDue} SRS card${srsDue!==1?"s":""} due</span><button class="td-go-sm" data-gototab="test">→</button></div>`);
+  const tStr=todayStr();
+  const studyCount=(S.studyPlans||[]).reduce((cnt,pl)=>cnt+((pl.schedule||[]).filter(s=>s.date===tStr&&!(pl.done||[]).includes(s.date+"|"+s.topic)).length),0);
+  if(studyCount>0) notes.push(`<div class="fn-row"><span class="fn-dot">📅</span><span>${studyCount} study review${studyCount!==1?"s":""} due</span><button class="td-go-sm" data-gototab="quizzes">→</button></div>`);
+  const lastAft=(S.aft||[])[S.aft.length-1];
+  if(lastAft){
+    const c=typeof aftCtx==="function"?aftCtx():{standard:"general"};
+    const pass=lastAft.total>=(c.standard==="combat"?350:300);
+    notes.push(`<div class="fn-row"><span class="fn-dot">⚔️</span><span>AFT: ${lastAft.total} pts <span style="color:${pass?"var(--jade)":"var(--ember)"}">(${pass?"passing":"below standard"})</span></span></div>`);
+  }
+  if(S.profile&&S.profile.gpa) notes.push(`<div class="fn-row"><span class="fn-dot">📊</span><span>GPA ${S.profile.gpa} · ${esc(S.branchGoal||"Branch TBD")}</span></div>`);
+  if(S.profile&&S.profile.bloodType){
+    const lastDon=(S.donations||[]).slice().sort((a,b)=>new Date(b.date)-new Date(a.date))[0];
+    if(lastDon){const nxt=new Date(lastDon.date);nxt.setDate(nxt.getDate()+56);const d=Math.ceil((nxt-Date.now())/864e5);if(d<=7)notes.push(`<div class="fn-row"><span class="fn-dot">🩸</span><span>Blood donation: ${d<=0?"eligible now":`eligible in ${d} day${d!==1?"s":""}`}</span></div>`);}
+  }
+  const notesHtml=notes.length?`<div class="td-card fn-card"><div class="td-h fn-h">Field Notes</div>${notes.join("")}</div>`:"";
+
+  // ── FM Advisory (only if recovery data exists)
+  let fmHtml="";
+  const rec=typeof recoveryReadiness==="function"?recoveryReadiness():null;
+  const vo2=typeof vo2Benchmark==="function"?vo2Benchmark():null;
+  if(rec||vo2){
+    const fl=typeof fmFocusLine==="function"?fmFocusLine():null;
+    const recIcon=rec?(rec.level==="easy"?"🟠":rec.level==="caution"?"🟡":"🟢"):"";
+    let body="";
+    if(rec) body+=`<div class="fn-row"><span>${recIcon} ${esc(rec.line)}</span></div>`;
+    if(fl) body+=`<div class="fn-row"><span>${esc(fl)}</span></div>`;
+    if(vo2) body+=`<div class="fn-row"><span>🫁 ${esc(vo2.line)}</span></div>`;
+    fmHtml=`<div class="td-card fn-card"><div class="td-h fn-h">FM Advisory</div>${body}<button class="td-go" data-gototab="plan">Open FM plan →</button></div>`;
+  }
+
+  // ── Getting started — shown only when the user has no data at all yet
+  let startHtml="";
+  const isNew = S.name==="Cadet" && !S.aft.length && !S.totalDone && !S.profile.commissionDate;
+  if(isNew){
+    startHtml=`<div class="start-card">
+      <div class="start-h">🌱 Getting Started</div>
+      <p class="start-intro">The tree grows one ring at a time. Work through these in order — each one unlocks the next thing this app can do for you.</p>
+      <div class="start-step"><span class="start-num">1</span><span>Set your name, rank, and commission date</span><button class="td-go-sm" data-gototab="profile">Profile →</button></div>
+      <div class="start-step"><span class="start-num">2</span><span>Log your first AFT score to set your baseline</span><button class="td-go-sm" data-gototab="aft">AFT →</button></div>
+      <div class="start-step"><span class="start-num">3</span><span>Add at least one daily order you'll complete every day</span><button class="td-go-sm" data-gototab="dailies">Orders →</button></div>
+      <div class="start-step"><span class="start-num">4</span><span>Open the FM Plan and log today's training session</span><button class="td-go-sm" data-gototab="plan">FM Plan →</button></div>
+    </div>`;
+  }
+
+  // ── Assemble — creed always first, then guided flow
+  const flow=[startHtml, sessHtml, ordersHtml, streakHtml, commissionHtml, focusHtml, adaptHtml, neglectHtml, notesHtml, fmHtml].filter(Boolean).join("");
+
+  el.innerHTML=`<div class="td-creed">🌲 <span>${creed}</span></div>`+(
+    flow
+      ? `<div class="td-flow">${flow}</div>`
+      : `<div class="aw-empty"><span class="big">🌱</span>The ground is bare. Swear your oaths, plant your daily orders — and this becomes the soil your tree grows from.</div>`
+  );
 }
 
 function makeStudyPlan(title,testDate,topics){
   const today=new Date(); today.setHours(0,0,0,0);
   const test=new Date(testDate); test.setHours(0,0,0,0);
   const totalDays=Math.max(1, Math.round((test-today)/864e5));
-  // spaced schedule: review each topic on an expanding cadence (day 1,2,4,7,... up to test)
   let offsets=[0,1,3,6,10,14,20,27].filter(o=>o<=totalDays);
-  if(totalDays>0 && !offsets.includes(totalDays-1) && (totalDays-1)>=0) offsets.push(totalDays-1); // a final review day before test
-  offsets=[...new Set(offsets)].sort((a,b)=>a-b); // no duplicate review days
+  if(totalDays>0 && !offsets.includes(totalDays-1) && (totalDays-1)>=0) offsets.push(totalDays-1);
+  offsets=[...new Set(offsets)].sort((a,b)=>a-b);
   const schedule=[];
-  topics.forEach((topic,ti)=>{
+  topics.forEach((topic)=>{
     offsets.forEach(o=>{
       const d=new Date(today); d.setDate(d.getDate()+o);
       schedule.push({date:localYMD(d), topic});
@@ -5486,6 +6077,7 @@ if(_cloudBtn) _cloudBtn.onclick=()=>{ if(fileHandle){ if(confirm("Unlink this cl
 cloudInit();
 
 /* ================= SKILLS (levels, decay, promotion quests) ================= */
+
 const SK_CAT={tactical:"Path of War",physical:"Path of the Body",cognitive:"Path of the Mind",physiological:"Path of Vitality",technical:"Path of the Craft",leadership:"Path of Command",academic:"Path of Knowledge",personal:"Path of the Self",hearth:"Path of the Hearth",roots:"Path of Roots"};
 const SK_CAT_ORDER=["tactical","physical","cognitive","physiological","technical","leadership","academic","personal","hearth","roots"];
 // Seed skills — editable starters across every category, each with a level ladder.
@@ -7293,6 +7885,7 @@ function seedSkillsIfEmpty(){
 // changes, so an old save (even one many versions behind) force-resyncs all ladder
 // CONTENT from the seed on load — while preserving the user's progress numbers
 // (currentLevel/peakLevel/history). This is the safety net for stale autosave files.
+
 const SKILL_LADDER_VER=84;
 // onto existing seeded skills. Never touches level/history/peak.
 function mergeNewSeedSkills(){
@@ -7439,6 +8032,7 @@ function eventScoreToLevel(score, maxLevels){
   else lvl=2;                  // passed (60-74)
   return Math.min(maxLevels, lvl);
 }
+
 function syncSkillsFromActivity(){
   if(!S.lifeSkills||!S.lifeSkills.length) return false;
   let changed=false;
@@ -7590,6 +8184,7 @@ function rhrToLevel(rhr){
   if(rhr==null) return 0;
   return rhr<=40?10 : rhr<44?9 : rhr<48?8 : rhr<52?7 : rhr<56?6 : rhr<60?5 : rhr<65?4 : rhr<70?3 : rhr<75?2 : 1;
 }
+
 let _skLevels=["",""];  // draft level abilities being entered (start with 2 blanks)
 function renderSkLevelInputs(){
   const el=document.getElementById("skLevelInputs"); if(!el) return;
@@ -7762,6 +8357,7 @@ function skLeafColor(eff, max){
   else { const f=(t-0.5)/0.5; r=lerp(0xb8,0x6f,f); g=lerp(0xa0,0x9e,f); bl=lerp(0x6a,0x54,f); }
   return `rgb(${r},${g},${bl})`;
 }
+
 const SK_PATH_ICON={tactical:"⚔️",physical:"💪",cognitive:"🧠",physiological:"❤️",technical:"⚙️",leadership:"⭐",academic:"📚",personal:"🌱",hearth:"🔥",roots:"🪶"};
 // Pan/zoom state for the tree (persists across re-renders within a session)
 let _treeView={k:1, x:0, y:0};
@@ -8074,6 +8670,7 @@ function _treeWireGestures(){
   svg.addEventListener("touchend",up);
   svg.style.cursor="grab";
 }
+
 function renderSkillsTab(){
   const listEl=document.getElementById("skList"); if(!listEl) return;
   if(syncSkillsFromActivity()) save();
@@ -8212,6 +8809,74 @@ function skProgressBlock(sk, eff){
     jb.innerHTML=SK_CAT_ORDER.filter(c=>skTopLevelInCat(c).length).map(c=>
       `<button data-skjump="${c}">${icons[c]||"•"}<span class="jb-tip">${SK_CAT[c]}</span></button>`).join("");
   }
+}
+
+
+/* ── Garden / Grove of the World Tree ────────────────────────────────────────
+   Renders the ten Sacred Path idols. Each idol's glow reflects accumulated
+   Path XP; the skill dots below each idol show which skills have awakened
+   and which remain dormant within that Path. */
+
+/* CSS color → approximate RGB triple for rgba() glow effects */
+const PATH_RGB = {
+  tactical:"156,74,52",      // --blood
+  physical:"111,158,84",     // --jade
+  cognitive:"124,147,168",   // --violet
+  physiological:"124,147,168",
+  technical:"200,119,46",    // --ember
+  leadership:"184,160,106",  // --gold
+  academic:"184,160,106",
+  personal:"111,158,84",
+  hearth:"200,119,46",
+  roots:"111,158,84",
+};
+
+function renderGarden(){
+  const el=document.getElementById("gardenGrid");
+  if(!el) return;
+
+  el.innerHTML=SK_CAT_ORDER.map(cat=>{
+    const pm=PATH_META[cat];
+    if(!pm) return "";
+    const xp=(S.pathXP&&S.pathXP[cat])||0;
+    const lvData=skillLevel(xp);
+    const lvl=lvData.lvl;
+    const pct=Math.round(lvData.into/lvData.need*100);
+
+    // Visual state based on level
+    const grayAmt = lvl<=1?80:lvl<=3?50:lvl<=5?20:0;
+    const opacity  = lvl<=1?.45:lvl<=3?.65:1;
+    const glowClass= lvl>=7?"radiant":lvl>=4?"lit":"";
+
+    // Skill dots: leaf skills (no group, no parent) in this path
+    const pathSkills=S.lifeSkills.filter(sk=>sk.cat===cat&&!sk.group);
+    // Sort: active (has level) first, then dormant
+    const active=pathSkills.filter(sk=>(sk.currentLevel||0)>0);
+    const dormant=pathSkills.filter(sk=>(sk.currentLevel||0)<=0);
+    const showSkills=[...active,...dormant].slice(0,8);
+    const extra=pathSkills.length-showSkills.length;
+
+    const dotsHtml=showSkills.map(sk=>{
+      const isActive=(sk.currentLevel||0)>0;
+      const lvLabel=isActive?` L${sk.currentLevel}`:"";
+      return `<span class="garden-dot ${isActive?"active":"dormant"}" title="${esc(sk.name)}${isActive?" (L"+sk.currentLevel+")":" — dormant"}">${esc(sk.name.length>14?sk.name.slice(0,13)+"…":sk.name)}${lvLabel}</span>`;
+    }).join("")+(extra>0?`<span class="garden-more">+${extra} more</span>`:"");
+
+    // Lore: first sentence only for compactness
+    const loreShort=pm.lore.split(".")[0]+".";
+
+    const rgb=PATH_RGB[cat]||"184,160,106";
+
+    return `<div class="garden-card ${glowClass}" style="--path-color:${pm.color};--path-rgb:${rgb};--idol-gray:${grayAmt}%;--idol-opacity:${opacity}">
+      <div class="garden-idol">${pm.icon}</div>
+      <div class="garden-idol-name">${pm.idol}</div>
+      <div class="garden-path-name">${pm.name}</div>
+      <div class="garden-level">Level ${lvl} · ${xp} XP total</div>
+      <div class="garden-bar"><div class="garden-bar-fill" style="width:${pct}%"></div></div>
+      <div class="garden-lore">${loreShort}</div>
+      ${pathSkills.length?`<div class="garden-skills">${dotsHtml}</div>`:""}
+    </div>`;
+  }).join("");
 }
 
 /* ---------------- Service worker (offline) ---------------- */

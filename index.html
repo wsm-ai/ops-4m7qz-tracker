@@ -1734,7 +1734,7 @@
 
   <div class="foot">
     <span id="footStatus">OPERATIONS · all data lives only on this device</span><br>
-    <a id="cloudBtn">link cloud file</a> &nbsp;·&nbsp; <a id="exportBtn">export backup</a> &nbsp;·&nbsp; <a id="importBtn">import backup</a> &nbsp;·&nbsp; <a id="resetBtn">reset everything</a>
+    <a id="cloudBtn">link cloud file</a> &nbsp;·&nbsp; <a id="exportBtn">export backup</a> &nbsp;·&nbsp; <a id="importBtn">import backup</a> &nbsp;·&nbsp; <a id="resyncBtn">resync skill trees</a> &nbsp;·&nbsp; <a id="resetBtn">reset everything</a>
     <input type="file" id="importFile" accept="application/json" style="display:none">
     <div id="cloudHint" class="cloud-hint"></div>
   </div>
@@ -2590,6 +2590,18 @@ document.getElementById("importFile").onchange=e=>{
   rd.readAsText(f);
 };
 document.getElementById("resetBtn").onclick=()=>{if(confirm("Erase all progress and start over? This cannot be undone.")){localStorage.removeItem(KEY);S=structuredClone(DEFAULT);save();render();}};
+// Force-resync every skill's ladder/tiers/guidance from the current seed, preserving
+// your progress (levels, peaks, history). Use this if a restored older backup shows
+// outdated skill trees (e.g. a skill with the wrong number of levels).
+document.getElementById("resyncBtn").onclick=()=>{
+  if(!confirm("Resync all skill trees to the latest version?\n\nThis updates every skill's levels, tiers, and guidance to current — your progress (levels reached, peaks, history) is kept.")) return;
+  S._skillLadderVer=0;                 // mark stale so the merge force-resyncs every ladder
+  if(typeof mergeNewSeedSkills==="function") mergeNewSeedSkills();
+  // re-derive auto skills from your logged performance afterward
+  if(typeof syncSkillsFromActivity==="function") syncSkillsFromActivity();
+  save(); render();
+  toast("✅ Skill trees resynced to the latest version");
+};
 
 /* ---------------- QUIZZES ---------------- */
 function renderQuizzes(){
@@ -7288,6 +7300,31 @@ function mergeNewSeedSkills(){
   // shadow the current seed. If its ladder version is behind, we force a full resync of
   // every skill's ladder content below (progress numbers are always preserved).
   const ladderStale = (S._skillLadderVer||0) < SKILL_LADDER_VER;
+  // ---- RENAME MERGES: skills that were renamed in later versions. An old save still
+  // carries the OLD name as an orphaned duplicate sitting next to the new-named skill.
+  // For each {from->to}, carry the higher progress (level/peak/history) onto the new
+  // skill so nothing is lost, then remove the orphan. (This is what was leaving a
+  // stale 6-level "Push-ups" beside the current "Push-ups in 2 minutes".)
+  const RENAMES=[
+    {from:"Push-ups", to:"Push-ups in 2 minutes"},
+    {from:"Pull-ups", to:"Pull-ups (max strict / weighted)"}
+  ];
+  RENAMES.forEach(r=>{
+    const oldSk=S.lifeSkills.find(s=>s.name===r.from);
+    if(!oldSk) return;
+    const newSk=S.lifeSkills.find(s=>s.name===r.to);
+    if(newSk){
+      // carry over the higher progress so a rename never costs the user a level
+      if((oldSk.currentLevel||0)>(newSk.currentLevel||0)){ newSk.currentLevel=oldSk.currentLevel; newSk.lastQuestTs=oldSk.lastQuestTs||newSk.lastQuestTs; }
+      if((oldSk.peakLevel||0)>(newSk.peakLevel||0)){ newSk.peakLevel=oldSk.peakLevel; }
+      if(Array.isArray(oldSk.history)&&oldSk.history.length){ newSk.history=(newSk.history||[]).concat(oldSk.history); }
+      if((newSk.peakLevel||0)<(newSk.currentLevel||0)) newSk.peakLevel=newSk.currentLevel;
+      S.lifeSkills=S.lifeSkills.filter(s=>s!==oldSk); changed=true;
+    } else {
+      // the new-named skill doesn't exist yet — just rename the old one in place
+      oldSk.name=r.to; changed=true;
+    }
+  });
   // retire the old combined skill (v37) now that it's split into two. Only remove it if
   // it was never leveled, so we never silently delete real progress.
   const oldCombined=S.lifeSkills.find(s=>s.name==="Controlled force & composure");

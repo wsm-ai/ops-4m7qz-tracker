@@ -25,6 +25,12 @@
       /* Side vignettes — forest shadow on the flanks */
       radial-gradient(circle at -5% 55%, rgba(5,6,3,.38), transparent 48%),
       radial-gradient(circle at 105% 55%, rgba(5,6,3,.38), transparent 48%),
+      /* Dark walnut wood grain — coarse annual rings */
+      repeating-linear-gradient(90deg,transparent 0 85px,rgba(120,65,12,.13) 85px 88px,transparent 88px 175px),
+      /* Wood grain — medium bands */
+      repeating-linear-gradient(89.4deg,transparent 0 26px,rgba(165,92,18,.15) 26px 28px,transparent 28px 60px,rgba(0,0,0,.11) 60px 62px,transparent 62px 108px),
+      /* Wood grain — fine tight grain */
+      repeating-linear-gradient(88deg,transparent 0 3px,rgba(185,105,22,.16) 3px 4px,transparent 4px 7px,rgba(0,0,0,.13) 7px 8px,transparent 8px 15px),
       var(--bg);
     color:var(--ink);
     font-family:"Oswald","Bebas Neue","Roboto Condensed","Arial Narrow",system-ui,sans-serif;
@@ -143,7 +149,10 @@
   /* ---- Cards (quests/dailies) ---- */
   ul.list{list-style:none;display:flex;flex-direction:column;gap:9px}
   li.card{
-    background:linear-gradient(180deg,var(--panel-2),var(--panel));
+    background:
+      repeating-linear-gradient(88deg,transparent 0 4px,rgba(185,105,22,.05) 4px 5px,transparent 5px 10px),
+      repeating-linear-gradient(89.5deg,transparent 0 32px,rgba(140,75,15,.06) 32px 34px,transparent 34px 72px),
+      linear-gradient(180deg,var(--panel-2),var(--panel));
     border:1px solid var(--line);border-radius:11px;padding:13px 14px;
     display:flex;align-items:center;gap:13px;position:relative;overflow:hidden;
     transition:transform .12s,border-color .2s;
@@ -1375,73 +1384,71 @@
   .hb-month-dow{flex:1;text-align:center;font-size:9px;color:var(--ink-faint);font-weight:600;letter-spacing:.03em}
 
   /* ============================================================
-     PHASE 3 — PER-TAB VISUAL ATMOSPHERE (v104)
+     PHASE 3 — PER-TAB VISUAL ATMOSPHERE (v104+)
      ============================================================ */
 
   /* === DAWN TAB THEME (view-today) ===
      First light over Asgard — golden, anticipatory, commanding */
 
-  /* Greeting strip: gold-tinted left band, brightened heading */
+  /* Atmospheric gold gradient at top of tab */
+  #view-today {
+    background-image: linear-gradient(180deg, rgba(184,160,106,.12) 0%, transparent 140px);
+  }
   #view-today .sec-h {
-    background: linear-gradient(135deg, rgba(184,160,106,.09) 0%, transparent 55%);
+    background: linear-gradient(135deg, rgba(184,160,106,.14) 0%, transparent 55%);
     border-radius: 8px;
     padding: 8px 12px;
-    border-bottom: 1px solid rgba(184,160,106,.1);
+    border-bottom: 1px solid rgba(184,160,106,.18);
     margin-bottom: 14px;
   }
   #view-today .sec-h h2 {
     color: var(--gold-bright);
     border-left-color: var(--gold-bright);
-    text-shadow: 0 0 22px rgba(184,160,106,.22);
+    text-shadow: 0 0 22px rgba(184,160,106,.4);
   }
-  /* Field-notes cards — parchment tint + rune corner accents */
   #view-today .fn-card {
-    background: linear-gradient(160deg, rgba(184,160,106,.052), var(--panel));
-    border-color: rgba(184,160,106,.18);
+    background: linear-gradient(160deg, rgba(184,160,106,.10), var(--panel));
+    border-color: rgba(184,160,106,.30);
     position: relative;
   }
   #view-today .fn-card::before {
     content: "";
     position: absolute; top: 5px; left: 5px;
     width: 11px; height: 11px;
-    border-top: 1.5px solid rgba(184,160,106,.3);
-    border-left: 1.5px solid rgba(184,160,106,.3);
+    border-top: 1.5px solid rgba(184,160,106,.55);
+    border-left: 1.5px solid rgba(184,160,106,.55);
     pointer-events: none;
   }
   #view-today .fn-card::after {
     content: "";
     position: absolute; bottom: 5px; right: 5px;
     width: 11px; height: 11px;
-    border-bottom: 1.5px solid rgba(184,160,106,.3);
-    border-right: 1.5px solid rgba(184,160,106,.3);
+    border-bottom: 1.5px solid rgba(184,160,106,.55);
+    border-right: 1.5px solid rgba(184,160,106,.55);
     pointer-events: none;
   }
-  /* Commission countdown — gold pulse when active (not radiant/commissioned) */
   @keyframes pulse-gold {
     0%, 100% { box-shadow: none; }
-    50%       { box-shadow: 0 0 14px rgba(184,160,106,.2); }
+    50%       { box-shadow: 0 0 18px rgba(184,160,106,.3); }
   }
   #view-today .commission-bar:not(.radiant) {
     border-left-color: var(--gold);
-    border-color: rgba(184,160,106,.28);
-    background: rgba(184,160,106,.07);
+    border-color: rgba(184,160,106,.35);
+    background: rgba(184,160,106,.10);
     animation: pulse-gold 3.5s ease-in-out infinite;
   }
 
   /* === OATHS TAB THEME (view-quests) ===
      Sworn word on parchment — weighty, binding, ancient */
 
-  /* Oath cards — warm parchment tint, left rune-stroke */
   #view-quests #qList li.card {
-    background: linear-gradient(180deg, rgba(184,160,106,.04), var(--panel));
-    border-left: 3px solid rgba(184,160,106,.22);
+    background: linear-gradient(180deg, rgba(184,160,106,.09), var(--panel));
+    border-left: 3px solid rgba(184,160,106,.28);
   }
-  /* Overdue oaths — amber accent, warmer tint */
   #view-quests #qList li.card.overdue {
-    background: linear-gradient(180deg, rgba(200,119,46,.06), var(--panel));
+    background: linear-gradient(180deg, rgba(200,119,46,.12), var(--panel));
     border-left-color: var(--ember);
   }
-  /* Active oath with a due date — wax-seal dot top-right (inside card) */
   #view-quests #qList li.card:has(.due-tag):not(.done)::after,
   #view-quests #qList li.card:has(.overdue-tag):not(.done)::after {
     content: "";
@@ -1452,15 +1459,14 @@
     box-shadow: 0 0 5px rgba(200,57,43,.55), inset 0 1px 0 rgba(255,255,255,.2);
     pointer-events: none;
   }
-  /* Archive section — sepia / aged parchment */
   .q-archive {
-    background: rgba(140,120,70,.05);
-    border-color: rgba(184,160,106,.14);
+    background: rgba(140,120,70,.09);
+    border-color: rgba(184,160,106,.2);
   }
   .q-archive summary {
     font-variant: small-caps;
     letter-spacing: .14em;
-    color: rgba(184,160,106,.55);
+    color: rgba(184,160,106,.65);
   }
   .q-arch-item {
     opacity: .82;
@@ -1470,25 +1476,30 @@
   /* === ORDERS TAB THEME (view-dailies) ===
      Military orders board — stencil, duty, accountability */
 
-  /* Habit and orders lists — dark mission-board background */
   #view-dailies #dList,
   #view-dailies #habitQuests {
-    background: rgba(5,6,3,.38);
+    background: rgba(5,6,3,.5);
     border-radius: 9px;
     padding: 6px;
   }
-  /* Daily order checkboxes — square, not round */
   #view-dailies ul.list .check {
     border-radius: 4px;
   }
-  /* 7-day consistency banner — monospace mission-status look */
+  @keyframes order-done {
+    from { background: rgba(111,158,84,.18); }
+    to   { background: transparent; }
+  }
+  #view-dailies ul.list .card.done {
+    opacity: .65;
+    animation: order-done .5s ease-out;
+  }
   .orders-week-summary {
     font-family: ui-monospace, monospace;
     letter-spacing: .05em;
     text-transform: uppercase;
     font-size: 11px;
-    background: rgba(184,160,106,.05);
-    border: 1px solid rgba(184,160,106,.1);
+    background: rgba(184,160,106,.10);
+    border: 1px solid rgba(184,160,106,.22);
     border-radius: 6px;
     padding: 7px 11px;
   }
@@ -1496,57 +1507,68 @@
     color: var(--gold-bright);
     font-size: 13px;
   }
-  /* Habit cards — left jade-rule accent */
   .hb-card {
-    border-left: 3px solid rgba(111,158,84,.2);
+    border-left: 3px solid rgba(111,158,84,.25);
   }
   .hb-card.done {
-    border-left-color: rgba(111,158,84,.44);
+    border-left-color: rgba(111,158,84,.55);
   }
 
   /* === AFT TAB THEME (view-aft) ===
      Combat readiness — stark, honest, measurement-forward */
 
-  /* Score card — black background, ember header rule */
   #view-aft .aft-result-card {
     background: #030404;
-    border: 1.5px solid rgba(200,119,46,.38);
+    border: 1.5px solid rgba(200,119,46,.45);
   }
+  /* Date label — keep small, score will dominate */
   #view-aft .aft-result-card h3 {
-    font-size: 11.5px;
-    letter-spacing: .16em;
+    font-size: 11px;
+    letter-spacing: .14em;
     text-transform: uppercase;
-    color: var(--ember);
-    margin-bottom: 12px;
-    padding-bottom: 8px;
-    border-bottom: 1px solid rgba(200,119,46,.18);
+    color: rgba(184,160,106,.55);
+    margin-bottom: 0;
+    padding-bottom: 0;
+    border-bottom: none;
   }
-  /* Per-event rows — monospace scoresheet */
+  /* Big total score number */
+  .aft-score-big {
+    font-size: 54px;
+    font-weight: 800;
+    font-family: ui-monospace, monospace;
+    color: var(--gold-bright);
+    text-align: center;
+    letter-spacing: -.02em;
+    line-height: 1;
+    padding: 8px 0 12px;
+    border-bottom: 1px solid rgba(200,119,46,.2);
+    margin-bottom: 12px;
+  }
+  .aft-score-pass { color: var(--jade); font-size: 13px; font-weight: 600; letter-spacing: .05em; display: block; margin-top: 5px; }
+  .aft-score-fail { color: var(--ember); font-size: 13px; font-weight: 600; letter-spacing: .05em; display: block; margin-top: 5px; }
   #view-aft .aft-event {
     font-family: ui-monospace, monospace;
     letter-spacing: .02em;
   }
   #view-aft .aft-event .ev-score {
-    font-size: 15px;
+    font-size: 16px;
     font-family: ui-monospace, monospace;
     color: var(--gold-bright);
   }
   #view-aft .aft-event.weak .ev-score {
     color: var(--ember);
   }
-  /* Sparkline — dark crosshatch grid background */
   #view-aft .aft-spark {
     background:
       repeating-linear-gradient(0deg,   rgba(255,255,255,.022) 0 1px, transparent 1px 18px),
       repeating-linear-gradient(90deg,  rgba(255,255,255,.022) 0 1px, transparent 1px 36px),
       #020303;
-    border: 1px solid rgba(184,160,106,.13);
+    border: 1px solid rgba(184,160,106,.18);
   }
-  /* History cards — dark, monospace, amber left border, date in small-caps */
   #view-aft .aft-hist-row {
     background: #050605;
-    border: 1px solid rgba(200,119,46,.18);
-    border-left: 3px solid rgba(200,119,46,.35);
+    border: 1px solid rgba(200,119,46,.22);
+    border-left: 3px solid rgba(200,119,46,.45);
     border-radius: 7px;
     font-family: ui-monospace, monospace;
   }
@@ -1557,51 +1579,45 @@
     font-size: 11px;
   }
   #view-aft .aft-hist-row .ttl {
-    font-size: 15px;
+    font-size: 16px;
   }
 
   /* === LOG TAB THEME (view-log) ===
      Warrior's journal — hand-written ledger */
 
-  /* Workout history cards — aged-paper tint, amber margin rule at 40px from left */
   #view-log .lg-hist {
-    background-color: rgba(184,160,106,.028);
-    background-image: linear-gradient(90deg, transparent 39px, rgba(200,119,46,.28) 39px, rgba(200,119,46,.28) 40px, transparent 40px);
-    border-color: rgba(184,160,106,.15);
+    background-color: rgba(184,160,106,.07);
+    background-image: linear-gradient(90deg, transparent 39px, rgba(200,119,46,.38) 39px, rgba(200,119,46,.38) 40px, transparent 40px);
+    border-color: rgba(184,160,106,.25);
   }
-  /* Journal entry header — small-caps date / session label */
   #view-log .lg-hist-top .dt {
     font-variant: small-caps;
     letter-spacing: .07em;
     color: var(--gold-bright);
   }
-  /* Exercise rows — monospace ledger entries */
   #view-log .lg-hist-ex {
     font-family: ui-monospace, monospace;
     font-size: 12px;
     letter-spacing: .02em;
-    border-bottom: 1px solid rgba(255,255,255,.03);
+    border-bottom: 1px solid rgba(255,255,255,.04);
     padding: 3px 0;
   }
-  /* Progress rows — amber left accent */
   #view-log .lg-prog-row {
-    border-left: 3px solid rgba(184,160,106,.22);
+    border-left: 3px solid rgba(184,160,106,.30);
     padding-left: 11px;
   }
 
   /* === PLAN TAB THEME (view-plan) ===
      Tactical map — grid paper, mission briefing */
 
-  /* Grid-paper texture in the gaps between cards */
   #view-plan {
     background-image:
-      repeating-linear-gradient(0deg,  rgba(255,255,255,.02) 0 1px, transparent 1px 22px),
-      repeating-linear-gradient(90deg, rgba(255,255,255,.02) 0 1px, transparent 1px 44px);
+      repeating-linear-gradient(0deg,  rgba(255,255,255,.025) 0 1px, transparent 1px 22px),
+      repeating-linear-gradient(90deg, rgba(255,255,255,.025) 0 1px, transparent 1px 44px);
   }
-  /* Coach-today panel — "ORDERS FOR TODAY" */
   #view-plan .coach-card {
-    background: linear-gradient(160deg, rgba(184,160,106,.1), rgba(184,160,106,.03));
-    border: 1.5px solid rgba(184,160,106,.38);
+    background: linear-gradient(160deg, rgba(184,160,106,.14), rgba(184,160,106,.05));
+    border: 1.5px solid rgba(184,160,106,.45);
     border-left: 4px solid var(--gold);
   }
   #view-plan .coach-h {
@@ -1611,20 +1627,18 @@
     font-weight: 800;
     color: var(--gold-bright);
   }
-  /* Session accordion cards — mission briefing cards */
   #view-plan details.wk {
-    background: linear-gradient(180deg, rgba(184,160,106,.032), var(--panel));
-    border-color: rgba(184,160,106,.14);
+    background: linear-gradient(180deg, rgba(184,160,106,.07), var(--panel));
+    border-color: rgba(184,160,106,.20);
   }
   #view-plan details.wk > summary {
     letter-spacing: .05em;
     font-weight: 700;
   }
-  /* Plan-intro blocks — mission parameter blocks: bordered top and bottom */
   #view-plan .plan-intro {
-    background: rgba(184,160,106,.03);
-    border-top: 1px solid rgba(184,160,106,.14);
-    border-bottom: 1px solid rgba(184,160,106,.14);
+    background: rgba(184,160,106,.07);
+    border-top: 1px solid rgba(184,160,106,.20);
+    border-bottom: 1px solid rgba(184,160,106,.20);
     border-left: none;
     border-right: none;
     border-radius: 0;
@@ -1633,106 +1647,106 @@
   /* === AWARDS TAB THEME (view-awards) ===
      Trophy case / shadow box — honor, permanence */
 
-  /* Award cards — dark navy display-case background */
   #view-awards .aw-card {
     background: linear-gradient(180deg, #111620, #0c0e18);
-    border-color: rgba(184,160,106,.18);
+    border-color: rgba(184,160,106,.25);
   }
-  /* Award name — gold, heavier weight */
   #view-awards .aw-title {
     color: var(--gold-bright);
     font-weight: 700;
   }
-  /* Membership cards — warmer tint */
   #view-awards .mb-card {
-    background: linear-gradient(180deg, rgba(184,160,106,.04), var(--panel));
+    background: linear-gradient(180deg, rgba(184,160,106,.08), var(--panel));
   }
-  /* Event cards — gold left-accent rule */
   #view-awards .ev-card {
-    border-left: 3px solid rgba(184,160,106,.22);
-    background: linear-gradient(180deg, rgba(184,160,106,.03), var(--panel));
+    border-left: 3px solid rgba(184,160,106,.30);
+    background: linear-gradient(180deg, rgba(184,160,106,.07), var(--panel));
   }
 
   /* === RECORDS TAB THEME (view-records) ===
      Archive / stone inscription — permanence, history */
 
-  /* Section headers — engraved-look text-shadow */
   #view-records .sec-h h2 {
-    text-shadow: 1px 1px 0 #000, -1px -1px 0 rgba(255,255,255,.05);
+    text-shadow: 1px 1px 0 #000, -1px -1px 0 rgba(255,255,255,.06);
     letter-spacing: .16em;
   }
-  /* History trend blocks — archival card style */
   #view-records .hist-block {
-    background: linear-gradient(180deg, rgba(184,160,106,.04), var(--panel));
-    border-color: rgba(184,160,106,.14);
+    background: linear-gradient(180deg, rgba(184,160,106,.09), var(--panel));
+    border-color: rgba(184,160,106,.20);
   }
   #view-records .hist-h {
     font-variant: small-caps;
     letter-spacing: .07em;
   }
-  /* Counseling log — filing card, violet left rule */
   #view-records .cn-card {
     background: var(--panel-2);
-    border-left: 3px solid rgba(124,147,168,.28);
+    border-left: 3px solid rgba(124,147,168,.38);
   }
   #view-records .cn-date {
     font-variant: small-caps;
     letter-spacing: .05em;
   }
-  /* Checklist cards — archival with gold accent */
   #view-records .cl-card {
-    border-left: 3px solid rgba(184,160,106,.2);
-    background: linear-gradient(180deg, rgba(184,160,106,.028), var(--panel));
+    border-left: 3px solid rgba(184,160,106,.28);
+    background: linear-gradient(180deg, rgba(184,160,106,.07), var(--panel));
   }
-
 
   /* === PROFILE TAB THEME (view-profile) ===
      Personnel dossier — classified file */
 
-  /* Form container — amber top edge suggests a folder */
   #view-profile .adder {
-    border-top: 2px solid rgba(184,160,106,.28);
-    border-top-left-radius: 2px;
-    border-top-right-radius: 2px;
+    position: relative;
+    border-color: rgba(184,160,106,.2);
+    border-top-left-radius: 0;
+    margin-top: 24px;
   }
-  /* Section labels within the form — amber classified-file dividers */
+  #view-profile .adder::before {
+    content: "PERSONNEL FILE";
+    position: absolute;
+    bottom: 100%; left: -1px;
+    font-size: 9px;
+    letter-spacing: .18em;
+    font-weight: 700;
+    color: rgba(184,160,106,.75);
+    background: var(--panel);
+    border: 1px solid rgba(184,160,106,.2);
+    border-bottom: none;
+    padding: 4px 12px 5px;
+    border-radius: 5px 5px 0 0;
+    text-transform: uppercase;
+    white-space: nowrap;
+  }
   #view-profile .sk-form-title {
     color: var(--gold-bright);
-    border-left: 2px solid rgba(184,160,106,.4);
+    border-left: 2px solid rgba(184,160,106,.5);
     padding-left: 9px;
     letter-spacing: .14em;
   }
-  /* Blood type card — richer red-amber tint */
   #view-profile .blood-card {
-    background: linear-gradient(160deg, rgba(156,74,52,.07), var(--panel));
-    border-color: rgba(156,74,52,.3);
+    background: linear-gradient(160deg, rgba(156,74,52,.12), var(--panel));
+    border-color: rgba(156,74,52,.38);
   }
 
   /* === WEIGHT TAB THEME (view-weight) ===
      Sacred oath on vellum — solemn, binding */
 
-  /* Warm parchment atmosphere on the whole tab */
   #view-weight {
-    background-image: linear-gradient(180deg, rgba(201,162,75,.03) 0%, transparent 40%);
+    background-image: linear-gradient(180deg, rgba(201,162,75,.08) 0%, transparent 50%);
   }
-  /* Keystone vow text — gold, the most solemn line in the app */
   #view-weight .ks-vow {
     color: var(--gold-bright);
   }
-  /* Memorial section label — aged chapter marker */
   #view-weight .weight-section-label {
-    color: rgba(184,160,106,.6);
+    color: rgba(184,160,106,.7);
   }
-  /* Ledger entries — amber left rule, parchment tint */
   #view-weight .wl-entry {
-    border-left: 3px solid rgba(184,160,106,.22);
-    background: linear-gradient(90deg, rgba(184,160,106,.03), var(--panel));
+    border-left: 3px solid rgba(184,160,106,.30);
+    background: linear-gradient(90deg, rgba(184,160,106,.08), var(--panel));
   }
   #view-weight .wl-entry.keystone {
-    border-left-color: rgba(184,160,106,.5);
-    background: linear-gradient(90deg, rgba(184,160,106,.06), var(--panel));
+    border-left-color: rgba(184,160,106,.6);
+    background: linear-gradient(90deg, rgba(184,160,106,.13), var(--panel));
   }
-  /* Promise disc identifier — gold label */
   #view-weight .wl-disc {
     color: var(--gold-bright);
     font-weight: 600;
@@ -1741,56 +1755,47 @@
   /* === BOARD TAB THEME (view-board) ===
      The Muster — tactical checklist, cyber branch prep */
 
-  /* Task list — dark mission-board background */
   #view-board #boardList {
-    background: rgba(5,6,3,.38);
+    background: rgba(5,6,3,.5);
     border-radius: 9px;
     padding: 6px;
   }
-  /* Board task items — violet left rule (Cyber branch color) */
   #view-board .board-item {
-    border-left: 3px solid rgba(124,147,168,.25);
+    border-left: 3px solid rgba(124,147,168,.32);
   }
   #view-board .board-item.done {
-    border-left-color: rgba(111,158,84,.38);
-    opacity: .72;
+    border-left-color: rgba(111,158,84,.45);
+    opacity: .70;
   }
 
   /* === SHOP TAB THEME (view-shop) ===
      The Mead Hall — earned rest, Norse celebration */
 
-  /* Mead Hall section header — warm gold */
   #view-shop .sec-h h2 {
     color: var(--gold-bright);
     border-left-color: var(--gold-bright);
-    text-shadow: 0 0 20px rgba(184,160,106,.18);
+    text-shadow: 0 0 20px rgba(184,160,106,.28);
   }
-  /* Reward cards — hearth-warm tint, ember left accent */
   #view-shop #rList .card {
-    background: linear-gradient(180deg, rgba(200,119,46,.04), var(--panel));
-    border-left: 3px solid rgba(200,119,46,.25);
+    background: linear-gradient(180deg, rgba(200,119,46,.09), var(--panel));
+    border-left: 3px solid rgba(200,119,46,.30);
   }
-  /* Merit cost label — gold */
   #view-shop .cost {
     color: var(--gold-bright);
     font-size: 11.5px;
     letter-spacing: .03em;
   }
 
-
   /* === OBJECTIVES TAB THEME (view-bosses) ===
-     Trials — fortress under siege, endurance measured in steps */
+     Trials — fortress under siege */
 
-  /* Trial cards — blood-red tint, dark bordered */
   #view-bosses li.card.boss {
-    background: linear-gradient(180deg, rgba(156,74,52,.06), var(--panel));
-    border-color: rgba(156,74,52,.28);
+    background: linear-gradient(180deg, rgba(156,74,52,.12), var(--panel));
+    border-color: rgba(156,74,52,.35);
   }
-  /* Trial name — ember color */
   #view-bosses .boss-name {
     color: var(--ember);
   }
-  /* HP bar — crenellation stripe overlay suggests battlement walls */
   #view-bosses .hpfill {
     position: relative;
   }
@@ -1798,78 +1803,68 @@
     content: "";
     position: absolute;
     inset: 0;
-    background: repeating-linear-gradient(90deg, transparent 0 11px, rgba(0,0,0,.32) 11px 13px);
+    background: repeating-linear-gradient(90deg, transparent 0 10px, rgba(0,0,0,.35) 10px 13px);
   }
 
   /* === GROVE TAB THEME (view-garden) ===
-     Grove of the World Tree — growth, paths, sacred idols */
+     Grove of the World Tree */
 
-  /* Section header — jade/growth green */
   #view-garden .sec-h h2 {
     color: var(--jade);
     border-left-color: var(--jade);
-    text-shadow: 0 0 20px rgba(111,158,84,.2);
+    text-shadow: 0 0 20px rgba(111,158,84,.28);
   }
-  /* Grove intro — jade left rule, full-ink text */
   #view-garden .garden-intro {
-    border-left-color: rgba(111,158,84,.35);
+    border-left-color: rgba(111,158,84,.42);
     color: var(--ink);
   }
 
   /* === QUIZZES TAB THEME (view-quizzes) ===
-     Officer knowledge — academic path, Well of Mimir */
+     Officer knowledge — Well of Mimir */
 
-  /* Quiz cards — violet/academic tint */
   #view-quizzes .quiz-card {
-    background: linear-gradient(180deg, rgba(124,100,200,.04), var(--panel));
-    border-color: rgba(124,100,200,.15);
+    background: linear-gradient(180deg, rgba(124,100,200,.09), var(--panel));
+    border-color: rgba(124,100,200,.22);
   }
-  /* Passed quiz cards — jade success tint */
   #view-quizzes .quiz-card.passed {
-    background: linear-gradient(180deg, rgba(111,158,84,.04), var(--panel));
+    background: linear-gradient(180deg, rgba(111,158,84,.09), var(--panel));
   }
 
   /* === TEST & TRAIN TAB THEME (view-test) ===
-     Cognitive measurement — clinical, steel blue */
+     Cognitive measurement — steel blue */
 
-  /* Test cards — steel-blue/cognitive tint */
   #view-test .test-card {
-    background: linear-gradient(180deg, rgba(124,147,168,.04), var(--panel));
-    border-color: rgba(124,147,168,.15);
+    background: linear-gradient(180deg, rgba(124,147,168,.09), var(--panel));
+    border-color: rgba(124,147,168,.22);
   }
-  /* Memory blocks — violet/scholarly tint */
   #view-test .mem-block {
-    background: linear-gradient(180deg, rgba(124,100,200,.04), var(--panel));
-    border-color: rgba(124,100,200,.15);
+    background: linear-gradient(180deg, rgba(124,100,200,.09), var(--panel));
+    border-color: rgba(124,100,200,.22);
   }
 
   /* === SKILLS TAB THEME (view-skills) ===
-     Tree of growth — the Yggdrasil card deck */
+     Tree of growth — Yggdrasil deck */
 
-  /* Section headers — jade/growth color */
   #view-skills .sec-h h2 {
     color: var(--jade);
     border-left-color: var(--jade);
   }
-  /* Plant-a-skill form — jade top edge (folder feel) */
   #view-skills .adder {
-    border-top: 2px solid rgba(111,158,84,.25);
+    border-top: 2px solid rgba(111,158,84,.30);
     border-top-left-radius: 2px;
     border-top-right-radius: 2px;
   }
 
   /* === CARVED RINGS TAB THEME (view-trophies) ===
-     Permanent record — amber, earned, honest */
+     Permanent record — amber, earned */
 
-  /* Section header — gold permanence */
   #view-trophies .sec-h h2 {
     color: var(--gold-bright);
     border-left-color: var(--gold-bright);
-    text-shadow: 0 0 20px rgba(184,160,106,.2);
+    text-shadow: 0 0 20px rgba(184,160,106,.28);
   }
-  /* Trophy lede — amber left rule instead of default --line */
   #view-trophies .trophy-lede {
-    border-left-color: rgba(184,160,106,.35);
+    border-left-color: rgba(184,160,106,.42);
     color: var(--ink);
   }
 

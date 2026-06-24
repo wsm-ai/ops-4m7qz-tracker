@@ -223,8 +223,11 @@ function showAftResult(a){
   if(secondary.length){
     focus+=` <br><br><b>Also watch:</b> ${secondary.map(e=>e.label).join(", ")} ${secondary.length>1?'are':'is'} trending down — ${secondary.map(e=>EVENT_FOCUS_SHORT[e.k]).join("; ")}.`;
   }
+  const scoreCls=a.total>=350?'aft-score-pass':a.total>=300?'aft-score-pass':'aft-score-fail';
+  const scoreLabel=a.total>=350?'✓ 350+ combat standard':a.total>=300?'✓ 300+ general standard':'✗ below 300 standard';
   el.innerHTML=`<div class="aft-result-card">
-    <h3>Latest — ${a.date} · ${a.total} pts ${a.total>=350?'<span style="color:var(--jade)">(350+ ✓)</span>':a.total>=300?'<span style="color:var(--gold)">(300+ pass)</span>':'<span style="color:var(--ember)">(below 300)</span>'}</h3>
+    <h3>Latest — ${a.date}</h3>
+    <div class="aft-score-big">${a.total}<span class="${scoreCls}">${scoreLabel}</span></div>
     ${events.map(e=>`<div class="aft-event ${e.k===weakest.k?'weak':''}"><span>${e.label}${e.k===weakest.k?' ← weakest':''}</span><span class="ev-score">${e.s} pts${trend(e)}${e.s<60?' ⚠️':''}</span></div>`).join("")}
     <div class="aft-focus">📍 <b>Plan focus:</b> ${focus} ${failing.length?`<br><br>⚠️ ${failing.length} event(s) below the 60-pt minimum — fix immediately to avoid a no-go.`:nearMin.length?`<br><br>⚠️ ${nearMin.map(e=>e.label).join(", ")} sitting near the 60-pt floor — keep a buffer.`:''}</div>
   </div>`;

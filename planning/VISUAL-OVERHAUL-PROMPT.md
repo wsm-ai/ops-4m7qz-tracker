@@ -1,219 +1,142 @@
 # Visual Overhaul Session Prompt — Operations PWA
 
-Paste this at the start of a session when implementing the visual redesign.
-Pick **one phase** per session — do not attempt all three in one session.
+Paste this at the start of a session when continuing the visual redesign.
+
+**Phases 1 and 2 are complete.** See `planning/FINISHED-FEATURES.md` for the full record of what was built (skill deck UI, sigil system, carved rings overhaul). Only Phase 3 remains.
+
+**Current version: v103.** Service worker is at `operations-v103` in `sw.js`. Bump to `v104` when you ship.
 
 ---
 
-You are implementing a major visual redesign of **Operations**, a gamified ROTC life-tracker PWA. Read `CLAUDE.md` first (binding rulebook), then `docs/OPERATIONS-HANDOFF.md` (architecture), then **`planning/DESIGN-VISUAL-OVERHAUL.md`** (the full visual specification you will implement from).
+## Phase 3 — Tab Theming Sweep
 
-**Current version: v101.** Service worker is at `operations-v101` in `sw.js`. Bump to the next version when you ship.
-
----
-
-## This session: implement Phase [N]
-
-Replace `[N]` with the phase you are doing:
-
-- **Phase 1** — Skill cards + deck UI
-- **Phase 2** — Tree emblems
-- **Phase 3** — Tab theming sweep (specify which tabs)
-
----
-
-## Phase 1 — Skill cards + deck UI
-
-### What to build
-Transform the skills tab from a flat list into a deck-based card interface. Full spec in `planning/DESIGN-VISUAL-OVERHAUL.md` Section 1.
-
-### Files to change
-- `src/tabs/skills.js` — `leafCard()` and `renderSkillsTab()`
-- `src/styles/main.css` — all `.sk-*` classes
-
-### Card anatomy (abbreviated)
-Each skill is a card with:
-- **Header band**: path icon + "PATH OF X" label + "Lv N / Max" — dark background in path color tint
-- **Center emblem**: placeholder circle for now (Phase 2 fills this in with the real emblem SVG)
-- **Skill name**: large, below emblem
-- **Tier label**: current tier name below skill name
-- **Level fill bar**: path-colored, width = `(effectiveLevel / maxLevel * 100)%`
-- **Footer**: fade warning (if fading) + copy button
-- **Border**: layered box-shadow for depth + CSS `::before`/`::after` corner accents in path color
-
-### Deck layout
-- `renderSkillsTab()` groups cards by `sk.cat` (already does this; restructure the wrapper)
-- Each path group becomes a `.sk-deck` with a `.sk-deck-header` (always visible) and `.sk-deck-body` (collapsible)
-- Deck header shows: path icon, path name, world level, skill count, fading count, expand arrow
-- Default: the path with the most recent XP activity (highest `pathXP[cat]`) is expanded; all others collapsed
-- Tap the deck header toggles `.sk-deck-body` visibility (add `data-skdeck` attribute, handle in `events.js` or inline onclick)
-- Cards in an expanded deck have a `2px` stagger shadow to feel like a physical stack
-
-### Path colors
-Use `skLeafColor()` from `skills-core.js` on the path's aggregate level, OR derive from the existing color palette per-path. The safe approach: use the `--ember`, `--gold`, etc. CSS vars mapped by cat, not a computed per-card color for the deck header (individual cards still use `skLeafColor` for their fill bar and border).
-
-Suggested path-color mapping for deck headers (add these as CSS custom properties or hardcode):
-```
-tactical     → #7a3e3e  (dark red)
-physical     → #7a5c2a  (dark amber)
-cognitive    → #3a5c7a  (dark steel blue)
-physiological→ #3a6b4a  (dark green)
-technical    → #4a4a6b  (dark indigo)
-leadership   → #6b5a2a  (dark gold)
-academic     → #5a3a6b  (dark violet)
-personal     → #3a6b3a  (dark sage)
-hearth       → #7a4a2a  (dark ember)
-roots        → #4a5a3a  (dark moss)
-```
-
-### CSS classes to add / update
-- `.sk-deck` — outer deck wrapper, `margin-bottom: 18px`
-- `.sk-deck-header` — flex row, `cursor: pointer`, `border-radius: 10px`, path color left accent, expand arrow rotates on `.open`
-- `.sk-deck-body` — cards container, `display: none` by default, `display: block` when deck is open
-- `.sk-card` — full redesign: `border-radius: 12px`, dark background, layered box-shadow border, `padding: 0` (internal sections handle padding), `position: relative` for corner accents
-- `.sk-card::before` `.sk-card::after` — corner ornaments (top-left and bottom-right): small SVG-drawn corner bracket or knotwork in path color, achieved via `background-image: url("data:image/svg+xml,...")` or pure CSS clip-path
-- `.sk-card-header` — header band inside card
-- `.sk-card-emblem` — center emblem area, `min-height: 60px`, `display: flex; align-items: center; justify-content: center`
-- `.sk-card-name` — skill name, larger weight
-- `.sk-card-tier` — tier label, `var(--ink-dim)`, smaller
-- `.sk-card-footer` — flex row with fade info + copy button
-- `.sk-level-bar` — already exists, keep and refine
-
-### Regression requirement
-After changes: `npm run regress` must show 0 pageerror and the SKILL AUDIT `{badCount: 0}`.
-
----
-
-## Phase 2 — Tree emblems
-
-### What to build
-Every started skill leaf on the Yggdrasil tree gets a per-skill SVG emblem inside it. Emblem complexity scales with `effectiveLevel / maxLevel` (5 tiers: Raw → Forged → Tempered → Refined → Mastered). Full motif spec per path in `planning/DESIGN-VISUAL-OVERHAUL.md` Section 3.
-
-### File to change
-`src/core/tree.js` — add a new `// === SKILL EMBLEMS ===` section before `renderSkillTree()`
-
-### Implementation blueprint
-
-**Step 1: Add helper functions**
-```javascript
-function _emblemSeed(skillId) {
-  let h = 0;
-  for (let i = 0; i < skillId.length; i++) h = ((h << 5) - h + skillId.charCodeAt(i)) | 0;
-  return Math.abs(h) % 4;
-}
-function _emblemTier(eff, max) {
-  if (!eff || eff < 1) return 0;
-  const pct = eff / (max || 1);
-  if (pct <= 0.20) return 1;
-  if (pct <= 0.40) return 2;
-  if (pct <= 0.60) return 3;
-  if (pct <= 0.80) return 4;
-  return 5;
-}
-```
-
-**Step 2: Write one emblem function per path**
-Each function signature: `function _emblemX(cx, cy, r, tier, seed)` returns an SVG string.
-Implement them per the motif specs in Section 3 of the design doc.
-Key constraint: keep generated SVG strings short — these are inlined into a large SVG. No `<style>` blocks inside emblem SVG. Use `stroke`, `fill`, `stroke-width` attributes directly.
-
-**Step 3: Dispatcher**
-```javascript
-const _EMBLEM_FN = {
-  tactical: _emblemSword, physical: _emblemFlame, cognitive: _emblemEye,
-  physiological: _emblemValknut, technical: _emblemGear, leadership: _emblemCrown,
-  academic: _emblemScroll, personal: _emblemSprout, hearth: _emblemHearth, roots: _emblemRoots,
-};
-function skEmblem(skill, eff, max, cx, cy, r) {
-  const fn = _EMBLEM_FN[skill.cat]; if (!fn) return '';
-  const tier = _emblemTier(eff, max);
-  if (tier === 0) return '';
-  const seed = _emblemSeed(skill.id || skill.name);
-  return fn(cx, cy, r * 0.58, tier, seed); // emblem fits within 58% of leaf radius
-}
-```
-
-**Step 4: Call in leaf rendering**
-In the existing leaf-rendering loop where sub-leaves and solo-node circles are drawn, after the circle element, insert the emblem:
-```javascript
-const emblemSvg = skEmblem(leaf, eff, sk.levels.length, lx, ly, leafR);
-// append to leaves array after the circle
-```
-
-### Emblem SVG style guidelines
-- All emblems use `stroke="currentColor"` with `stroke-width` scaled to `r * 0.08` or similar fraction
-- `fill="none"` by default; use `fill` only for solid inner shapes at tier 4–5
-- Color: use the same leaf color (`skLeafColor(eff, max)`) so the emblem matches the leaf
-- Keep each emblem to ≤ 8 SVG elements at tier 5. Tier 1 should be 1–2 elements.
-
-### Screenshot verification
-After implementing, run `npm run regress -- --shot` to generate `dist/tree.png` and verify:
-- Emblems are visible at normal zoom
-- No overlap with fade rings (rings are outside the circle; emblems are inside)
-- No overlap with leaf labels
-
----
-
-## Phase 3 — Tab theming sweep
-
-### What to build
-Apply per-tab visual atmosphere to each tab. Full tab specs in `planning/DESIGN-VISUAL-OVERHAUL.md` Section 2.
+Read `planning/DESIGN-VISUAL-OVERHAUL.md` Section 2 for the full per-tab specifications. Read `planning/FINISHED-FEATURES.md` for design language reference (color palette, path colors, Yggdrasil theme rules).
 
 ### Recommended session splits
-**Session 3a**: Dawn, Oaths, Orders, AFT (the daily-use tabs — highest value)
-**Session 3b**: Log, Plan, Awards, Records (secondary tabs)
-**Session 3c**: Profile, Weight, Board, Shop (tertiary tabs)
 
-### Files to change
-- `src/styles/main.css` — add tab-scoped CSS classes for each tab's atmosphere
-- `src/tabs/<tab>.html` — add `.tab-header-band` wrapper or atmosphere class to root element if needed
-- `src/tabs/<tab>.js` — only if a render change is needed (e.g. adding a class to a wrapper element)
+**Session 3a — Daily-use tabs (highest value, do these first):**
+- Dawn (`today.js`) — golden light, anticipatory, commanding
+- Oaths (`quests.js`) — sworn parchment, weighty, ancient
+- Orders (`dailies.js`) — military stencil, accountability board
+- AFT (`aft.js`) — stark, measurement-forward, combat readiness
 
-### Approach for each tab
-1. Read the tab spec in `DESIGN-VISUAL-OVERHAUL.md` Section 2
-2. Identify the CSS that creates the atmosphere (background tints, border styles, typography treatment)
-3. Add it to `main.css` under a clearly labelled comment: `/* === DAWN TAB THEME === */`
-4. Test that the tab renders correctly and all interactive elements still work
-5. Run `npm run regress` before moving to the next tab
+**Session 3b — Secondary tabs:**
+- Log (`log.js`) — warrior's journal, hand-written ledger
+- Plan (`plan.js`) — tactical map, grid paper, mission briefing
+- Awards (`awards.js`) — trophy case, shadow box, honor
+- Records (`records.js`) — archive, stone inscription, permanence
 
-### What NOT to do in this phase
-- Do not restructure the HTML of any tab significantly — this could break existing JS renderers
-- Do not add new JS state
-- Do not add any external assets
-- Do not change how data is stored or displayed — only how it is styled
+**Session 3c — Tertiary tabs:**
+- Profile (`profile.js`) — personnel dossier, ID card
+- Weight (`weight.js`) — sacred oath on vellum, solemn
+- Board (`board.js`) — task board styling
+- Shop (`shop.html`) — reward shop styling
 
 ---
 
-## Required workflow for all phases
+## Implementation rules for Phase 3
+
+### What you're doing
+Apply per-tab visual atmosphere using CSS only. No new JS state. No layout restructures that break existing JS renderers.
+
+### Files to change
+- `src/styles/main.css` — primary change target; add tab-scoped CSS under a clear comment per tab
+- `src/tabs/<tab>.html` — only if a wrapper element or class attribute needs to be added
+- `src/tabs/<tab>.js` — only if a class needs to be applied to a dynamically-rendered wrapper
+
+### Approach for each tab
+1. Read the tab's spec in `DESIGN-VISUAL-OVERHAUL.md` Section 2
+2. Identify the CSS that creates the atmosphere (background tints, border styles, typography treatment)
+3. Add to `main.css` under: `/* === TAB NAME THEME === */`
+4. Test that the tab renders and all interactive elements still work
+5. Run `npm run regress` before moving to the next tab
+
+### What NOT to do
+- Do not restructure HTML significantly — this breaks existing JS renderers
+- Do not add new JS state or new localStorage keys
+- Do not add external assets, CDN links, or network calls
+- Do not change how data is stored, loaded, or computed
+- Do not alter the Yggdrasil tree renderer or skill sigil system
+
+### Per-tab atmosphere specs (abbreviated — see DESIGN-VISUAL-OVERHAUL.md for full detail)
+
+#### Dawn (`view-today`)
+- Top strip: deep navy-to-gold gradient framing the greeting
+- Greeting card: wide, gold left border (4px), subtle gold inner shadow
+- Field Brief card: parchment tint (`rgba(184,160,106,.07)`), rune-corner accents (::before/::after)
+- Commission countdown bar: gold pulse animation when active
+- Section dividers: thin rule with diamond or rune at center
+
+#### Oaths (`view-quests`)
+- Oath cards: warmer background tint, left border as vertical rune-stroke
+- Overdue oaths: amber left border, warmer card background
+- Active oaths with due date: small red wax-seal dot (CSS circle) in top-right
+- Archive: sepia-toned reduced-opacity cards, "THE OATH ARCHIVE" in small-caps
+
+#### Orders (`view-dailies`)
+- Container: near-black background (`#0a0b07`), monospace-adjacent treatment
+- Order rows: horizontal rules between rows
+- Done state: strike animation on check
+- 7-day summary banner: mission status board look — stencil uppercase, amber numbers
+
+#### AFT (`view-aft`)
+- Score card: black background, amber score in 48px+ font, ruled border
+- Per-event rows: military scoresheet style, monospace numbers
+- Sparkline: dark grid background (faint CSS `repeating-linear-gradient` crosshatch)
+- History cards: official test record feel — date in small-caps
+
+#### Log (`view-log`)
+- Entry cards: slight aged-paper tint, 1px amber left-margin rule 40px from left
+- Entry header (date + type): small-caps journal header style
+- Exercise rows: ledger entries — name left-aligned, values right-aligned
+
+#### Plan (`view-plan`)
+- Container: faint grid texture (`repeating-linear-gradient` crosshatch at very low opacity)
+- Session cards: mission briefing card — bold header with objective
+- Weekly goal block: mission parameter block, bordered top and bottom
+- Coach-today: "ORDERS FOR TODAY" panel with amber border
+
+#### Awards (`view-awards`)
+- Award cards: dark navy background, gold inner glow on hover
+- Award name: heavier weight, gold color
+- Unearned awards: desaturated, lower opacity (empty display slot)
+
+#### Records (`view-records`)
+- Section headers: engraved-look via `text-shadow: 1px 1px 0 #000, -1px -1px 0 rgba(255,255,255,.05)`
+- History entries: archival card style, filing date in top corner
+
+#### Profile (`view-profile`)
+- Profile card: file folder with tabbed top edge (CSS `::before` clip-path creates the tab)
+- Blood type / rank: data fields — label in uppercase, value in amber
+
+#### Weight (`view-weight`)
+- Container: warm parchment tint, slightly narrower to feel like a scroll
+- Promise entries: subtle left rule, weight values in amber
+
+---
+
+## Required workflow
 
 ```bash
-# After each feature or tab:
+# After each tab:
 python scripts/build.py
 npm run check
-npm run regress
+npm run regress       # must show 0 pageerror
 
-# When the full phase is done:
-# Bump sw.js:  operations-v101 → operations-v102 (or current+1)
+# When the full session's tabs are done:
+# Bump sw.js: operations-v103 → operations-v104 (or current+1)
 npm run package
 ```
 
-**Definition of done per phase:** `npm run verify` passes with 0 pageerror, SW version bumped, `npm run package` run, deliverable described in phase spec is visually complete.
+**Definition of done:** `npm run regress` passes with 0 pageerror, SW bumped, `npm run package` run.
 
 ---
 
 ## Architecture reminders
 
-- `index.html` is assembled output — edit `src/` only, then `python scripts/build.py`
-- `skLeafColor(eff, max)` returns an `rgb(r,g,b)` string — NOT a CSS var — use directly in `style=""` attributes
-- `SK_PATH_ICON`, `SK_CAT` are defined at the top of `src/core/skills-data.js` and available globally
-- `SK_CAT_ORDER` = `["tactical","physical","cognitive","physiological","technical","leadership","academic","personal","hearth","roots"]`
-- Tree leaf rendering is in `renderSkillTree()` in `src/core/tree.js` — the leaf circles and their fade rings are added to the `leaves[]` array
-- `skEffectiveLevel(sk)` and `skDaysLeft(sk)` are in `src/core/skills-core.js`
+- `index.html` is assembled output — edit `src/` only, then build
+- `skLeafColor(eff, max)` returns `rgb(r,g,b)` — use in `style=""` attributes directly, not as a CSS var
+- `SK_PATH_ICON` is in `src/core/tree.js`; `SK_CAT` and `SK_CAT_ORDER` in `src/core/skills-data.js`
+- All CSS lives in `src/styles/main.css` — no per-tab CSS files
 - No new dependencies. No network calls. No external fonts.
-
----
-
-## After each phase
-
-1. Commit or package the deliverable
-2. Note what phase was completed in `planning/NEXT-SESSION-PROMPT.md` under "What was just completed"
-3. On the final phase (Phase 3c), update `planning/NEXT-SESSION-PROMPT.md` to show the visual overhaul as fully complete
+- After this phase, update `planning/NEXT-SESSION-PROMPT.md` to mark the visual overhaul fully complete

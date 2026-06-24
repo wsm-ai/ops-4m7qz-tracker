@@ -1315,21 +1315,25 @@
   .trophy-path-bar-fill{display:block;height:100%;background:var(--tpc,var(--gold));border-radius:3px}
   .trophy-path[open] .trophy-path-hdr{border-bottom:1px solid var(--line)}
 
-  .trophy-path-body{padding:10px 12px;display:flex;flex-direction:column;gap:8px}
-  .trophy-skill{display:flex;align-items:flex-start;gap:10px;padding:6px 4px;border-bottom:1px solid rgba(255,255,255,.03)}
-  .trophy-skill:last-child{border-bottom:none}
-  .trophy-skill.started .trophy-skill-name{color:var(--ink)}
-  .trophy-skill-info{flex:none;width:130px;min-width:0}
-  .trophy-skill-name{font-size:12.5px;font-weight:600;color:var(--ink-dim);line-height:1.3;word-break:break-word}
-  .trophy-skill-tier{font-size:10.5px;color:var(--ink-faint);letter-spacing:.03em;margin-top:2px}
-  .trophy-skill-tier.unstarted{font-style:italic;opacity:.5}
-  .trophy-chips{display:flex;flex-wrap:wrap;gap:4px;flex:1}
+  .trophy-path-body{padding:10px 12px;display:grid;grid-template-columns:repeat(auto-fill,minmax(118px,1fr));gap:10px}
+  /* Sigil ring card — one per skill, shows peak-level sigil */
+  .trophy-ring-card{background:var(--panel-2);border:1px solid var(--line);border-radius:11px;padding:10px 8px 8px;display:flex;flex-direction:column;align-items:center;gap:4px;text-align:center;transition:border-color .2s}
+  .trophy-ring-card.started{border-color:rgba(255,255,255,.1)}
+  .trophy-ring-card.unstarted{opacity:.28;filter:grayscale(.7)}
+  .trophy-ring-sigil{width:62px;height:62px;display:flex;align-items:center;justify-content:center;border-radius:50%;cursor:default;flex:none}
+  .trophy-ring-sigil[data-trophychip]{cursor:pointer}
+  .trophy-ring-sigil[data-trophychip]:hover{filter:brightness(1.3)}
+  .trophy-ring-sigil svg{width:62px;height:62px}
+  .trophy-sigil-ph{width:36px;height:36px;border-radius:50%;border:1px dashed var(--line);opacity:.4}
+  .trophy-ring-name{font-size:11.5px;font-weight:600;color:var(--ink);line-height:1.3;word-break:break-word;max-width:100%}
+  .trophy-ring-tier{font-size:10px;color:var(--ink-faint);letter-spacing:.03em}
+  .trophy-chips{display:flex;flex-wrap:wrap;gap:3px;justify-content:center;margin-top:2px}
 
   /* Each chip: square, level number, earned = colored by tier/path */
   .trophy-chip{
-    width:26px;height:26px;border-radius:5px;
+    width:22px;height:22px;border-radius:4px;
     display:flex;align-items:center;justify-content:center;
-    font-size:11px;font-weight:700;letter-spacing:0;
+    font-size:10px;font-weight:700;letter-spacing:0;
     border:1px solid var(--line);color:var(--ink-faint);background:#0e0f09;
     transition:background .2s,border-color .2s,color .2s;cursor:default;
   }
@@ -1339,7 +1343,7 @@
   .trophy-chip.on.t2{background:rgba(var(--tpc-rgb,184,160,106),.26);border-color:rgba(var(--tpc-rgb,184,160,106),.55);color:var(--tpc,var(--gold))}
   .trophy-chip.on.t3{background:rgba(var(--tpc-rgb,184,160,106),.3);border-color:var(--tpc,var(--gold));color:var(--tpc,var(--gold));font-weight:800}
   /* Max-level (★) chip — gold glow regardless of path */
-  .trophy-chip.max{background:rgba(184,160,106,.28);border-color:var(--gold);color:var(--gold-bright);font-size:13px;box-shadow:0 0 8px rgba(184,160,106,.25)}
+  .trophy-chip.max{background:rgba(184,160,106,.28);border-color:var(--gold);color:var(--gold-bright);font-size:11px;box-shadow:0 0 8px rgba(184,160,106,.25)}
   .trophy-chip[data-trophychip]{cursor:pointer}
   .trophy-chip[data-trophychip]:hover{filter:brightness(1.25)}
   /* Tap-to-reveal trophy detail panel */
@@ -1385,6 +1389,505 @@
   .hb-month-cell.hm-future{background:rgba(255,255,255,.03)}
   .hb-month-header{display:flex;gap:2px;margin-bottom:2px}
   .hb-month-dow{flex:1;text-align:center;font-size:9px;color:var(--ink-faint);font-weight:600;letter-spacing:.03em}
+
+  /* ============================================================
+     PHASE 3 — PER-TAB VISUAL ATMOSPHERE (v104)
+     ============================================================ */
+
+  /* === DAWN TAB THEME (view-today) ===
+     First light over Asgard — golden, anticipatory, commanding */
+
+  /* Greeting strip: gold-tinted left band, brightened heading */
+  #view-today .sec-h {
+    background: linear-gradient(135deg, rgba(184,160,106,.09) 0%, transparent 55%);
+    border-radius: 8px;
+    padding: 8px 12px;
+    border-bottom: 1px solid rgba(184,160,106,.1);
+    margin-bottom: 14px;
+  }
+  #view-today .sec-h h2 {
+    color: var(--gold-bright);
+    border-left-color: var(--gold-bright);
+    text-shadow: 0 0 22px rgba(184,160,106,.22);
+  }
+  /* Field-notes cards — parchment tint + rune corner accents */
+  #view-today .fn-card {
+    background: linear-gradient(160deg, rgba(184,160,106,.052), var(--panel));
+    border-color: rgba(184,160,106,.18);
+    position: relative;
+  }
+  #view-today .fn-card::before {
+    content: "";
+    position: absolute; top: 5px; left: 5px;
+    width: 11px; height: 11px;
+    border-top: 1.5px solid rgba(184,160,106,.3);
+    border-left: 1.5px solid rgba(184,160,106,.3);
+    pointer-events: none;
+  }
+  #view-today .fn-card::after {
+    content: "";
+    position: absolute; bottom: 5px; right: 5px;
+    width: 11px; height: 11px;
+    border-bottom: 1.5px solid rgba(184,160,106,.3);
+    border-right: 1.5px solid rgba(184,160,106,.3);
+    pointer-events: none;
+  }
+  /* Commission countdown — gold pulse when active (not radiant/commissioned) */
+  @keyframes pulse-gold {
+    0%, 100% { box-shadow: none; }
+    50%       { box-shadow: 0 0 14px rgba(184,160,106,.2); }
+  }
+  #view-today .commission-bar:not(.radiant) {
+    border-left-color: var(--gold);
+    border-color: rgba(184,160,106,.28);
+    background: rgba(184,160,106,.07);
+    animation: pulse-gold 3.5s ease-in-out infinite;
+  }
+
+  /* === OATHS TAB THEME (view-quests) ===
+     Sworn word on parchment — weighty, binding, ancient */
+
+  /* Oath cards — warm parchment tint, left rune-stroke */
+  #view-quests #qList li.card {
+    background: linear-gradient(180deg, rgba(184,160,106,.04), var(--panel));
+    border-left: 3px solid rgba(184,160,106,.22);
+  }
+  /* Overdue oaths — amber accent, warmer tint */
+  #view-quests #qList li.card.overdue {
+    background: linear-gradient(180deg, rgba(200,119,46,.06), var(--panel));
+    border-left-color: var(--ember);
+  }
+  /* Active oath with a due date — wax-seal dot top-right (inside card) */
+  #view-quests #qList li.card:has(.due-tag):not(.done)::after,
+  #view-quests #qList li.card:has(.overdue-tag):not(.done)::after {
+    content: "";
+    position: absolute; top: 7px; right: 36px;
+    width: 7px; height: 7px;
+    border-radius: 50%;
+    background: #c8392b;
+    box-shadow: 0 0 5px rgba(200,57,43,.55), inset 0 1px 0 rgba(255,255,255,.2);
+    pointer-events: none;
+  }
+  /* Archive section — sepia / aged parchment */
+  .q-archive {
+    background: rgba(140,120,70,.05);
+    border-color: rgba(184,160,106,.14);
+  }
+  .q-archive summary {
+    font-variant: small-caps;
+    letter-spacing: .14em;
+    color: rgba(184,160,106,.55);
+  }
+  .q-arch-item {
+    opacity: .82;
+    filter: sepia(22%);
+  }
+
+  /* === ORDERS TAB THEME (view-dailies) ===
+     Military orders board — stencil, duty, accountability */
+
+  /* Habit and orders lists — dark mission-board background */
+  #view-dailies #dList,
+  #view-dailies #habitQuests {
+    background: rgba(5,6,3,.38);
+    border-radius: 9px;
+    padding: 6px;
+  }
+  /* Daily order checkboxes — square, not round */
+  #view-dailies ul.list .check {
+    border-radius: 4px;
+  }
+  /* 7-day consistency banner — monospace mission-status look */
+  .orders-week-summary {
+    font-family: ui-monospace, monospace;
+    letter-spacing: .05em;
+    text-transform: uppercase;
+    font-size: 11px;
+    background: rgba(184,160,106,.05);
+    border: 1px solid rgba(184,160,106,.1);
+    border-radius: 6px;
+    padding: 7px 11px;
+  }
+  .orders-week-summary b {
+    color: var(--gold-bright);
+    font-size: 13px;
+  }
+  /* Habit cards — left jade-rule accent */
+  .hb-card {
+    border-left: 3px solid rgba(111,158,84,.2);
+  }
+  .hb-card.done {
+    border-left-color: rgba(111,158,84,.44);
+  }
+
+  /* === AFT TAB THEME (view-aft) ===
+     Combat readiness — stark, honest, measurement-forward */
+
+  /* Score card — black background, ember header rule */
+  #view-aft .aft-result-card {
+    background: #030404;
+    border: 1.5px solid rgba(200,119,46,.38);
+  }
+  #view-aft .aft-result-card h3 {
+    font-size: 11.5px;
+    letter-spacing: .16em;
+    text-transform: uppercase;
+    color: var(--ember);
+    margin-bottom: 12px;
+    padding-bottom: 8px;
+    border-bottom: 1px solid rgba(200,119,46,.18);
+  }
+  /* Per-event rows — monospace scoresheet */
+  #view-aft .aft-event {
+    font-family: ui-monospace, monospace;
+    letter-spacing: .02em;
+  }
+  #view-aft .aft-event .ev-score {
+    font-size: 15px;
+    font-family: ui-monospace, monospace;
+    color: var(--gold-bright);
+  }
+  #view-aft .aft-event.weak .ev-score {
+    color: var(--ember);
+  }
+  /* Sparkline — dark crosshatch grid background */
+  #view-aft .aft-spark {
+    background:
+      repeating-linear-gradient(0deg,   rgba(255,255,255,.022) 0 1px, transparent 1px 18px),
+      repeating-linear-gradient(90deg,  rgba(255,255,255,.022) 0 1px, transparent 1px 36px),
+      #020303;
+    border: 1px solid rgba(184,160,106,.13);
+  }
+  /* History cards — dark, monospace, amber left border, date in small-caps */
+  #view-aft .aft-hist-row {
+    background: #050605;
+    border: 1px solid rgba(200,119,46,.18);
+    border-left: 3px solid rgba(200,119,46,.35);
+    border-radius: 7px;
+    font-family: ui-monospace, monospace;
+  }
+  #view-aft .aft-hist-row > span:first-child {
+    font-variant: small-caps;
+    letter-spacing: .07em;
+    color: var(--ink-faint);
+    font-size: 11px;
+  }
+  #view-aft .aft-hist-row .ttl {
+    font-size: 15px;
+  }
+
+  /* === LOG TAB THEME (view-log) ===
+     Warrior's journal — hand-written ledger */
+
+  /* Workout history cards — aged-paper tint, amber margin rule at 40px from left */
+  #view-log .lg-hist {
+    background-color: rgba(184,160,106,.028);
+    background-image: linear-gradient(90deg, transparent 39px, rgba(200,119,46,.28) 39px, rgba(200,119,46,.28) 40px, transparent 40px);
+    border-color: rgba(184,160,106,.15);
+  }
+  /* Journal entry header — small-caps date / session label */
+  #view-log .lg-hist-top .dt {
+    font-variant: small-caps;
+    letter-spacing: .07em;
+    color: var(--gold-bright);
+  }
+  /* Exercise rows — monospace ledger entries */
+  #view-log .lg-hist-ex {
+    font-family: ui-monospace, monospace;
+    font-size: 12px;
+    letter-spacing: .02em;
+    border-bottom: 1px solid rgba(255,255,255,.03);
+    padding: 3px 0;
+  }
+  /* Progress rows — amber left accent */
+  #view-log .lg-prog-row {
+    border-left: 3px solid rgba(184,160,106,.22);
+    padding-left: 11px;
+  }
+
+  /* === PLAN TAB THEME (view-plan) ===
+     Tactical map — grid paper, mission briefing */
+
+  /* Grid-paper texture in the gaps between cards */
+  #view-plan {
+    background-image:
+      repeating-linear-gradient(0deg,  rgba(255,255,255,.02) 0 1px, transparent 1px 22px),
+      repeating-linear-gradient(90deg, rgba(255,255,255,.02) 0 1px, transparent 1px 44px);
+  }
+  /* Coach-today panel — "ORDERS FOR TODAY" */
+  #view-plan .coach-card {
+    background: linear-gradient(160deg, rgba(184,160,106,.1), rgba(184,160,106,.03));
+    border: 1.5px solid rgba(184,160,106,.38);
+    border-left: 4px solid var(--gold);
+  }
+  #view-plan .coach-h {
+    letter-spacing: .16em;
+    text-transform: uppercase;
+    font-size: 10.5px;
+    font-weight: 800;
+    color: var(--gold-bright);
+  }
+  /* Session accordion cards — mission briefing cards */
+  #view-plan details.wk {
+    background: linear-gradient(180deg, rgba(184,160,106,.032), var(--panel));
+    border-color: rgba(184,160,106,.14);
+  }
+  #view-plan details.wk > summary {
+    letter-spacing: .05em;
+    font-weight: 700;
+  }
+  /* Plan-intro blocks — mission parameter blocks: bordered top and bottom */
+  #view-plan .plan-intro {
+    background: rgba(184,160,106,.03);
+    border-top: 1px solid rgba(184,160,106,.14);
+    border-bottom: 1px solid rgba(184,160,106,.14);
+    border-left: none;
+    border-right: none;
+    border-radius: 0;
+  }
+
+  /* === AWARDS TAB THEME (view-awards) ===
+     Trophy case / shadow box — honor, permanence */
+
+  /* Award cards — dark navy display-case background */
+  #view-awards .aw-card {
+    background: linear-gradient(180deg, #111620, #0c0e18);
+    border-color: rgba(184,160,106,.18);
+  }
+  /* Award name — gold, heavier weight */
+  #view-awards .aw-title {
+    color: var(--gold-bright);
+    font-weight: 700;
+  }
+  /* Membership cards — warmer tint */
+  #view-awards .mb-card {
+    background: linear-gradient(180deg, rgba(184,160,106,.04), var(--panel));
+  }
+  /* Event cards — gold left-accent rule */
+  #view-awards .ev-card {
+    border-left: 3px solid rgba(184,160,106,.22);
+    background: linear-gradient(180deg, rgba(184,160,106,.03), var(--panel));
+  }
+
+  /* === RECORDS TAB THEME (view-records) ===
+     Archive / stone inscription — permanence, history */
+
+  /* Section headers — engraved-look text-shadow */
+  #view-records .sec-h h2 {
+    text-shadow: 1px 1px 0 #000, -1px -1px 0 rgba(255,255,255,.05);
+    letter-spacing: .16em;
+  }
+  /* History trend blocks — archival card style */
+  #view-records .hist-block {
+    background: linear-gradient(180deg, rgba(184,160,106,.04), var(--panel));
+    border-color: rgba(184,160,106,.14);
+  }
+  #view-records .hist-h {
+    font-variant: small-caps;
+    letter-spacing: .07em;
+  }
+  /* Counseling log — filing card, violet left rule */
+  #view-records .cn-card {
+    background: var(--panel-2);
+    border-left: 3px solid rgba(124,147,168,.28);
+  }
+  #view-records .cn-date {
+    font-variant: small-caps;
+    letter-spacing: .05em;
+  }
+  /* Checklist cards — archival with gold accent */
+  #view-records .cl-card {
+    border-left: 3px solid rgba(184,160,106,.2);
+    background: linear-gradient(180deg, rgba(184,160,106,.028), var(--panel));
+  }
+
+
+  /* === PROFILE TAB THEME (view-profile) ===
+     Personnel dossier — classified file */
+
+  /* Form container — amber top edge suggests a folder */
+  #view-profile .adder {
+    border-top: 2px solid rgba(184,160,106,.28);
+    border-top-left-radius: 2px;
+    border-top-right-radius: 2px;
+  }
+  /* Section labels within the form — amber classified-file dividers */
+  #view-profile .sk-form-title {
+    color: var(--gold-bright);
+    border-left: 2px solid rgba(184,160,106,.4);
+    padding-left: 9px;
+    letter-spacing: .14em;
+  }
+  /* Blood type card — richer red-amber tint */
+  #view-profile .blood-card {
+    background: linear-gradient(160deg, rgba(156,74,52,.07), var(--panel));
+    border-color: rgba(156,74,52,.3);
+  }
+
+  /* === WEIGHT TAB THEME (view-weight) ===
+     Sacred oath on vellum — solemn, binding */
+
+  /* Warm parchment atmosphere on the whole tab */
+  #view-weight {
+    background-image: linear-gradient(180deg, rgba(201,162,75,.03) 0%, transparent 40%);
+  }
+  /* Keystone vow text — gold, the most solemn line in the app */
+  #view-weight .ks-vow {
+    color: var(--gold-bright);
+  }
+  /* Memorial section label — aged chapter marker */
+  #view-weight .weight-section-label {
+    color: rgba(184,160,106,.6);
+  }
+  /* Ledger entries — amber left rule, parchment tint */
+  #view-weight .wl-entry {
+    border-left: 3px solid rgba(184,160,106,.22);
+    background: linear-gradient(90deg, rgba(184,160,106,.03), var(--panel));
+  }
+  #view-weight .wl-entry.keystone {
+    border-left-color: rgba(184,160,106,.5);
+    background: linear-gradient(90deg, rgba(184,160,106,.06), var(--panel));
+  }
+  /* Promise disc identifier — gold label */
+  #view-weight .wl-disc {
+    color: var(--gold-bright);
+    font-weight: 600;
+  }
+
+  /* === BOARD TAB THEME (view-board) ===
+     The Muster — tactical checklist, cyber branch prep */
+
+  /* Task list — dark mission-board background */
+  #view-board #boardList {
+    background: rgba(5,6,3,.38);
+    border-radius: 9px;
+    padding: 6px;
+  }
+  /* Board task items — violet left rule (Cyber branch color) */
+  #view-board .board-item {
+    border-left: 3px solid rgba(124,147,168,.25);
+  }
+  #view-board .board-item.done {
+    border-left-color: rgba(111,158,84,.38);
+    opacity: .72;
+  }
+
+  /* === SHOP TAB THEME (view-shop) ===
+     The Mead Hall — earned rest, Norse celebration */
+
+  /* Mead Hall section header — warm gold */
+  #view-shop .sec-h h2 {
+    color: var(--gold-bright);
+    border-left-color: var(--gold-bright);
+    text-shadow: 0 0 20px rgba(184,160,106,.18);
+  }
+  /* Reward cards — hearth-warm tint, ember left accent */
+  #view-shop #rList .card {
+    background: linear-gradient(180deg, rgba(200,119,46,.04), var(--panel));
+    border-left: 3px solid rgba(200,119,46,.25);
+  }
+  /* Merit cost label — gold */
+  #view-shop .cost {
+    color: var(--gold-bright);
+    font-size: 11.5px;
+    letter-spacing: .03em;
+  }
+
+
+  /* === OBJECTIVES TAB THEME (view-bosses) ===
+     Trials — fortress under siege, endurance measured in steps */
+
+  /* Trial cards — blood-red tint, dark bordered */
+  #view-bosses li.card.boss {
+    background: linear-gradient(180deg, rgba(156,74,52,.06), var(--panel));
+    border-color: rgba(156,74,52,.28);
+  }
+  /* Trial name — ember color */
+  #view-bosses .boss-name {
+    color: var(--ember);
+  }
+  /* HP bar — crenellation stripe overlay suggests battlement walls */
+  #view-bosses .hpfill {
+    position: relative;
+  }
+  #view-bosses .hpfill::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    background: repeating-linear-gradient(90deg, transparent 0 11px, rgba(0,0,0,.32) 11px 13px);
+  }
+
+  /* === GROVE TAB THEME (view-garden) ===
+     Grove of the World Tree — growth, paths, sacred idols */
+
+  /* Section header — jade/growth green */
+  #view-garden .sec-h h2 {
+    color: var(--jade);
+    border-left-color: var(--jade);
+    text-shadow: 0 0 20px rgba(111,158,84,.2);
+  }
+  /* Grove intro — jade left rule, full-ink text */
+  #view-garden .garden-intro {
+    border-left-color: rgba(111,158,84,.35);
+    color: var(--ink);
+  }
+
+  /* === QUIZZES TAB THEME (view-quizzes) ===
+     Officer knowledge — academic path, Well of Mimir */
+
+  /* Quiz cards — violet/academic tint */
+  #view-quizzes .quiz-card {
+    background: linear-gradient(180deg, rgba(124,100,200,.04), var(--panel));
+    border-color: rgba(124,100,200,.15);
+  }
+  /* Passed quiz cards — jade success tint */
+  #view-quizzes .quiz-card.passed {
+    background: linear-gradient(180deg, rgba(111,158,84,.04), var(--panel));
+  }
+
+  /* === TEST & TRAIN TAB THEME (view-test) ===
+     Cognitive measurement — clinical, steel blue */
+
+  /* Test cards — steel-blue/cognitive tint */
+  #view-test .test-card {
+    background: linear-gradient(180deg, rgba(124,147,168,.04), var(--panel));
+    border-color: rgba(124,147,168,.15);
+  }
+  /* Memory blocks — violet/scholarly tint */
+  #view-test .mem-block {
+    background: linear-gradient(180deg, rgba(124,100,200,.04), var(--panel));
+    border-color: rgba(124,100,200,.15);
+  }
+
+  /* === SKILLS TAB THEME (view-skills) ===
+     Tree of growth — the Yggdrasil card deck */
+
+  /* Section headers — jade/growth color */
+  #view-skills .sec-h h2 {
+    color: var(--jade);
+    border-left-color: var(--jade);
+  }
+  /* Plant-a-skill form — jade top edge (folder feel) */
+  #view-skills .adder {
+    border-top: 2px solid rgba(111,158,84,.25);
+    border-top-left-radius: 2px;
+    border-top-right-radius: 2px;
+  }
+
+  /* === CARVED RINGS TAB THEME (view-trophies) ===
+     Permanent record — amber, earned, honest */
+
+  /* Section header — gold permanence */
+  #view-trophies .sec-h h2 {
+    color: var(--gold-bright);
+    border-left-color: var(--gold-bright);
+    text-shadow: 0 0 20px rgba(184,160,106,.2);
+  }
+  /* Trophy lede — amber left rule instead of default --line */
+  #view-trophies .trophy-lede {
+    border-left-color: rgba(184,160,106,.35);
+    color: var(--ink);
+  }
 
   @media (prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
 
@@ -10223,27 +10726,29 @@ function renderSkillRings(sk, pm){
   const maxLevel=levels.length;
   if(!maxLevel) return '';
   const isMaxed=peak>=maxLevel;
+  const tierLabel=peak>0?getTierLabelForLevel(sk,peak):'Unproven';
+
+  // Sigil at peak level — permanent record of what was carved into the tree
+  const sigilHtml=peak>0&&typeof skEmblemSvg==='function'
+    ?skEmblemSvg(sk,peak,maxLevel)
+    :`<div class="trophy-sigil-ph"></div>`;
+
+  const sigilAttrs=peak>0?` data-trophychip="${sk.id}" data-trophylvl="${peak}" role="button" tabindex="0"`:'';
 
   const chips=levels.map((lv,i)=>{
     const lvNum=i+1;
     const earned=peak>=lvNum;
     const isMax=lvNum===maxLevel;
-    const tierLabel=getTierLabelForLevel(sk,lvNum);
     const tierIdx=getTierIndexForLevel(sk,lvNum);
-    const title=`${tierLabel} · ${sk.name} · L${lvNum}${earned?' (earned)':' (not yet)'}`;
-    const interactAttrs=earned?` role="button" tabindex="0" data-trophychip="${sk.id}" data-trophylvl="${lvNum}"`:"";
-    return `<div class="trophy-chip t${tierIdx} ${earned?'on':''} ${isMax&&earned?'max':''}"
-      title="${esc(title)}"
-      style="${earned?`--tpc:${pm.color}`:''}"
-      ${interactAttrs}
-    >${isMax&&earned?'★':lvNum}</div>`;
+    const title=`${getTierLabelForLevel(sk,lvNum)} · ${sk.name} · L${lvNum}${earned?' (earned)':' (not yet)'}`;
+    const interactAttrs=earned?` role="button" tabindex="0" data-trophychip="${sk.id}" data-trophylvl="${lvNum}"`:'';
+    return `<div class="trophy-chip t${tierIdx} ${earned?'on':''} ${isMax&&earned?'max':''}" title="${esc(title)}" style="${earned?`--tpc:${pm.color}`:''}"${interactAttrs}>${isMax&&earned?'★':lvNum}</div>`;
   }).join('');
 
-  return `<div class="trophy-skill ${peak>0?'started':''}">
-    <div class="trophy-skill-info">
-      <div class="trophy-skill-name">${esc(sk.name)}</div>
-      ${peak>0?`<div class="trophy-skill-tier">${getTierLabelForLevel(sk,peak)} · L${peak}/${maxLevel}${isMaxed?' ✦':''}</div>`:'<div class="trophy-skill-tier unstarted">not yet started</div>'}
-    </div>
+  return `<div class="trophy-ring-card ${peak>0?'started':'unstarted'}">
+    <div class="trophy-ring-sigil"${sigilAttrs}>${sigilHtml}</div>
+    <div class="trophy-ring-name">${esc(sk.name)}</div>
+    <div class="trophy-ring-tier">${esc(tierLabel)}${peak>0?` · L${peak}/${maxLevel}${isMaxed?' ✦':''}`:''}</div>
     <div class="trophy-chips">${chips}</div>
   </div>`;
 }

@@ -19,27 +19,29 @@ function renderSkillRings(sk, pm){
   const maxLevel=levels.length;
   if(!maxLevel) return '';
   const isMaxed=peak>=maxLevel;
+  const tierLabel=peak>0?getTierLabelForLevel(sk,peak):'Unproven';
+
+  // Sigil at peak level — permanent record of what was carved into the tree
+  const sigilHtml=peak>0&&typeof skEmblemSvg==='function'
+    ?skEmblemSvg(sk,peak,maxLevel)
+    :`<div class="trophy-sigil-ph"></div>`;
+
+  const sigilAttrs=peak>0?` data-trophychip="${sk.id}" data-trophylvl="${peak}" role="button" tabindex="0"`:'';
 
   const chips=levels.map((lv,i)=>{
     const lvNum=i+1;
     const earned=peak>=lvNum;
     const isMax=lvNum===maxLevel;
-    const tierLabel=getTierLabelForLevel(sk,lvNum);
     const tierIdx=getTierIndexForLevel(sk,lvNum);
-    const title=`${tierLabel} · ${sk.name} · L${lvNum}${earned?' (earned)':' (not yet)'}`;
-    const interactAttrs=earned?` role="button" tabindex="0" data-trophychip="${sk.id}" data-trophylvl="${lvNum}"`:"";
-    return `<div class="trophy-chip t${tierIdx} ${earned?'on':''} ${isMax&&earned?'max':''}"
-      title="${esc(title)}"
-      style="${earned?`--tpc:${pm.color}`:''}"
-      ${interactAttrs}
-    >${isMax&&earned?'★':lvNum}</div>`;
+    const title=`${getTierLabelForLevel(sk,lvNum)} · ${sk.name} · L${lvNum}${earned?' (earned)':' (not yet)'}`;
+    const interactAttrs=earned?` role="button" tabindex="0" data-trophychip="${sk.id}" data-trophylvl="${lvNum}"`:'';
+    return `<div class="trophy-chip t${tierIdx} ${earned?'on':''} ${isMax&&earned?'max':''}" title="${esc(title)}" style="${earned?`--tpc:${pm.color}`:''}"${interactAttrs}>${isMax&&earned?'★':lvNum}</div>`;
   }).join('');
 
-  return `<div class="trophy-skill ${peak>0?'started':''}">
-    <div class="trophy-skill-info">
-      <div class="trophy-skill-name">${esc(sk.name)}</div>
-      ${peak>0?`<div class="trophy-skill-tier">${getTierLabelForLevel(sk,peak)} · L${peak}/${maxLevel}${isMaxed?' ✦':''}</div>`:'<div class="trophy-skill-tier unstarted">not yet started</div>'}
-    </div>
+  return `<div class="trophy-ring-card ${peak>0?'started':'unstarted'}">
+    <div class="trophy-ring-sigil"${sigilAttrs}>${sigilHtml}</div>
+    <div class="trophy-ring-name">${esc(sk.name)}</div>
+    <div class="trophy-ring-tier">${esc(tierLabel)}${peak>0?` · L${peak}/${maxLevel}${isMaxed?' ✦':''}`:''}</div>
     <div class="trophy-chips">${chips}</div>
   </div>`;
 }

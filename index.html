@@ -1804,6 +1804,7 @@ const DEFAULT = {
   counseling:[],          // DA 4856-style: [{id, date, type, people, summary, plan, followUp}]
   checklists:[],          // packing/gear: [{id, name, items:[{text,done}], template}]
   _seeded:false,     // whether starter skills have been seeded
+  _skillLadderVer:0, // bumped whenever seed ladders change; forces a full ladder resync on load
   boardTasks:[
     {id:id(), name:"Create / verify your CC IMS (Cadet Command) & TBB account", done:false},
     {id:id(), name:"Build your Talent-Based Branching (TBB) accessions file", done:false},
@@ -2243,6 +2244,7 @@ function load(){
     merged.volunteer=r.volunteer||[];
     merged.lifeSkills=r.lifeSkills||[];
     merged._seeded=r._seeded||false;
+    merged._skillLadderVer=r._skillLadderVer||0;
     // migration: if skills exist but lack hierarchy fields, they're the old flat set — reseed fresh
     if(merged.lifeSkills.length && merged.lifeSkills.every(s=>s.group===undefined && s.parent===undefined)){
       merged.lifeSkills=[]; merged._seeded=false;
@@ -7271,12 +7273,21 @@ function seedSkillsIfEmpty(){
     currentLevel:0, lastQuestTs:Date.now(), peakLevel:0,
     levels:(s.levels||[]).map((ability,i)=>({n:i+1,ability})), history:[], seeded:true
   }));
-  S._seeded=true; save();
+  S._seeded=true; S._skillLadderVer=SKILL_LADDER_VER; save();
 }
 // Add seed skills the user doesn't have yet (by name), and backfill transparency copy
+// Current seed-ladder version. BUMP THIS whenever any skill's ladder/tiers/guidance
+// changes, so an old save (even one many versions behind) force-resyncs all ladder
+// CONTENT from the seed on load — while preserving the user's progress numbers
+// (currentLevel/peakLevel/history). This is the safety net for stale autosave files.
+const SKILL_LADDER_VER=84;
 // onto existing seeded skills. Never touches level/history/peak.
 function mergeNewSeedSkills(){
   let changed=false;
+  // A save from an older version may carry stale, shorter ladders that would otherwise
+  // shadow the current seed. If its ladder version is behind, we force a full resync of
+  // every skill's ladder content below (progress numbers are always preserved).
+  const ladderStale = (S._skillLadderVer||0) < SKILL_LADDER_VER;
   // retire the old combined skill (v37) now that it's split into two. Only remove it if
   // it was never leveled, so we never silently delete real progress.
   const oldCombined=S.lifeSkills.find(s=>s.name==="Controlled force & composure");
@@ -7326,7 +7337,7 @@ function mergeNewSeedSkills(){
         if(s.levels && ex.levels){
           const seedAbilities=s.levels.map(l=>(typeof l==='string'?l:l.ability)).join("|");
           const exAbilities=ex.levels.map(l=>(l&&l.ability!=null)?l.ability:String(l)).join("|");
-          if(seedAbilities!==exAbilities){
+          if(ladderStale || seedAbilities!==exAbilities){
             ex.levels=s.levels.map((l,i)=>({n:i+1, ability:(typeof l==='string'?l:l.ability)}));
             changed=true;
           }
@@ -7346,10 +7357,11 @@ function mergeNewSeedSkills(){
           if(ex.peakLevel>max){ ex.peakLevel=max; changed=true; }
         }
         // Refresh roadmap/advance/maintain/tiers to the current seed when they differ
-        if(s.roadmap && JSON.stringify(ex.roadmap)!==JSON.stringify(s.roadmap)){ ex.roadmap=s.roadmap; changed=true; }
-        if(s.advance && JSON.stringify(ex.advance)!==JSON.stringify(s.advance)){ ex.advance=s.advance; changed=true; }
-        if(s.maintain && JSON.stringify(ex.maintain)!==JSON.stringify(s.maintain)){ ex.maintain=s.maintain; changed=true; }
-        if(s.tiers && JSON.stringify(ex.tiers)!==JSON.stringify(s.tiers)){ ex.tiers=s.tiers; changed=true; }
+        // (or unconditionally when the saved ladder version is stale).
+        if(s.roadmap && (ladderStale || JSON.stringify(ex.roadmap)!==JSON.stringify(s.roadmap))){ ex.roadmap=s.roadmap; changed=true; }
+        if(s.advance && (ladderStale || JSON.stringify(ex.advance)!==JSON.stringify(s.advance))){ ex.advance=s.advance; changed=true; }
+        if(s.maintain && (ladderStale || JSON.stringify(ex.maintain)!==JSON.stringify(s.maintain))){ ex.maintain=s.maintain; changed=true; }
+        if(s.tiers && (ladderStale || JSON.stringify(ex.tiers)!==JSON.stringify(s.tiers))){ ex.tiers=s.tiers; changed=true; }
       }
     }
   });
@@ -7360,6 +7372,8 @@ function mergeNewSeedSkills(){
     const seed=seedByName[ex.name];
     if(seed && seed.parent && ex.parent!==seed.parent){ ex.parent=seed.parent; changed=true; }
   });
+  // stamp the current ladder version so the one-time forced resync doesn't repeat each load
+  if((S._skillLadderVer||0)!==SKILL_LADDER_VER){ S._skillLadderVer=SKILL_LADDER_VER; changed=true; }
   if(changed) save();
 }
 // Returns true if anything changed (so render can re-save).

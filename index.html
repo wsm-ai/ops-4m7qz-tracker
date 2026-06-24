@@ -5471,8 +5471,8 @@ if(_cloudBtn) _cloudBtn.onclick=()=>{ if(fileHandle){ if(confirm("Unlink this cl
 cloudInit();
 
 /* ================= SKILLS (levels, decay, promotion quests) ================= */
-const SK_CAT={tactical:"Path of War",physical:"Path of the Body",cognitive:"Path of the Mind",physiological:"Path of Vitality",technical:"Path of the Craft",leadership:"Path of Command",academic:"Path of Knowledge",personal:"Path of the Self"};
-const SK_CAT_ORDER=["tactical","physical","cognitive","physiological","technical","leadership","academic","personal"];
+const SK_CAT={tactical:"Path of War",physical:"Path of the Body",cognitive:"Path of the Mind",physiological:"Path of Vitality",technical:"Path of the Craft",leadership:"Path of Command",academic:"Path of Knowledge",personal:"Path of the Self",hearth:"Path of the Hearth",roots:"Path of Roots"};
+const SK_CAT_ORDER=["tactical","physical","cognitive","physiological","technical","leadership","academic","personal","hearth","roots"];
 // Seed skills — editable starters across every category, each with a level ladder.
 // fadeDays = how long a level lasts without a maintenance/practice quest.
 /* Hierarchical skill tree:
@@ -7057,6 +7057,202 @@ const SEED_SKILLS=[
    "Reach L6: run a trusted system (a 'second brain') that compounds your knowledge across years."],
    maintain:[
    "Hold L1: keep capturing in one place.","Hold L2: keep rephrasing in your words.","Hold L3: keep it organized.","Hold L4: keep reviewing and linking.","Hold L5: keep putting notes to use.","Hold L6: maintain and prune the system."]},
+
+  // ================= PATH OF THE HEARTH — sustainment & readiness (a root) =================
+  {name:"Sustainment", cat:"hearth", group:true, fadeDays:60},
+  {name:"Logistics & resupply", cat:"hearth", parent:"Sustainment", fadeDays:60,
+   tiers:[{label:"Caught-Short",upTo:2},{label:"Stocked",upTo:4},{label:"Quartermaster",upTo:6}],
+   why:"A soldier who runs out of what they need is combat-ineffective regardless of skill. Managing your own supply — never caught short on the essentials — is the unglamorous root that keeps you in the fight.",
+   whatYouDo:"Track and replenish your consumables and essentials (water, batteries, socks, meds, cash, fuel) before they run out, so you're never grounded by a shortage you could have foreseen.",
+   howTo:"Build a running list of what you actually consume and at what rate, set reorder/refill thresholds, and check stock on a schedule rather than when you run dry. Keep a small reserve of true essentials.",
+   levels:[
+   "Know what essentials you'd be in trouble without (make the list)",
+   "Replace an essential before it fully runs out, at least once",
+   "Hold a small reserve of true essentials (don't run on empty)",
+   "Track consumption rates so you reorder on time, not in a panic",
+   "Never get caught short on a planned event — kit fully resupplied in advance",
+   "Run a steady supply system: nothing essential ever surprises you"],
+   roadmap:["make the list","replace before empty","keep a reserve","track rates","resupply ahead","steady system"],
+   advance:[
+   "Reach L1: write down the essentials you genuinely can't function without.",
+   "Reach L2: catch one item before it runs out and replace it — proof you're watching.",
+   "Reach L3: keep a small reserve of the true essentials so a delay never grounds you.",
+   "Reach L4: learn your consumption rates and reorder on time.",
+   "Reach L5: go into a planned event (FTX, ruck, trip) fully resupplied — no scrambling.",
+   "Reach L6: your supply runs itself — nothing essential ever catches you short."],
+   maintain:[
+   "Hold L1: keep the list current.","Hold L2: keep replacing before empty.","Hold L3: keep the reserve stocked.","Hold L4: keep tracking rates.","Hold L5: keep resupplying ahead of events.","Hold L6: keep the system steady."]},
+  {name:"Gear readiness", cat:"hearth", parent:"Sustainment", fadeDays:90,
+   tiers:[{label:"Neglected",upTo:2},{label:"Maintained",upTo:4},{label:"Inspection-Ready",upTo:6}],
+   why:"Equipment that fails when you need it is worse than no equipment — you planned around it. Keeping your kit maintained, serviceable, and packed to standard is a core soldier responsibility and a graded one.",
+   whatYouDo:"Maintain, inspect, and pack your gear so it works the moment you need it and meets standard on inspection. Pairs with the packing/gear checklists in the app.",
+   howTo:"Clean and check gear after every use, fix or flag faults immediately rather than later, know your packing standards, and do a pre-event layout so nothing is missing or broken when it counts.",
+   levels:[
+   "Clean and stow your gear after use, not days later",
+   "Inspect kit for faults and flag/fix them before the next use",
+   "Pack to a known standard for a routine event",
+   "Pass a basic gear/uniform inspection without scrambling",
+   "Maintain all your kit on a schedule — nothing fails from neglect",
+   "Your gear is always inspection-ready and mission-serviceable, unprompted"],
+   roadmap:["clean after use","inspect & fix","pack to standard","pass inspection","scheduled upkeep","always ready"],
+   advance:[
+   "Reach L1: clean and stow gear right after use — habits beat marathons.",
+   "Reach L2: inspect for faults and fix or flag them before they bite you.",
+   "Reach L3: learn the packing standard for a routine event and meet it.",
+   "Reach L4: pass a basic inspection without a last-minute scramble.",
+   "Reach L5: maintain everything on a schedule so nothing fails from neglect.",
+   "Reach L6: your kit is permanently inspection-ready and serviceable — no prompting needed."],
+   maintain:[
+   "Hold L1: keep cleaning after use.","Hold L2: keep inspecting.","Hold L3: keep packing to standard.","Hold L4: stay inspection-capable.","Hold L5: keep the maintenance schedule.","Hold L6: keep it always-ready."]},
+  {name:"Field sustainment", cat:"hearth", parent:"Sustainment", fadeDays:90,
+   tiers:[{label:"Soft",upTo:2},{label:"Self-Reliant",upTo:4},{label:"Hard-Living",upTo:6}],
+   why:"In the field, the basics keep you effective: water discipline, fueling, warmth, foot care. Soldiers are lost to dehydration, cold, and blisters more than to the enemy. Mastering your own sustainment in austere conditions is foundational readiness.",
+   whatYouDo:"Keep yourself fed, hydrated, warm/cool, and serviceable in the field over increasing durations and harsher conditions, without it degrading your performance.",
+   howTo:"Practice water discipline (drink on a plan, not just thirst), ration and fuel management, layering for warmth, and foot care. Build up from a half-day outdoors to multi-day field conditions.",
+   safety:"Know the signs of heat injury and hypothermia; never push a real cold/heat situation alone to prove a point. Hydration and foot care first.",
+   levels:[
+   "Stay hydrated and fueled through a half-day outdoors on a plan",
+   "Manage warmth/cooling and basic foot care for a full day in the field",
+   "Sustain yourself overnight outdoors without performance dropping",
+   "Handle a multi-day field exercise: water, food, warmth, feet all managed",
+   "Stay effective in adverse weather (heat, cold, wet) over multiple days",
+   "Thrive in austere field conditions — sustainment is automatic, performance holds"],
+   roadmap:["half-day on plan","full day managed","one night out","multi-day FTX","adverse weather","austere & effective"],
+   advance:[
+   "Reach L1: get through a half-day outdoors hydrated and fueled on a plan, not on thirst.",
+   "Reach L2: manage warmth/cooling and foot care across a full field day.",
+   "Reach L3: spend a night outdoors with your performance intact the next day.",
+   "Reach L4: complete a multi-day FTX with water, food, warmth, and feet all under control.",
+   "Reach L5: stay effective through adverse weather over several days.",
+   "Reach L6: austere conditions don't degrade you — sustainment runs on autopilot."],
+   maintain:[
+   "Hold L1: keep the hydration plan.","Hold L2: keep managing warmth and feet.","Hold L3: keep getting reps outdoors.","Hold L4: keep doing multi-day field time.","Hold L5: keep training in bad weather.","Hold L6: keep the edge — austere stays easy."]},
+  {name:"Frugality & resourcefulness", cat:"hearth", parent:"Sustainment", fadeDays:120,
+   tiers:[{label:"Wasteful",upTo:2},{label:"Resourceful",upTo:4},{label:"Improviser",upTo:6}],
+   why:"Doing more with less is a force multiplier and a discipline. The soldier who can improvise, repair, repurpose, and stretch resources stays effective when supply is thin — and builds margin in civilian life too.",
+   whatYouDo:"Get more out of what you have: repair instead of replace, repurpose, improvise field-expedient solutions, and avoid waste — without sacrificing readiness.",
+   howTo:"Practice fixing small things instead of discarding them, find a second use for gear, build a simple field-expedient solution to a real problem, and cut waste from your routine consumption.",
+   levels:[
+   "Repair or maintain something instead of replacing it",
+   "Find a second use for a piece of gear or material",
+   "Solve a real problem with a field-expedient/improvised fix",
+   "Cut noticeable waste from your regular consumption without losing readiness",
+   "Routinely stretch resources further than expected, by habit",
+   "Improvise effective solutions under real constraint — make do and win"],
+   roadmap:["repair not replace","second use","improvised fix","cut waste","stretch by habit","improvise & win"],
+   advance:[
+   "Reach L1: fix or maintain one thing you'd normally have replaced.",
+   "Reach L2: find a genuine second use for a piece of kit or material.",
+   "Reach L3: solve a real problem with an improvised, field-expedient fix.",
+   "Reach L4: cut visible waste from your routine without dropping readiness.",
+   "Reach L5: stretching resources becomes a habit, not an effort.",
+   "Reach L6: under real constraint you improvise effective solutions and still come out ahead."],
+   maintain:[
+   "Hold L1: keep repairing.","Hold L2: keep finding second uses.","Hold L3: keep improvising.","Hold L4: keep waste low.","Hold L5: keep stretching by habit.","Hold L6: keep the improviser's edge."]},
+
+  // ================= PATH OF ROOTS — character & origin (the deepest root) =================
+  {name:"Character", cat:"roots", group:true, fadeDays:60},
+  {name:"Integrity", cat:"roots", parent:"Character", fadeDays:30, auto:"weight:integrity",
+   tiers:[{label:"Untested",upTo:2},{label:"Proven",upTo:5},{label:"Unshakeable",upTo:8}],
+   why:"Integrity is the bedrock the whole tree grows from — the consistency between what you say and what you do. It can't be self-declared; it's earned by keeping the promises you make and bearing the cost of the ones you break. This skill mirrors your Weight ledger: it reads the vows you've made and how you've held them.",
+   whatYouDo:"Keep the promises you make. This skill is read-only and levels automatically from your Weight ledger — your kept promises raise it, standing vows held strengthen it, and broken vows lower it (a broken keystone or heavy vow costs far more than an ordinary one). You can't tap to set this; it is earned.",
+   howTo:"Make promises deliberately in the Weight app, keep them, and close them honestly. Hold your standing vows daily. When you break one, mark it dead rather than hiding it — the honesty is part of the integrity. Then keep more than you break, especially the heavy ones.",
+   levels:[
+   "Make and keep your first promise on the ledger",
+   "Keep more promises than you break (a positive record begins)",
+   "Hold a standing vow continuously — a daily, ongoing commitment kept",
+   "Maintain a solid kept-record across a meaningful number of vows",
+   "Keep your keystone and heavy vows intact while building volume",
+   "Hold a strong kept-rate under real volume — tested and proven",
+   "Long record, heavy vows held, breaks rare — integrity others can rely on",
+   "Unshakeable: a deep ledger of kept promises, keystone intact, word = deed"],
+   roadmap:["first kept vow","kept>broken","hold a standing vow","solid record","heavy vows intact","proven under volume","reliable","unshakeable"],
+   advance:[
+   "Reach L1: make a promise in the Weight app and keep it — close it kept.",
+   "Reach L2: keep more than you break so your record turns positive.",
+   "Reach L3: hold a standing vow continuously — an ongoing daily commitment.",
+   "Reach L4: build a solid kept-record across a real number of promises.",
+   "Reach L5: protect your keystone and serious vows while you grow the ledger.",
+   "Reach L6: sustain a strong kept-rate while carrying real volume — this is where it's proven.",
+   "Reach L7: long record, heavy vows held, breaks rare — your word is dependable.",
+   "Reach L8: unshakeable — a deep ledger kept, keystone intact, word and deed are one. This levels only from your Weight ledger."],
+   maintain:[
+   "Hold L1: keep closing promises kept.","Hold L2: keep the record positive.","Hold L3: keep your standing vow alive.","Hold L4: keep the kept-record solid.","Hold L5: protect the heavy vows.","Hold L6: hold the kept-rate under volume.","Hold L7: keep breaks rare.","Hold L8: keep the keystone intact — integrity is held, never finished."]},
+  {name:"Resilience / grit", cat:"roots", parent:"Character", fadeDays:45,
+   tiers:[{label:"Brittle",upTo:2},{label:"Tough",upTo:5},{label:"Indomitable",upTo:8}],
+   why:"Resilience is recovering from setbacks without quitting, and grit is sustained effort toward a goal over time. Both predict success in hard schools and hard careers more than raw talent. They are built by surviving difficulty and choosing to continue.",
+   whatYouDo:"Recover from failures and keep going; sustain effort toward long, hard goals through discomfort and discouragement. Track honestly how you respond when things go wrong.",
+   howTo:"Reframe setbacks as data, not verdicts. Keep showing up after a bad day, a failed test, a quit-worthy moment. Pursue a genuinely hard, long-term goal and refuse to abandon it when it stops being fun.",
+   levels:[
+   "Get back to the work after a single bad day or failure",
+   "Recover from a real setback without quitting the goal",
+   "Push through a hard stretch where you wanted to stop",
+   "Sustain effort toward a long-term goal for months despite friction",
+   "Stay steady and effective through a genuinely hard period (school, loss, stress)",
+   "Treat adversity as expected — recover fast, keep aim, don't spiral",
+   "Endure a sustained ordeal and come out still moving toward the goal",
+   "Indomitable: setbacks don't shake your direction; you simply continue"],
+   roadmap:["back after a bad day","recover from setback","push through wanting to stop","months of effort","steady through hardship","adversity expected","endure an ordeal","indomitable"],
+   advance:[
+   "Reach L1: after a bad day or failure, return to the work — don't let one day become a week.",
+   "Reach L2: take a real setback and keep the goal alive anyway.",
+   "Reach L3: push through a stretch where quitting felt reasonable.",
+   "Reach L4: sustain effort toward a long goal for months through friction.",
+   "Reach L5: stay effective through a genuinely hard period of life.",
+   "Reach L6: adversity becomes expected — you recover fast and hold your aim.",
+   "Reach L7: endure a sustained ordeal and still be moving toward the goal at the end.",
+   "Reach L8: indomitable — setbacks no longer shake your direction; you continue."],
+   maintain:[
+   "Hold L1: keep returning after bad days.","Hold L2: keep goals alive through setbacks.","Hold L3: keep pushing through hard stretches.","Hold L4: keep the long effort going.","Hold L5: stay steady in hardship.","Hold L6: keep recovering fast.","Hold L7: keep enduring.","Hold L8: keep your direction unshaken."]},
+  {name:"Values & purpose", cat:"roots", parent:"Character", fadeDays:90,
+   tiers:[{label:"Unexamined",upTo:2},{label:"Clear",upTo:4},{label:"Anchored",upTo:6}],
+   why:"Knowing what you stand for and why you serve is the compass that keeps decisions consistent under pressure. Cadets who can articulate and defend their 'why' are steadier leaders and stronger board candidates — and harder to knock off course.",
+   whatYouDo:"Clarify, articulate, and live by your core values and your reason for serving — to the point you can defend them and they actually guide hard choices.",
+   howTo:"Name your core values in writing. Write your 'why I serve / why this branch.' Test it against hard questions. Then check your real decisions against it, and revise when honest reflection demands it.",
+   levels:[
+   "Name your core values honestly, in writing",
+   "Write a clear statement of why you serve / why this path",
+   "Defend your 'why' against hard, skeptical questions",
+   "Make a real decision guided by your values, even when it costs you",
+   "Show consistency between your stated values and your actual choices over time",
+   "Live anchored: values and purpose reliably steer you under pressure"],
+   roadmap:["name values","write your why","defend it","decide by it","consistent over time","anchored under pressure"],
+   advance:[
+   "Reach L1: write down your core values — naming them is the first honest step.",
+   "Reach L2: write a clear 'why I serve / why this branch' statement.",
+   "Reach L3: defend it against hard questions (board-style) without it falling apart.",
+   "Reach L4: make a genuine decision guided by your values even when it costs you something.",
+   "Reach L5: show, over time, that your choices match your stated values.",
+   "Reach L6: your values and purpose anchor you — under pressure they steer the call."],
+   maintain:[
+   "Hold L1: revisit your values periodically.","Hold L2: keep the 'why' current.","Hold L3: keep it defensible.","Hold L4: keep deciding by it.","Hold L5: keep choices and values aligned.","Hold L6: keep the anchor set."]},
+  {name:"Mental fortitude", cat:"roots", parent:"Character", fadeDays:45,
+   tiers:[{label:"Reactive",upTo:2},{label:"Composed",upTo:5},{label:"Unflinching",upTo:8}],
+   why:"Mental fortitude is the inner steadiness to stay calm, clear, and in control of yourself when conditions are hostile — fear, fatigue, chaos, discomfort. It is the anchor beneath leadership and performance, and it is trainable through deliberate exposure.",
+   whatYouDo:"Hold your composure and judgment under stress, discomfort, and fear; act deliberately instead of reacting. Framed honestly — this is trained steadiness, not the absence of fear.",
+   howTo:"Use controlled breathing under stress, deliberately put yourself in uncomfortable-but-safe situations and stay composed, and rehearse staying calm in chaos. Build from minor discomfort to high-pressure performance.",
+   safety:"Deliberate discomfort means cold, hard effort, public speaking, and the like — never self-harm or genuine danger. Build steadiness, not recklessness.",
+   levels:[
+   "Stay calm through a minor stressor using controlled breathing",
+   "Hold composure through real discomfort without flinching away",
+   "Keep clear judgment under time pressure or mild fear",
+   "Stay deliberate (not reactive) when things get chaotic",
+   "Perform under high pressure with your composure intact",
+   "Hold steady through fear and fatigue together",
+   "Lead others calmly while under genuine stress yourself",
+   "Unflinching: composed and clear-headed when it matters most"],
+   roadmap:["calm a minor stressor","hold through discomfort","clear under pressure","deliberate in chaos","perform under pressure","steady in fear+fatigue","calm while leading","unflinching"],
+   advance:[
+   "Reach L1: use controlled breathing to stay calm through a small stressor.",
+   "Reach L2: stay composed through real discomfort instead of flinching away.",
+   "Reach L3: keep clear judgment under time pressure or mild fear.",
+   "Reach L4: stay deliberate when things turn chaotic — respond, don't react.",
+   "Reach L5: perform under high pressure with composure intact.",
+   "Reach L6: hold steady when fear and fatigue stack together.",
+   "Reach L7: keep others calm while you're under genuine stress yourself.",
+   "Reach L8: unflinching — composed and clear-headed exactly when it matters most. Trained steadiness, not fearlessness."],
+   maintain:[
+   "Hold L1: keep using the breathing.","Hold L2: keep facing discomfort.","Hold L3: keep judgment clear under pressure.","Hold L4: stay deliberate in chaos.","Hold L5: keep performing under pressure.","Hold L6: keep steady in fear and fatigue.","Hold L7: keep leading calm.","Hold L8: keep the anchor set."]},
 ];
 function seedSkillsIfEmpty(){
   // If any hierarchical skills exist, leave them alone — but still add any NEW seed
@@ -7269,9 +7465,63 @@ function syncSkillsFromActivity(){
       if(lvl>rsk.currentLevel){ rsk.currentLevel=lvl; skUpdatePeak(rsk); rsk.lastQuestTs=now; rsk.history.push({ts:now,type:"auto-rhr",level:lvl}); changed=true; }
     }
   }
+  // Integrity skill: levels from the Weight ledger (read-only mirror). This is the
+  // one auto skill that can move DOWN as well as up — broken vows cost integrity,
+  // and a broken keystone/heavy vow costs far more than an ordinary one. Honest by
+  // design: it measures consistency between word and deed, not a self-declared tier.
+  const isk=S.lifeSkills.find(s=>s.auto==="weight:integrity");
+  if(isk){
+    const lvl=integrityLevel(isk.levels.length);
+    if(lvl!==isk.currentLevel){
+      // move toward the computed level (up or down); peak still tracks the all-time high
+      isk.currentLevel=lvl; skUpdatePeak(isk); isk.lastQuestTs=now;
+      isk.history.push({ts:now,type:"auto-integrity",level:lvl}); changed=true;
+    }
+  }
   return changed;
 }
-// Map a resting heart rate (bpm) to the Resting-heart-rate skill ladder rung.
+// Compute the Integrity level from S.weight.promises. Tier-weighted: keeping vows
+// raises it, holding standing vows strengthens it, breaking vows lowers it — and
+// breaking a keystone or heavy ("serious"/"standing") vow hurts far more than an
+// ordinary one. Returns an integer level clamped to [0, maxLevel]; the skill engine
+// floors a started skill at 1, so a rough patch never erases the record entirely.
+function integrityLevel(maxLevel){
+  const proms=(S.weight&&Array.isArray(S.weight.promises))?S.weight.promises.filter(p=>!p.favor):[];
+  if(!proms.length) return 0;                      // unproven until you've made a vow
+  const tierW=p=>{
+    if(isKeystoneP(p)) return 5;                   // the keystone vow — gravest
+    const t=(p.tier||"ordinary");
+    return t==="serious"?3 : t==="standing"?3 : 1; // heavy vows weigh more
+  };
+  let keptW=0, brokeW=0, kept=0, broke=0, standingHeld=0, keystoneBroken=false, keystoneKept=false;
+  proms.forEach(p=>{
+    const w=tierW(p);
+    if(p.status==="kept"){ keptW+=w; kept++; if(isKeystoneP(p))keystoneKept=true; }
+    else if(p.status==="broken"){ brokeW+=w; broke++; if(isKeystoneP(p))keystoneBroken=true; }
+    else if(p.status==="standing"){ keptW+=w*0.5; standingHeld++; }  // a held ongoing vow counts, but isn't "closed"
+  });
+  const tested=kept+broke;                         // resolved (closed) vows — the real test
+  if(tested===0 && standingHeld===0) return 0;     // only open vows so far — not yet tested
+  // weighted kept-rate: how much of your closed-vow weight you actually kept
+  const denom=keptW+brokeW;
+  const rate = denom>0 ? keptW/denom : 1;          // all-standing-no-closed -> treat as clean so far
+  // base level from the weighted kept-rate
+  let lvl;
+  if(rate>=0.99 && tested>=12 && standingHeld>=1 && keystoneKept) lvl=8;
+  else if(rate>=0.95 && tested>=8) lvl=7;
+  else if(rate>=0.90 && tested>=6) lvl=6;
+  else if(rate>=0.85 && tested>=4) lvl=5;
+  else if(rate>=0.75 && tested>=2) lvl=4;
+  else if(standingHeld>=1 && rate>=0.6) lvl=3;     // holding a standing vow with a decent record
+  else if(kept>broke) lvl=2;                        // positive record begun
+  else if(kept>=1 || standingHeld>=1) lvl=1;        // first kept/held vow
+  else lvl=1;                                        // a vow exists but record isn't positive — floored, not erased
+  // tier-weighted penalty for breaking heavy vows
+  if(keystoneBroken) lvl=Math.min(lvl,2);          // a broken keystone caps integrity hard
+  else if(brokeW>=6) lvl=Math.min(lvl,3);          // multiple heavy breaks cap it
+  else if(brokeW>=3) lvl=Math.min(lvl,5);          // one heavy break holds it back
+  return Math.max(0, Math.min(lvl, maxLevel));
+}
 // Ladder: L1 baseline, L2<75, L3<70, L4<65, L5<60, L6<56, L7<52, L8<48, L9<44, L10<=40 (lower=better).
 function rhrToLevel(rhr){
   if(rhr==null) return 0;
@@ -7449,7 +7699,7 @@ function skLeafColor(eff, max){
   else { const f=(t-0.5)/0.5; r=lerp(0xb8,0x6f,f); g=lerp(0xa0,0x9e,f); bl=lerp(0x6a,0x54,f); }
   return `rgb(${r},${g},${bl})`;
 }
-const SK_PATH_ICON={tactical:"⚔️",physical:"💪",cognitive:"🧠",physiological:"❤️",technical:"⚙️",leadership:"⭐",academic:"📚",personal:"🌱"};
+const SK_PATH_ICON={tactical:"⚔️",physical:"💪",cognitive:"🧠",physiological:"❤️",technical:"⚙️",leadership:"⭐",academic:"📚",personal:"🌱",hearth:"🔥",roots:"🪶"};
 // Pan/zoom state for the tree (persists across re-renders within a session)
 let _treeView={k:1, x:0, y:0};
 function _treeApply(){
@@ -7472,108 +7722,231 @@ function renderSkillTree(){
   const paths=SK_CAT_ORDER.filter(c=>skTopLevelInCat(c).length);
   if(!paths.length){ host.innerHTML=`<div class="aw-empty"><span class="big">🌱</span>Plant a skill to grow your tree.</div>`; return; }
 
-  // ---- A real tree: a trunk rises from the roots, then splits into a spreading crown.
-  // The 8 Paths are the main limbs of the crown, fanning out across the top like a canopy.
-  const W=1200, H=1080;
+  // ============================================================
+  //  YGGDRASIL — the World Tree. One great ash: roots in the deep,
+  //  a single rising trunk, a spreading crown. Each Path is a WORLD
+  //  (a realm) hung upon the tree in the Norse manner. A realm is a
+  //  luminous disc bearing its sigil; its skills hang from it as
+  //  boughs and leaves. No rectangles, no stacked blocks.
+  // ============================================================
+  const W=2600, H=2640;
   const cx=W/2;
-  const groundY=H-40;                 // where roots meet earth
-  const crownBaseY=H*0.52;            // trunk rises to here, then forks into the canopy
-  const crownBaseX=cx;
-  let parts=[];                       // tree strokes (drawn first, behind leaves)
-  let leaves=[];                      // leaf dots + labels (drawn on top)
+  const crownTopY=H*0.05;             // highest reach of the canopy
+  const groundY=H*0.545;              // the world's surface — trunk meets roots
+  const rootBotY=H*0.95;              // deepest reach of the roots
+  const trunkTopY=H*0.35;             // where the trunk forks into the crown
+  let parts=[];                       // wood: trunk, limbs, boughs, roots (behind)
+  let glows=[];                       // realm halos (mid layer)
+  let leaves=[];                      // realm discs, labels, skill leaves (front)
 
-  // helpers — a tapering branch as a filled quad from (x1,y1,w1) to (x2,y2,w2)
-  function branch(x1,y1,w1,x2,y2,w2,fill){
-    // perpendicular offsets
-    const dx=x2-x1, dy=y2-y1, len=Math.hypot(dx,dy)||1; const nx=-dy/len, ny=dx/len;
-    const ax=x1+nx*w1, ay=y1+ny*w1, bx=x1-nx*w1, by=y1-ny*w1;
-    const ddx=x2+nx*w2, ddy=y2+ny*w2, ex=x2-nx*w2, ey=y2-ny*w2;
-    // a slight quadratic bow toward the midpoint for an organic feel
+  // a smooth curved limb (bezier ribbon) — organic, tapering
+  function limb(x1,y1,x2,y2,w1,w2,fill,bowK){
     const mx=(x1+x2)/2, my=(y1+y2)/2;
-    return `<path d="M${ax.toFixed(1)} ${ay.toFixed(1)} L${ddx.toFixed(1)} ${ddy.toFixed(1)} L${ex.toFixed(1)} ${ey.toFixed(1)} L${bx.toFixed(1)} ${by.toFixed(1)} Z" fill="${fill}"/>`;
+    const dx=x2-x1, dy=y2-y1, len=Math.hypot(dx,dy)||1, nx=-dy/len, ny=dx/len;
+    const bow=len*(bowK==null?0.14:bowK);
+    const c1x=mx+nx*bow, c1y=my+ny*bow;
+    const off =(s)=>`${(x1+nx*w1*s).toFixed(1)} ${(y1+ny*w1*s).toFixed(1)}`;
+    const offE=(s)=>`${(x2+nx*w2*s).toFixed(1)} ${(y2+ny*w2*s).toFixed(1)}`;
+    const cw=(w1+w2)/2;
+    const ctrl=(s)=>`${(c1x+nx*cw*s).toFixed(1)} ${(c1y+ny*cw*s).toFixed(1)}`;
+    return `<path d="M${off(1)} Q${ctrl(1)} ${offE(1)} L${offE(-1)} Q${ctrl(-1)} ${off(-1)} Z" fill="${fill}"/>`;
   }
 
-  // ground + roots
-  parts.push(`<line x1="${cx-220}" y1="${groundY}" x2="${cx+220}" y2="${groundY}" stroke="#343a26" stroke-width="2" opacity=".45"/>`);
-  parts.push(`<path d="M${cx-22} ${groundY-6} q-30 6 -60 26 M${cx+22} ${groundY-6} q30 6 60 26 M${cx-8} ${groundY} q-6 14 -14 26 M${cx+8} ${groundY} q6 14 14 26" stroke="#4a3d28" stroke-width="4" fill="none" opacity=".55" stroke-linecap="round"/>`);
-  // trunk: a tapering column from ground to the crown base
-  parts.push(branch(cx, groundY, 24, crownBaseX, crownBaseY, 15, "#4a3d28"));
-  parts.push(branch(cx, groundY, 24, crownBaseX, crownBaseY, 15, "#52432b")); // subtle highlight overlay
-  // a few short bark ridges on the trunk
-  parts.push(`<path d="M${cx-6} ${groundY-40} q3 -90 0 -180 M${cx+7} ${groundY-30} q-2 -80 0 -160" stroke="#3a2f1e" stroke-width="1.4" fill="none" opacity=".5"/>`);
+  const barkDark="#332a1b", bark="#4a3d28", barkLite="#5d4c30";
 
-  // Fan the paths across an upward arc. Left paths lean left, right lean right; middle go up.
-  const n=paths.length;
-  // angles from about -75° (far left) to -105°... we want spread around straight up (-90°).
-  // Use a spread of ~150° centred on straight up.
-  const spreadDeg=168, startDeg=-90-spreadDeg/2;
+  // ---- ROOTS: three great roots delving to the wells of the deep, each ending
+  //  at a root-world. The connecting "limb" for each root-world is the root itself
+  //  (drawn here as a thick tapering member), so the world sits at the very tip.
+  const rootTipDepth = rootBotY;
+  const rootSpreadL = cx-760, rootSpreadR = cx+760, rootCenterX = cx-20;
+  // each root: {tip:{x,y}, path:"<svg d>", world:cat}
+  const ROOTS=[
+    { cat:"hearth",   tip:{x:rootSpreadL,  y:rootTipDepth-120},
+      d:`M${cx-30} ${groundY+10} C${cx-260} ${groundY+150} ${rootSpreadL+180} ${groundY+260} ${rootSpreadL} ${rootTipDepth-120}` },
+    { cat:"personal", tip:{x:rootCenterX,  y:rootTipDepth},
+      d:`M${cx} ${groundY+10} C${cx-30} ${groundY+220} ${cx+10} ${rootTipDepth-360} ${rootCenterX} ${rootTipDepth}` },
+    { cat:"roots",    tip:{x:rootSpreadR,  y:rootTipDepth-120},
+      d:`M${cx+30} ${groundY+10} C${cx+260} ${groundY+150} ${rootSpreadR-180} ${groundY+260} ${rootSpreadR} ${rootTipDepth-120}` }
+  ];
+  // draw each root as a thick stroked member (tapered look via two passes)
+  ROOTS.forEach(r=>{
+    parts.push(`<path d="${r.d}" stroke="${bark}" stroke-width="30" fill="none" stroke-linecap="round" opacity=".95"/>`);
+    parts.push(`<path d="${r.d}" stroke="${barkLite}" stroke-width="18" fill="none" stroke-linecap="round" opacity=".9"/>`);
+  });
+  // fine rootlets fraying off each tip into the deep
+  ROOTS.forEach(r=>{
+    const tx=r.tip.x, ty=r.tip.y;
+    parts.push(`<path d="M${tx} ${ty} q-46 70 -82 96 M${tx} ${ty} q14 80 -6 120 M${tx} ${ty} q50 66 88 90"
+        stroke="${barkDark}" stroke-width="5" fill="none" stroke-linecap="round" opacity=".55"/>`);
+  });
+  parts.push(`<line x1="${cx-980}" y1="${groundY}" x2="${cx+980}" y2="${groundY}" stroke="#2a2f1c" stroke-width="2.5" opacity=".4"/>`);
+
+  // ---- TRUNK: a single great ash rising from the surface into the crown fork
+  parts.push(limb(cx, groundY+10, cx, trunkTopY+18, 40, 23, bark, 0.02));
+  parts.push(limb(cx-3, groundY+10, cx-2, trunkTopY+18, 34, 19, barkLite, 0.02));
+  parts.push(`<path d="M${cx-11} ${groundY-20} C${cx-15} ${groundY-260} ${cx-8} ${groundY-560} ${cx-6} ${trunkTopY+30}
+      M${cx+12} ${groundY-10} C${cx+16} ${groundY-280} ${cx+7} ${groundY-580} ${cx+6} ${trunkTopY+30}"
+      stroke="${barkDark}" stroke-width="1.8" fill="none" opacity=".4"/>`);
+  // a broad fork-knot where the limbs spring from the trunk, so the crown reads
+  // as one continuous swelling of wood rather than separate sticks meeting in space.
+  // The swollen limb bases all originate here and overlap across this knot.
+  parts.push(`<ellipse cx="${cx}" cy="${trunkTopY}" rx="78" ry="56" fill="${bark}"/>`);
+  parts.push(`<ellipse cx="${cx-2}" cy="${trunkTopY-4}" rx="70" ry="46" fill="${barkLite}"/>`);
+
+  // ---- Fixed, balanced placement: each Path maps to a deliberate Norse realm slot.
+  //  Canopy (high realms): the aspirational mind & command. Mid: body, war, craft,
+  //  knowledge flanking the trunk. Root: the foundational self & vitality, cradled
+  //  among the roots. Slots are keyed by category so layout is deterministic & even.
+  //  The seven above-ground worlds fan out from the crown-fork on a wide arc,
+  //  each far enough apart that a world's full foliage footprint (disc + boughs
+  //  + leaves + label, ~230px radius) never reaches a neighbour. The eighth,
+  //  the foundational Self, is cradled deep among the roots. Geometry is built
+  //  from polar angles + radius so the spacing is guaranteed, not hand-nudged.
+  const forkX=cx, forkY=trunkTopY;
+  // angle measured from straight-up (−90°). Wide, even fan across the top.
+  const ARM=1010;                      // distance from fork to each canopy/mid realm
+  const polar=(deg,r)=>({rx:forkX+Math.cos((deg-90)*Math.PI/180)*r,
+                         ry:forkY+Math.sin((deg-90)*Math.PI/180)*r});
+  const tierOf=(deg)=> Math.abs(deg)<=22 ? "canopy" : "mid";
+  function slot(deg,r,w){ const p=polar(deg,r); return {ax:forkX, ay:forkY, rx:p.rx, ry:p.ry, w, tier:tierOf(deg), deg}; }
+  const SLOT_BY_CAT={
+    // seven worlds on a wide fan across the CROWN: −78° … 0° … +78°
+    physical:     slot(-78, ARM, 13),   // low-left
+    cognitive:    slot(-52, ARM, 14),   // upper-left
+    leadership:   slot(-20, ARM, 15),   // top-left-of-crown
+    academic:     slot( 20, ARM, 15),   // top-right-of-crown
+    tactical:     slot( 52, ARM, 14),   // upper-right
+    technical:    slot( 78, ARM, 13),   // low-right
+    physiological:slot(  0, ARM+120, 15), // crown apex, pushed highest & centred
+    // THREE foundational worlds in the ROOTS, each at the tip of a real root.
+    // The connecting limb for these is the root itself (drawn above), so the
+    // world sits at the very end of the root that feeds it.
+    hearth:   {ax:ROOTS[0].tip.x, ay:ROOTS[0].tip.y, rx:ROOTS[0].tip.x, ry:ROOTS[0].tip.y, w:0, tier:"root", rootLimb:true},
+    personal: {ax:ROOTS[1].tip.x, ay:ROOTS[1].tip.y, rx:ROOTS[1].tip.x, ry:ROOTS[1].tip.y, w:0, tier:"root", rootLimb:true},
+    roots:    {ax:ROOTS[2].tip.x, ay:ROOTS[2].tip.y, rx:ROOTS[2].tip.x, ry:ROOTS[2].tip.y, w:0, tier:"root", rootLimb:true}
+  };
+  // fallback slot ring for any unexpected category
+  const fallbackSlots=Object.values(SLOT_BY_CAT);
+
+  // Per-world two-tone palette {core, edge} — luminous, distinct, on-theme
+  const realmPal={
+    cognitive:    {core:"#6fa0c8", edge:"#2f4a66"},
+    leadership:   {core:"#e0c878", edge:"#7a5e22"},
+    academic:     {core:"#6fb894", edge:"#2f6450"},
+    physical:     {core:"#d89a5a", edge:"#7a4a22"},
+    tactical:     {core:"#d87a6a", edge:"#7a3028"},
+    technical:    {core:"#7c8fb0", edge:"#3a4663"},
+    physiological:{core:"#d87a9a", edge:"#7a2f4a"},
+    personal:     {core:"#9ec46a", edge:"#4f6a2c"}
+  };
+
+  let palDefs="";
   paths.forEach((cat,i)=>{
+    const slot=SLOT_BY_CAT[cat] || fallbackSlots[i%fallbackSlots.length];
     const tops=skTopLevelInCat(cat);
     const groups=tops.filter(s=>s.group);
     const looseLeaves=tops.filter(s=>!s.group);
     const nodes=[...groups, ...looseLeaves];
     const catLvl=catRolledLevel(cat);
+    const pal=realmPal[cat]||{core:"#9ec46a",edge:"#4f6a2c"};
 
-    const tDeg = startDeg + (n<=1?spreadDeg/2:(i/(n-1))*spreadDeg);
-    const tRad = tDeg*Math.PI/180;
-    const dirx=Math.cos(tRad), diry=Math.sin(tRad);          // unit direction of the limb
-    const goesLeft = dirx<-0.0001, goesRight = dirx>0.0001;
-    const limbLen = 300 + (nodes.length>3?70:0);
-    // limb springs from a point slightly up the crown base (so limbs share a fork zone)
-    const ox = crownBaseX + dirx*16;
-    const oy = crownBaseY + diry*16;
-    const tipX = ox + dirx*limbLen;
-    const tipY = oy + diry*limbLen;
-    // the limb itself, tapering
-    parts.push(branch(ox, oy, 12, tipX, tipY, 5, "#5a4a30"));
+    // --- the great branch (or root) from the trunk to this realm.
+    // Compute the realm radius up front so the limb can run all the way INTO the
+    // disc edge (not stop short in empty space) and plug into it with real width.
+    const realmR = 36 + Math.min(20, nodes.length*2.4);
+    if(!slot.rootLimb){
+      // direction from fork toward realm
+      let ldx=slot.rx-slot.ax, ldy=slot.ry-slot.ay; const llen=Math.hypot(ldx,ldy)||1; ldx/=llen; ldy/=llen;
+      // limb ends just inside the disc rim so wood and world overlap seamlessly
+      const limbEndX = slot.rx - ldx*(realmR-10);
+      const limbEndY = slot.ry - ldy*(realmR-10);
+      const woodFill = slot.tier==="root" ? bark : barkLite;
+      const baseW = slot.w*1.7;            // swollen where it leaves the trunk
+      const tipW  = Math.max(9, slot.w*0.85); // still thick where it meets the world
+      const bowK  = slot.tier==="root" ? 0.04 : 0.10;
+      parts.push(limb(slot.ax, slot.ay, limbEndX, limbEndY, baseW, tipW, woodFill, bowK));
+      // a soft inner highlight along the limb
+      parts.push(limb(slot.ax, slot.ay, limbEndX, limbEndY, baseW*0.5, tipW*0.45, "rgba(255,255,255,.05)", bowK));
+    }
+    // for root-tip worlds the connecting root is already drawn (the world sits at its tip)
 
-    // Path label, placed just beyond the tip, nudged outward along the limb direction.
-    const anchor = goesLeft ? "end" : (goesRight ? "start" : "middle");
-    const lblx = tipX + dirx*14;
-    const lbly = tipY + diry*14;
-    leaves.push(`<text x="${lblx.toFixed(0)}" y="${lbly.toFixed(0)}" text-anchor="${anchor}" font-size="15" font-weight="700" fill="var(--gold)">${SK_PATH_ICON[cat]||""} ${esc(SK_CAT[cat]||cat)}</text>`);
-    leaves.push(`<text x="${lblx.toFixed(0)}" y="${(lbly+16).toFixed(0)}" text-anchor="${anchor}" font-size="11" fill="var(--ink-faint)">Lv ${fmtLvl(catLvl)}</text>`);
-
-    // perpendicular to the limb, for forking boughs to alternate sides
-    const px=-diry, py=dirx;
+    // --- skills hang from the realm as boughs. Crown worlds radiate outward from
+    // the fork; root worlds fan their boughs DOWNWARD into the deep (rootlets).
+    const isCanopy = slot.tier==="canopy";
+    let baseAng;
+    if(slot.rootLimb){
+      baseAng = Math.PI/2;               // straight down — roots reach deeper
+    } else {
+      let bdx=slot.rx-slot.ax, bdy=slot.ry-slot.ay; const blen=Math.hypot(bdx,bdy)||1; bdx/=blen; bdy/=blen;
+      baseAng=Math.atan2(bdy,bdx);
+    }
+    const m=nodes.length;
+    // draw boughs+leaves FIRST so the glowing realm disc sits on top of bough roots
     nodes.forEach((node,j)=>{
-      // fork point along the outer 45–95% of the limb
-      const frac = nodes.length<=1 ? 0.7 : 0.45+0.5*(j/(nodes.length-1));
-      const fxp = ox + dirx*limbLen*frac;
-      const fyp = oy + diry*limbLen*frac;
-      const sidePerp = (j%2===0)? 1 : -1;
-      const boughLen = 46 + (j%3)*8;
-      const bx = fxp + px*sidePerp*boughLen + dirx*14;
-      const by = fyp + py*sidePerp*boughLen + diry*14;
-      parts.push(branch(fxp,fyp,3.2, bx,by,1.6, "#5a4a30"));
+      const spread = Math.PI*(slot.rootLimb?1.4:(slot.tier==="root"?1.25:1.0));
+      const a = baseAng + (m<=1?0:((j/(m-1))-0.5)*spread);
+      const boughLen = 78 + (j%3)*18;            // longer boughs => fuller crown
+      const fx = slot.rx + Math.cos(a)*(realmR-4);
+      const fy = slot.ry + Math.sin(a)*(realmR-4);
+      const tx = slot.rx + Math.cos(a)*(realmR+boughLen);
+      const ty = slot.ry + Math.sin(a)*(realmR+boughLen);
+      parts.push(limb(fx,fy,tx,ty,4.2,1.6,barkLite,0.12));
 
       if(node.group){
         const subs=skSubsOf(node);
-        const banchor = bx<fxp ? "end" : "start";
-        leaves.push(`<text x="${bx.toFixed(0)}" y="${(by + (py*sidePerp<0?-9:16)).toFixed(0)}" text-anchor="${banchor}" font-size="10.5" font-weight="600" fill="var(--ink-dim)">${esc(node.name)}</text>`);
-        // leaf cluster fanned at the bough tip
-        const m=subs.length;
+        const lblAnchor = Math.cos(a)<-0.2?"end":(Math.cos(a)>0.2?"start":"middle");
+        leaves.push(`<text x="${(tx+Math.cos(a)*10).toFixed(0)}" y="${(ty+Math.sin(a)*10+3).toFixed(0)}" text-anchor="${lblAnchor}" font-size="11.5" font-weight="600" fill="var(--ink-dim)" style="text-shadow:0 1px 3px #000,0 0 2px #000">${esc(node.name)}</text>`);
+        const sc=subs.length;
         subs.forEach((leaf,k)=>{
-          const a = (m<=1?0:(k/(m-1)-0.5))*1.4;              // fan angle
-          const rr = 16 + (k%2)*10;
-          const lx = bx + Math.cos(tRad+a)*rr*(goesLeft?-1:1) + (goesLeft?-6:6);
-          const ly = by + Math.sin(tRad+a)*rr - 2;
+          // fan the cluster wider and add a second ring so foliage looks full
+          const la = a + (sc<=1?0:((k/(sc-1))-0.5)*1.15);
+          const lr = 18 + (k%3)*13;
+          const lx = tx + Math.cos(la)*lr;
+          const ly = ty + Math.sin(la)*lr;
+          // tiny twig to each leaf
+          parts.push(`<line x1="${tx.toFixed(1)}" y1="${ty.toFixed(1)}" x2="${lx.toFixed(1)}" y2="${ly.toFixed(1)}" stroke="${barkLite}" stroke-width="1.1" opacity=".5"/>`);
           const eff=skEffectiveLevel(leaf), peak=leaf.peakLevel||0, max=leaf.levels.length;
-          const rad = 3.4 + Math.min(4,(peak/max)*4);
-          leaves.push(`<circle cx="${lx.toFixed(1)}" cy="${ly.toFixed(1)}" r="${rad.toFixed(1)}" fill="${skLeafColor(eff,max)}" stroke="rgba(0,0,0,.3)" stroke-width=".6"><title>${esc(leaf.name)} — ${eff>0?'Lv '+eff:'unproven'}${peak>eff?' · peak '+peak:''}</title></circle>`);
+          const rad = 4 + Math.min(5,(peak/max)*5);
+          leaves.push(`<circle cx="${lx.toFixed(1)}" cy="${ly.toFixed(1)}" r="${rad.toFixed(1)}" fill="${skLeafColor(eff,max)}" stroke="rgba(0,0,0,.4)" stroke-width=".7"><title>${esc(leaf.name)} — ${eff>0?'Lv '+eff:'unproven'}${peak>eff?' · peak '+peak:''}</title></circle>`);
         });
       } else {
         const eff=skEffectiveLevel(node), peak=node.peakLevel||0, max=node.levels.length;
-        const rad = 3.6 + Math.min(4.5,(peak/max)*4.5);
-        const banchor = bx<fxp ? "end" : "start";
-        leaves.push(`<circle cx="${bx.toFixed(1)}" cy="${by.toFixed(1)}" r="${rad.toFixed(1)}" fill="${skLeafColor(eff,max)}" stroke="rgba(0,0,0,.3)" stroke-width=".6"><title>${esc(node.name)} — ${eff>0?'Lv '+eff:'unproven'}${peak>eff?' · peak '+peak:''}</title></circle>`);
-        leaves.push(`<text x="${(bx+(banchor==='end'?-8:8)).toFixed(0)}" y="${(by+3).toFixed(0)}" text-anchor="${banchor}" font-size="9.5" fill="var(--ink-faint)">${esc(node.name)}</text>`);
+        const rad = 4.5 + Math.min(5.2,(peak/max)*5.2);
+        const lblAnchor = Math.cos(a)<-0.2?"end":(Math.cos(a)>0.2?"start":"middle");
+        leaves.push(`<circle cx="${tx.toFixed(1)}" cy="${ty.toFixed(1)}" r="${rad.toFixed(1)}" fill="${skLeafColor(eff,max)}" stroke="rgba(0,0,0,.4)" stroke-width=".7"><title>${esc(node.name)} — ${eff>0?'Lv '+eff:'unproven'}${peak>eff?' · peak '+peak:''}</title></circle>`);
+        leaves.push(`<text x="${(tx+Math.cos(a)*11).toFixed(0)}" y="${(ty+Math.sin(a)*11+3).toFixed(0)}" text-anchor="${lblAnchor}" font-size="10.5" fill="var(--ink-faint)" style="text-shadow:0 1px 3px #000,0 0 2px #000">${esc(node.name)}</text>`);
       }
     });
+
+    // --- the realm itself: a luminous world-disc with a per-world radial gradient
+    const gid=`realm_${cat}`;
+    palDefs+=`<radialGradient id="${gid}" cx="38%" cy="34%" r="72%">
+      <stop offset="0%" stop-color="${pal.core}"/>
+      <stop offset="100%" stop-color="${pal.edge}"/>
+    </radialGradient>`;
+    const haloR = realmR + 18 + catLvl*3.6;
+    glows.push(`<circle cx="${slot.rx.toFixed(1)}" cy="${slot.ry.toFixed(1)}" r="${haloR.toFixed(1)}" fill="url(#realmGlow)" opacity="${(0.16+catLvl*0.045).toFixed(2)}"/>`);
+    leaves.push(`<circle cx="${slot.rx.toFixed(1)}" cy="${slot.ry.toFixed(1)}" r="${realmR.toFixed(1)}" fill="url(#${gid})" stroke="var(--gold)" stroke-width="2"/>`);
+    leaves.push(`<circle cx="${slot.rx.toFixed(1)}" cy="${slot.ry.toFixed(1)}" r="${(realmR-5).toFixed(1)}" fill="none" stroke="rgba(255,255,255,.16)" stroke-width="1"/>`);
+    // specular glint
+    leaves.push(`<ellipse cx="${(slot.rx-realmR*0.28).toFixed(1)}" cy="${(slot.ry-realmR*0.34).toFixed(1)}" rx="${(realmR*0.34).toFixed(1)}" ry="${(realmR*0.2).toFixed(1)}" fill="rgba(255,255,255,.18)"/>`);
+    // sigil + name + level
+    leaves.push(`<text x="${slot.rx.toFixed(0)}" y="${(slot.ry+realmR*0.16).toFixed(0)}" text-anchor="middle" font-size="${Math.min(34,realmR*0.78).toFixed(0)}">${SK_PATH_ICON[cat]||""}</text>`);
+    const nm=esc(SK_CAT[cat]||cat);
+    leaves.push(`<text x="${slot.rx.toFixed(0)}" y="${(slot.ry+realmR+20).toFixed(0)}" text-anchor="middle" font-size="16" font-weight="700" fill="var(--gold-bright)" style="text-shadow:0 1px 4px #000,0 0 3px #000">${nm}</text>`);
+    leaves.push(`<text x="${slot.rx.toFixed(0)}" y="${(slot.ry+realmR+37).toFixed(0)}" text-anchor="middle" font-size="12" fill="var(--ink-dim)" style="text-shadow:0 1px 3px #000">World Lv ${fmtLvl(catLvl)}</text>`);
   });
 
+  const defs=`<defs>
+    <radialGradient id="realmGlow" cx="50%" cy="50%" r="50%">
+      <stop offset="0%" stop-color="#e8d49a" stop-opacity=".85"/>
+      <stop offset="100%" stop-color="#e8d49a" stop-opacity="0"/>
+    </radialGradient>
+    ${palDefs}
+  </defs>`;
   const svg=`<svg id="skTreeSvg" class="sk-tree-svg" viewBox="0 0 ${W} ${H}" xmlns="http://www.w3.org/2000/svg" font-family="'Roboto Condensed',sans-serif">
-    <g id="skTreeG">${parts.join("")}${leaves.join("")}</g>
+    ${defs}
+    <g id="skTreeG">${parts.join("")}${glows.join("")}${leaves.join("")}</g>
   </svg>`;
   const controls=`<div class="sk-tree-ctrls">
     <button type="button" id="skTreeZoomOut" title="Zoom out">–</button>
@@ -7585,23 +7958,22 @@ function renderSkillTree(){
     <span><i class="sk-tree-dot" style="background:#c8772e"></i>growing</span>
     <span><i class="sk-tree-dot" style="background:#b8a06a"></i>established</span>
     <span><i class="sk-tree-dot" style="background:#6f9e54"></i>mastered</span>
-    <span style="color:var(--ink-faint)">leaf size = all-time peak · drag to pan · pinch / buttons to zoom · tap a leaf for its level</span>
+    <span style="color:var(--ink-faint)">each glowing world is a Path · leaf size = all-time peak · drag to pan · pinch / buttons to zoom · tap a leaf for its skill</span>
   </div>`;
   host.innerHTML=`<div class="sk-tree-wrap">${svg}${controls}</div>${legend}`;
-  // default view frames the canopy (the crown is where the content is; the long trunk is empty).
-  // only set it the first time the tree is opened in a session, so user pan/zoom is preserved.
+  // default view frames the whole world-tree (canopy through roots) on first open.
   if(!_treeView._init){
     const wrap=host.querySelector('.sk-tree-wrap');
     const r=wrap?wrap.getBoundingClientRect():{width:600,height:600};
-    // canopy bounds in viewBox units (roughly the upper portion of the canvas)
-    const cyTop=120, cyBot=crownBaseY+40, canopyH=cyBot-cyTop, canopyMidY=(cyTop+cyBot)/2;
-    const scaleX=svg2vbScale(W, r.width);
-    // choose k so the canopy height fills ~the viewport height
-    const vbPerPx_y = H / (r.height||600);
-    const targetK = Math.max(0.8, Math.min(2.2, (H*0.92) / canopyH ));
+    const treeTop=crownTopY-70, treeBot=rootBotY+50, treeH=treeBot-treeTop, treeMidY=(treeTop+treeBot)/2;
+    // fit to whichever dimension is the binding constraint so the full crown shows
+    const fitH=(r.height? (treeH/(H)) : 1);
+    const kByH=(H*0.98)/treeH;
+    const kByW=(r.width&&r.height)? ( (r.width/r.height) * (H/W) * kByH ) : kByH;
+    const targetK = Math.max(0.32, Math.min(1.1, Math.min(kByH, kByW) ));
     _treeView.k = targetK;
-    _treeView.x = (W/2) - cx*targetK;                 // keep horizontally centred
-    _treeView.y = (H/2) - canopyMidY*targetK;         // lift canopy to vertical centre
+    _treeView.x = (W/2) - cx*targetK;
+    _treeView.y = (H/2) - treeMidY*targetK;
     _treeView._init=true;
   }
   _treeApply();

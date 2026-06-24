@@ -7325,12 +7325,23 @@ function mergeNewSeedSkills(){
         // numbers (currentLevel/peakLevel), so we preserve those and just clamp to the new length.
         if(s.levels && ex.levels){
           const seedAbilities=s.levels.map(l=>(typeof l==='string'?l:l.ability)).join("|");
-          const exAbilities=ex.levels.map(l=>l.ability).join("|");
+          const exAbilities=ex.levels.map(l=>(l&&l.ability!=null)?l.ability:String(l)).join("|");
           if(seedAbilities!==exAbilities){
             ex.levels=s.levels.map((l,i)=>({n:i+1, ability:(typeof l==='string'?l:l.ability)}));
             changed=true;
           }
           const max=ex.levels.length;
+          // RECOVER lost progress: an earlier version could have shrunk this ladder and
+          // destructively clamped currentLevel/peakLevel down. Now that the ladder is the
+          // correct (often longer) length again, restore the true high-water mark from the
+          // skill's own history (every auto/manual level-up is recorded there).
+          if(Array.isArray(ex.history) && ex.history.length){
+            const histMax=ex.history.reduce((mx,h)=>Math.max(mx, (typeof h.level==='number'?h.level:0)), 0);
+            if(histMax>(ex.peakLevel||0) && histMax<=max){ ex.peakLevel=histMax; changed=true; }
+          }
+          // peak can never be below the level you currently hold
+          if((ex.peakLevel||0) < (ex.currentLevel||0)){ ex.peakLevel=ex.currentLevel; changed=true; }
+          // only clamp DOWN when genuinely above the (real) ladder length
           if(ex.currentLevel>max){ ex.currentLevel=max; changed=true; }
           if(ex.peakLevel>max){ ex.peakLevel=max; changed=true; }
         }

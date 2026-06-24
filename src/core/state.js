@@ -172,7 +172,7 @@ function render(){
   const undone=total-done;
   if(S.missedYesterday && S.streak===0){
     warn.className="rd-warn show"; warn.style.color="var(--blood)";
-    warn.innerHTML="💥 Streak broken — you missed a day. Clear every order today to start rebuilding.";
+    warn.innerHTML="💥 Streak broken — you missed a day. Clear every order today to start forge-back.";
   } else if(undone>0 && S.streak>0){
     warn.className="rd-warn show"; warn.style.color="var(--ember)";
     warn.innerHTML=`⚠️ ${S.streak}-day streak AT RISK — ${undone} order${undone>1?'s':''} left. Don't lose it now.`;
@@ -243,7 +243,9 @@ function renderQuests(){
       const dueTag=q.due?`<span class="tag ${overdue?'overdue-tag':'due-tag'}">${overdue?'OVERDUE':'due '+q.due}</span>`:'';
       const ageDays=q.createdDate&&!q.done?dayDiff(q.createdDate,today):0;
       const ageTag=ageDays>3?`<span class="quest-age${ageDays>14?' old':''}">open ${ageDays}d</span>`:'';
-      const snoozeBtn=(!q.done&&q.due)?`<button class="q-snooze" data-qsnooze="${q.id}" title="Postpone 3 days">+3d</button>`:'';
+      const snoozeCount=q.snoozeCount||0;
+      const snoozeWarn=(!q.done&&snoozeCount>=2)?`<span class="oath-postpone-warn">postponed ${snoozeCount}×</span>`:'';
+      const snoozeBtn=(!q.done&&q.due)?`<button class="q-snooze" data-qsnooze="${q.id}" title="Postpone 3 days">+3d</button>${snoozeWarn}`:'';
       return `<li class="card ${q.done?'done':''}${overdue?' overdue':''}">
         <div class="check" data-q="${q.id}">${q.done?'✓':''}</div>
         <div class="c-body"><div class="c-name">${esc(q.name)}</div>

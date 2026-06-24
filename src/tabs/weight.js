@@ -71,6 +71,15 @@ function renderWeight(){
   } else {
     led.innerHTML=`<div class="aw-empty"><span class="big">⚖️</span>No promises mirrored yet. Export your ledger from the Weight app and tap "Update mirror" to bring it in.</div>`;
   }
+  // sync-recency footer
+  const sfEl=document.getElementById("wmSyncFooter");
+  if(sfEl){
+    if(S.lastMirrorUpdate){
+      const sfD=Math.round((Date.now()-new Date(S.lastMirrorUpdate).getTime())/864e5);
+      const sfN=(S.weight.promises||[]).length;
+      sfEl.innerHTML=`Last synced ${sfD===0?"today":sfD+" day"+(sfD!==1?"s":"")+" ago"} · ${sfN} entr${sfN!==1?"ies":"y"}`;
+    } else { sfEl.innerHTML=""; }
+  }
   // daily refresh nudge — fires when the mirror snapshot is from an earlier day
   const nudge=document.getElementById("wmNudge");
   if(nudge){

@@ -101,9 +101,15 @@ function skProgressBlock(sk, eff){
     const tier=skTier(sk, eff);
     const tierPrefix = (tier && eff>0) ? `<span class="sk-tier-prefix">${esc(tier.label)}:</span> ` : "";
     const tierBadge = (tier && eff>0) ? ` <span class="sk-tier-tag">${esc(tier.label)}</span>` : "";
-    return `<div class="sk-card ${isSub?'sk-sub':''}">
+    const leafCol=typeof skLeafColor==="function"?skLeafColor(eff,sk.levels.length):"#6e7459";
+    const pathIcon=(typeof SK_PATH_ICON!=="undefined"&&SK_PATH_ICON[sk.cat])||"🌿";
+    const pathName=(typeof SK_CAT!=="undefined"&&SK_CAT[sk.cat])||sk.cat||"";
+    const maxLv=(sk.levels||[]).length||1;
+    const fillPct=Math.round((eff/maxLv)*100);
+    return `<div class="sk-card ${isSub?'sk-sub':''}" style="border-left:3px solid ${leafCol};--sk-fill:${fillPct}%">
       <div class="sk-card-top">
-        <div><div class="sk-card-name">${tierPrefix}${esc(sk.name)}${sk.auto?' <span class="sk-auto">auto</span>':''}</div></div>
+        <div><div class="sk-card-name">${tierPrefix}${esc(sk.name)}${sk.auto?' <span class="sk-auto">auto</span>':''}</div>
+        <div class="sk-card-world">${pathIcon} ${esc(pathName)}</div></div>
         <span class="sk-level-badge ${maxed?'maxed':''}">${eff>0?'Lv '+eff:'Unproven'}${tierBadge}${maxed?' · MAX':peakStr}</span>
         <button class="sk-copy-btn" data-skcopy="${sk.id}" title="Copy skill card">⧉</button>
         <button class="sk-card-edit" data-skedit="${sk.id}">✎</button>
@@ -116,6 +122,7 @@ function skProgressBlock(sk, eff){
       ${(sk.why||sk.whatYouDo||sk.howTo||sk.prep||sk.recover||sk.safety||sk.roadmap||sk.advance||sk.maintain)?`<details class="sk-info"><summary>ℹ️ Why, how &amp; how to level up</summary><div class="sk-info-body">${sk.why?`<p><b>Why:</b> ${esc(sk.why)}</p>`:''}${sk.whatYouDo?`<p><b>What you do:</b> ${esc(sk.whatYouDo)}</p>`:''}${sk.howTo?`<p><b>How:</b> ${esc(sk.howTo)}</p>`:''}${sk.prep?`<p class="sk-prep"><b>🤸 Warm-up before:</b> ${esc(sk.prep)}</p>`:''}${sk.recover?`<p class="sk-recover"><b>🧘 Stretch after:</b> ${esc(sk.recover)}</p>`:''}${skProgressBlock(sk,eff)}${sk.safety?`<p class="sk-safety">⚠️ ${esc(sk.safety)}</p>`:''}</div></details>`:''}
       <button class="sk-work" data-skwork="${sk.id}">▶ Work on this</button>
       <div class="sk-work-panel" id="skwork-${sk.id}"></div>
+      <div class="sk-level-bar"><div class="sk-level-fill" style="width:var(--sk-fill);background:${leafCol}"></div></div>
     </div>`;
   };
   const groupCard=sk=>{

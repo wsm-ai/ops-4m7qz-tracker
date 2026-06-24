@@ -81,6 +81,9 @@ document.getElementById("lgSave").onclick=()=>{
   })).filter(ex=>ex.sets.length>0 && ex.name && ex.name!=="Custom exercise");
   if(!exercises.length){toast("Log at least one set first");return;}
   const note=document.getElementById("lgNote").value.trim()||null;
+  // Snapshot adaptive targets BEFORE adding the new workout so we can diff
+  const _exNames=exercises.map(e=>e.name);
+  const _tBefore={}; _exNames.forEach(n=>{ _tBefore[n]=computeTarget(n); });
   S.workouts.push({id:id(), date:new Date().toLocaleDateString(), ts:Date.now(), session:LG.session, duration:dur, rpe, exercises, note});
   if(!S.pathXP) S.pathXP={};
   S.pathXP.physical=(S.pathXP.physical||0)+25; S.gold+=8; S.totalDone++;
@@ -90,7 +93,9 @@ document.getElementById("lgSave").onclick=()=>{
   document.getElementById("lgNote").value="";
   buildLogForm(document.getElementById("lgSession").value);
   render();
-  toast(`<span class="t-xp">Workout logged · +25 Fitness XP +8 pts</span>`);
+  const _changed=_exNames.filter(n=>{const b=_tBefore[n],a=computeTarget(n);if(!b&&!a)return false;if(!b&&a)return true;if(b&&!a)return false;return b.target!==a.target;}).length;
+  const _adaptMsg=_changed>0?` · 🎯 ${_changed} target${_changed!==1?'s':''} updated`:'';
+  toast(`<span class="t-xp">Workout logged · +25 Fitness XP +8 pts${_adaptMsg}</span>`);
 };
 // best-set helpers for progress tracking
 function setVolume(ex,st){ // a single comparable number per set for "best"

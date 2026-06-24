@@ -86,7 +86,7 @@ function renderSkillBalance(){
     if(Math.abs(d)>=1) ctx+=`<div class="recovery-line">⚖️ <b>Weight trend:</b> ${d>0?"+":""}${d.toFixed(1)} lb since ${new Date(first.date).toLocaleDateString()} — ${d>0?"if this is muscle, your strength ratios will follow; watch the run":"lighter bodyweight raises your strength-to-weight ratios"}.</div>`;
   }
   if(ctx) lines+=ctx;
-  el.innerHTML=`<div class="recovery-card balance"><h3>📊 Whole-body balance (from your skill levels)</h3>${lines}</div>`;
+  el.innerHTML=`<div class="forge-recovery-card balance"><h3>📊 Whole-body balance (from your skill levels)</h3>${lines}</div>`;
 }
 
 function renderRecoveryAdvisory(){
@@ -105,7 +105,7 @@ function renderRecoveryAdvisory(){
   if(sore.length) lines+=`<div class="recovery-line">⚠️ <b>${sore.map(k=>AREA_LABEL[k]).join(", ")}</b> got hit hard — avoid loading ${sore.length>1?'them':'it'} heavily for a day or two.</div>`;
   if(freshSessions.length) lines+=`<div class="recovery-line">✅ Good to train now: <b>${freshSessions.map(sName).join(", ")}</b> — ${freshSessions.length>1?'these hit':'this hits'} muscles PT left fresh.</div>`;
   if(easeSessions.length) lines+=`<div class="recovery-line">🟠 Ease off / reduce volume: <b>${easeSessions.map(sName).join(", ")}</b> — overlaps what PT already worked.</div>`;
-  el.innerHTML=`<div class="recovery-card"><h3>♻️ Recovery-aware (from your PT log)</h3>${lines}</div>`;
+  el.innerHTML=`<div class="forge-recovery-card"><h3>♻️ Recovery-aware (from your PT log)</h3>${lines}</div>`;
 }
 
 // The coached "today" block: yesterday's read + today's session, fully explained, in order.

@@ -71,7 +71,13 @@ function renderHabits(){
   // count done today for the hint
   const doneCount=S.habits.filter(habitDoneToday).length;
   const hint=document.getElementById("habitStreakHint"); if(hint) hint.textContent=`${doneCount}/${S.habits.length} done today`;
-  wrap.innerHTML=S.habits.map(h=>{
+  // 7-day consistency banner
+  const last7=Array.from({length:7},(_,i)=>{const d=new Date();d.setDate(d.getDate()-i);return localYMD(d);});
+  const weekPcts=S.habits.map(h=>{const done=last7.filter(d=>(h.history||[]).includes(d)).length;return {name:h.name,pct:Math.round(done/7*100)};});
+  const avgWk=weekPcts.length?Math.round(weekPcts.reduce((s,h)=>s+h.pct,0)/weekPcts.length):0;
+  const atRisk=weekPcts.filter(h=>h.pct<57).map(h=>h.name);
+  const weekSummary=`<div class="orders-week-summary">7-day: <b>${avgWk}%</b>${atRisk.length?' · ⚠️ '+atRisk.slice(0,2).map(n=>esc(n)).join(', ')+' lagging':' · on pace'}</div>`;
+  wrap.innerHTML=weekSummary+S.habits.map(h=>{
     const st=habitStreakState(h);
     const done=st.state==="done";
     const graceIcon=(st.state==="grace"&&!h.graceUsed)?' ⏰':(h.graceUsed&&st.state!=="done"?' ⚠️':'');
@@ -82,7 +88,8 @@ function renderHabits(){
     else if(h.linkedSkill) note=`<div class="hb-note">Feeds: ${esc(h.linkedSkill)}</div>`;
     const best=h.bestStreak||0;
     const cur=st.streak||0;
-    const bestHtml=best>0?`<div class="hb-best">Best: ${best} day${best!==1?'s':''} ${cur>=best&&cur>0?' ⭐':''}</div>`:'';
+    const atPeak=cur>=best&&cur>0&&best>0;
+    const bestHtml=best>0?`<div class="hb-best${atPeak?' at-peak':''}">Best: ${best} day${best!==1?'s':''} ${atPeak?' ⭐':''}</div>`:'';
     const view=_hbView[h.id]||'strip';
     const calView=view==='month'?habitMonthGrid(h):habitHeatMap(h);
     const toggleBtn=(h.history&&h.history.length)?`<button class="hb-view-toggle ${view==='month'?'on':''}" data-hbview="${h.id}">${view==='month'?'60d':'Cal'}</button>`:'';

@@ -222,14 +222,14 @@ function renderSkillTree(){
           parts.push(`<line x1="${tx.toFixed(1)}" y1="${ty.toFixed(1)}" x2="${lx.toFixed(1)}" y2="${ly.toFixed(1)}" stroke="${barkLite}" stroke-width="1.1" opacity=".5"/>`);
           const eff=skEffectiveLevel(leaf), peak=leaf.peakLevel||0, max=leaf.levels.length;
           const rad = 4 + Math.min(5,(peak/max)*5);
-          leaves.push(`<circle cx="${lx.toFixed(1)}" cy="${ly.toFixed(1)}" r="${rad.toFixed(1)}" fill="${skLeafColor(eff,max)}" stroke="rgba(0,0,0,.4)" stroke-width=".7"><title>${esc(leaf.name)} — ${eff>0?'Lv '+eff:'unproven'}${peak>eff?' · peak '+peak:''}</title></circle>`);
+          leaves.push(`<circle cx="${lx.toFixed(1)}" cy="${ly.toFixed(1)}" r="${rad.toFixed(1)}" fill="${skLeafColor(eff,max)}" stroke="rgba(0,0,0,.4)" stroke-width=".7" data-skid="${esc(leaf.id)}" style="cursor:pointer"><title>${esc(leaf.name)} — ${eff>0?'Lv '+eff:'unproven'}${peak>eff?' · peak '+peak:''}</title></circle>`);
           pushFadeRing(lx.toFixed(1), ly.toFixed(1), rad, leaf);
         });
       } else {
         const eff=skEffectiveLevel(node), peak=node.peakLevel||0, max=node.levels.length;
         const rad = 4.5 + Math.min(5.2,(peak/max)*5.2);
         const lblAnchor = Math.cos(a)<-0.2?"end":(Math.cos(a)>0.2?"start":"middle");
-        leaves.push(`<circle cx="${tx.toFixed(1)}" cy="${ty.toFixed(1)}" r="${rad.toFixed(1)}" fill="${skLeafColor(eff,max)}" stroke="rgba(0,0,0,.4)" stroke-width=".7"><title>${esc(node.name)} — ${eff>0?'Lv '+eff:'unproven'}${peak>eff?' · peak '+peak:''}</title></circle>`);
+        leaves.push(`<circle cx="${tx.toFixed(1)}" cy="${ty.toFixed(1)}" r="${rad.toFixed(1)}" fill="${skLeafColor(eff,max)}" stroke="rgba(0,0,0,.4)" stroke-width=".7" data-skid="${esc(node.id)}" style="cursor:pointer"><title>${esc(node.name)} — ${eff>0?'Lv '+eff:'unproven'}${peak>eff?' · peak '+peak:''}</title></circle>`);
         pushFadeRing(tx.toFixed(1), ty.toFixed(1), rad, node);
         leaves.push(`<text x="${(tx+Math.cos(a)*11).toFixed(0)}" y="${(ty+Math.sin(a)*11+3).toFixed(0)}" text-anchor="${lblAnchor}" font-size="10.5" fill="var(--ink-faint)" style="text-shadow:0 1px 3px #000,0 0 2px #000">${esc(node.name)}</text>`);
       }
@@ -305,11 +305,10 @@ function _treeWireGestures(){
   if(zi) zi.onclick=()=>treeZoom(1.25);
   if(zo) zo.onclick=()=>treeZoom(0.8);
   if(rz) rz.onclick=treeReset;
-  // map a client point to viewBox units (account for current scale)
   const scaleFactor=()=>{ const vb=svg.viewBox.baseVal; const r=svg.getBoundingClientRect(); return vb.width/r.width; };
-  let dragging=false, lastX=0, lastY=0;
-  const down=(x,y)=>{ dragging=true; lastX=x; lastY=y; svg.style.cursor="grabbing"; };
-  const move=(x,y)=>{ if(!dragging) return; const f=scaleFactor(); _treeView.x+=(x-lastX)*f; _treeView.y+=(y-lastY)*f; lastX=x; lastY=y; _treeApply(); };
+  let dragging=false, lastX=0, lastY=0, _moved=false;
+  const down=(x,y)=>{ dragging=true; lastX=x; lastY=y; _moved=false; svg.style.cursor="grabbing"; };
+  const move=(x,y)=>{ if(!dragging) return; if(Math.abs(x-lastX)+Math.abs(y-lastY)>4) _moved=true; const f=scaleFactor(); _treeView.x+=(x-lastX)*f; _treeView.y+=(y-lastY)*f; lastX=x; lastY=y; _treeApply(); };
   const up=()=>{ dragging=false; svg.style.cursor="grab"; };
   svg.addEventListener("mousedown",e=>{ down(e.clientX,e.clientY); e.preventDefault(); });
   window.addEventListener("mousemove",e=>move(e.clientX,e.clientY));
@@ -327,4 +326,14 @@ function _treeWireGestures(){
   },{passive:false});
   svg.addEventListener("touchend",up);
   svg.style.cursor="grab";
+  // tap a leaf → navigate to its skill card in the list view
+  svg.addEventListener("click",e=>{
+    if(_moved) return;
+    const skId=e.target.dataset.skid; if(!skId) return;
+    const nb=document.querySelector('#sideNav button[data-tab="skills"]'); if(nb) nb.click();
+    setTimeout(()=>{
+      const sk=(S.lifeSkills||[]).find(s=>s.id===skId);
+      if(sk){ const el=document.getElementById(`skcat-${sk.cat}`); if(el) el.scrollIntoView({behavior:"smooth",block:"start"}); }
+    },150);
+  });
 }

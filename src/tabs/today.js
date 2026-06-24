@@ -66,13 +66,13 @@ function disciplineLogHtml(){
   const avg=Math.round(log.reduce((s,e)=>s+e.pct,0)/log.length);
   const cells=log.map(e=>{
     const h=Math.max(4,Math.round(e.pct/100*28));
-    const col=e.pct>=100?"var(--jade)":e.pct>=50?"var(--gold)":"var(--ember)";
+    const col=e.pct>=100?"var(--jade)":e.pct>=50?"var(--gold)":e.pct>0?"var(--ember)":"var(--line)";
     return `<div class="disc-cell" title="${e.pct}% on ${e.date}" style="height:${h}px;background:${col}"></div>`;
   }).join('');
   return `<div class="td-card fn-card">
     <div class="td-h fn-h">7-Day Discipline <span class="disc-avg">${avg}% avg</span></div>
     <div class="disc-log">${cells}</div>
-    <div class="disc-legend">Orders completed per day — green=100%, amber≥50%, ember&lt;50%</div>
+    <div class="disc-legend">Orders completed per day — green=100%, gold≥50%, ember&gt;0%, grey=0%</div>
   </div>`;
 }
 
@@ -104,7 +104,7 @@ function copyDailyBrief(){
   const overdueCount=(S.quests||[]).filter(q=>!q.done&&q.due&&q.due<localYMD()).length;
   const activeQ=(S.quests||[]).filter(q=>!q.done).length;
   const brief=[
-    `DAILY BRIEF — ${name} · ${rank}`,
+    `FIELD BRIEF — ${name} · ${rank}`,
     `Date: ${date}`,
     `─────────────────────`,
     aftLine,
@@ -208,7 +208,10 @@ function renderToday(){
         `${daysLeft} day${daysLeft!==1?"s":""}`;
       commissionHtml=`<div class="commission-bar">⚔️ <b>${daysLeft}</b> days to commissioning <span class="commission-sub">· ${sub} remaining · The long march continues, ${firstName}.</span></div>`;
     } else if(daysLeft<=0){
-      commissionHtml=`<div class="commission-bar radiant">⚔️ ${firstName} — today is the day. You made it.</div>`;
+      const daysSince=Math.abs(daysLeft);
+      commissionHtml=daysSince===0
+        ?`<div class="commission-bar radiant">⚔️ ${firstName} — today is the day. You made it.</div>`
+        :`<div class="commission-bar radiant">⭐ Commissioned ${cd} · ${daysSince} day${daysSince!==1?'s':''} of commissioned service. Well done, ${firstName}.</div>`;
     }
   }
 
@@ -261,12 +264,16 @@ function renderToday(){
     const c=typeof aftCtx==="function"?aftCtx():{standard:"general"};
     const pass=lastAft.total>=(c.standard==="combat"?350:300);
     notes.push(`<div class="fn-row"><span class="fn-dot">⚔️</span><span>AFT: ${lastAft.total} pts <span style="color:${pass?"var(--jade)":"var(--ember)"}">(${pass?"passing":"below standard"})</span></span></div>`);
-    // AFT regression note
     if(S.aft.length>=2){
-      const prevAft=S.aft[S.aft.length-2];
-      if(lastAft.total < prevAft.total - 4){
-        notes.push(`<div class="fn-row"><span class="fn-dot">📉</span><span>Score dropped ${prevAft.total-lastAft.total} pts from last test</span><button class="td-go-sm" data-gototab="aft">→</button></div>`);
-      }
+      const prev=S.aft[S.aft.length-2];
+      const deltas=[
+        {name:"DL",delta:(lastAft.scores&&lastAft.scores.dl||0)-(prev.scores&&prev.scores.dl||0)},
+        {name:"HRP",delta:(lastAft.scores&&lastAft.scores.hrp||0)-(prev.scores&&prev.scores.hrp||0)},
+        {name:"SDC",delta:(lastAft.scores&&lastAft.scores.sdc||0)-(prev.scores&&prev.scores.sdc||0)},
+        {name:"Plank",delta:(lastAft.scores&&lastAft.scores.plank||0)-(prev.scores&&prev.scores.plank||0)},
+        {name:"Run",delta:(lastAft.scores&&lastAft.scores.run||0)-(prev.scores&&prev.scores.run||0)},
+      ].filter(d=>d.delta<0).map(d=>`${d.name} ${d.delta}`).join(" · ");
+      if(deltas) notes.push(`<div class="fn-row"><span class="fn-dot">📉</span><span>Last AFT: ${deltas}</span><button class="td-go-sm" data-gototab="aft">→</button></div>`);
     }
   }
   if(S.profile&&S.profile.gpa) notes.push(`<div class="fn-row"><span class="fn-dot">📊</span><span>GPA ${S.profile.gpa} · ${esc(S.branchGoal||"Branch TBD")}</span></div>`);
@@ -335,7 +342,7 @@ function renderToday(){
     if(left>0){
       const pips=[1,2,3].map(n=>`<div class="rm-pip${n<dayNum?' done':''}">${n<dayNum?'✓':n}</div>`).join('');
       recoveryHtml=`<div class="recovery-mode-card">
-        <div class="rm-title">⚡ Day ${dayNum} of rebuilding</div>
+        <div class="rm-title">⚡ Day ${dayNum} of forge-back</div>
         <div class="rm-body">${left===1?"One perfect day restores your momentum.":`${left} perfect days to restore your momentum.`} Today: complete all orders.</div>
         <div class="rm-pips">${pips}</div>
       </div>`;
@@ -355,7 +362,7 @@ function renderToday(){
   const discHtml=disciplineLogHtml();
 
   // ── Copy daily brief button (compact row)
-  const briefBtnHtml=`<div class="brief-row"><button class="brief-btn" data-copybriefbtn="1">📋 Copy today's brief</button></div>`;
+  const briefBtnHtml=`<div class="brief-row"><button class="brief-btn" data-copybriefbtn="1">📋 Copy field brief</button></div>`;
 
   // ── Assemble — creed always first, then guided flow
   const flow=[startHtml, sessHtml, weekCardHtml, ordersHtml, recoveryHtml, discHtml, bossHtml, streakHtml, commissionHtml, focusHtml, adaptHtml, neglectHtml, pathPips, notesHtml, fmHtml, briefBtnHtml, installHtml, notifPromptHtml].filter(Boolean).join("");

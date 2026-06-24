@@ -34,8 +34,13 @@
   html,body{height:100%}
   body{
     background:
-      radial-gradient(circle at 20% -10%, rgba(184,160,106,.06), transparent 45%),
-      radial-gradient(circle at 90% 110%, rgba(111,158,84,.05), transparent 45%),
+      /* Crown of Yggdrasil — broad gold emanation from above */
+      radial-gradient(ellipse 140% 55% at 50% -20%, rgba(184,160,106,.14), transparent 70%),
+      /* Deep roots — jade tinge rising from below */
+      radial-gradient(ellipse 140% 45% at 50% 115%, rgba(111,158,84,.11), transparent 70%),
+      /* Side vignettes — forest shadow on the flanks */
+      radial-gradient(circle at -5% 55%, rgba(5,6,3,.38), transparent 48%),
+      radial-gradient(circle at 105% 55%, rgba(5,6,3,.38), transparent 48%),
       var(--bg);
     color:var(--ink);
     font-family:"Oswald","Bebas Neue","Roboto Condensed","Arial Narrow",system-ui,sans-serif;
@@ -421,13 +426,13 @@
   .pt-recent-row .del{background:none;border:none;color:var(--ink-faint);cursor:pointer;font-size:15px}
   .pt-recent-row .del:hover{color:var(--blood)}
   /* recovery advisory on FM tab */
-  .recovery-card{background:linear-gradient(180deg,rgba(200,119,46,.1),transparent);border:1px solid var(--ember);border-radius:11px;padding:13px 15px;margin-bottom:12px}
-  .recovery-card h3{font-size:13.5px;color:var(--ember);letter-spacing:.04em;margin-bottom:7px;display:flex;align-items:center;gap:7px}
+  .forge-recovery-card{background:linear-gradient(180deg,rgba(200,119,46,.1),transparent);border:1px solid var(--ember);border-radius:11px;padding:13px 15px;margin-bottom:12px}
+  .forge-recovery-card h3{font-size:13.5px;color:var(--ember);letter-spacing:.04em;margin-bottom:7px;display:flex;align-items:center;gap:7px}
   .recovery-line{font-size:13px;color:var(--ink-dim);line-height:1.55;padding:3px 0}
   .recovery-line b{color:var(--ember)}
-  .recovery-card.balance{background:linear-gradient(180deg,rgba(124,147,168,.1),transparent);border-color:var(--violet)}
-  .recovery-card.balance h3{color:var(--violet)}
-  .recovery-card.balance .recovery-line b{color:var(--violet)}
+  .forge-recovery-card.balance{background:linear-gradient(180deg,rgba(124,147,168,.1),transparent);border-color:var(--violet)}
+  .forge-recovery-card.balance h3{color:var(--violet)}
+  .forge-recovery-card.balance .recovery-line b{color:var(--violet)}
 
   /* ---- Skills ---- */
   .sk-form-title{font-size:13px;letter-spacing:.08em;text-transform:uppercase;color:var(--ink-dim);margin-bottom:10px}
@@ -459,7 +464,10 @@
   .sk-pass:hover{background:rgba(111,158,84,.28)}
   .sk-skip{background:transparent;border-color:var(--line);color:var(--ink-faint)}
   /* skill list cards */
-  .sk-card{background:var(--panel);border:1px solid var(--line);border-radius:11px;padding:13px 15px;margin-bottom:10px}
+  .sk-card{background:var(--panel);border:1px solid var(--line);border-left:3px solid var(--line);border-radius:11px;padding:13px 15px;margin-bottom:10px}
+  .sk-card-world{font-size:10px;color:var(--ink-faint);letter-spacing:.04em;margin-top:1px}
+  .sk-level-bar{height:3px;background:var(--line);border-radius:2px;margin-top:10px}
+  .sk-level-fill{height:3px;border-radius:2px;transition:width .3s}
   .sk-card-top{display:flex;justify-content:space-between;align-items:center;gap:8px}
   .sk-card-name{font-size:15px;font-weight:700}
   .sk-card-cat{font-size:11px;color:var(--ink-faint);letter-spacing:.05em;text-transform:uppercase}
@@ -507,6 +515,7 @@
   .hb-streak.broken{color:var(--ink-faint);border-color:var(--line);background:transparent}
   .hb-del{flex:none;background:none;border:none;color:var(--ink-faint);cursor:pointer;font-size:14px}
   .hb-del:hover{color:var(--blood)}
+  .orders-week-summary{font-size:12px;color:var(--ink-dim);padding:6px 2px 10px;border-bottom:1px solid var(--line);margin-bottom:8px}
   /* Test tab */
   .test-card{background:var(--panel);border:1px solid var(--line);border-radius:11px;padding:14px;margin-bottom:12px}
   .test-head{display:flex;align-items:center;justify-content:space-between;gap:10px}
@@ -929,6 +938,8 @@
 
   .weight-bind{background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:15px;margin-top:18px}
   .weight-mirror{background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:15px;margin-top:18px;text-align:center}
+  .weight-sync-footer{font-size:11px;color:var(--ink-faint);text-align:center;padding-bottom:6px;min-height:0}
+  .weight-sync-footer:empty{display:none}
   .wm-row{display:flex;gap:9px}
   .wm-btn{flex:1;background:rgba(201,162,75,.14);border:1px solid #c9a06a;color:#d8b06a;padding:12px;border-radius:8px;font-family:inherit;font-weight:600;font-size:13.5px;letter-spacing:.03em;cursor:pointer}
   .wm-btn:hover{background:rgba(201,162,75,.24)}
@@ -1160,6 +1171,7 @@
   .tag.overdue-tag{background:rgba(200,80,40,.18);color:var(--ember);font-weight:700}
   .q-snooze{background:none;border:1px solid var(--line);color:var(--ink-faint);padding:2px 7px;border-radius:5px;font-size:11px;cursor:pointer;font-family:inherit;flex:none;margin-right:3px}
   .q-snooze:hover{border-color:var(--gold);color:var(--gold)}
+  .oath-postpone-warn{font-size:10px;color:var(--ember);font-style:italic;vertical-align:middle;display:inline-block;margin-top:2px}
   .card.overdue{border-left:3px solid var(--ember)}
 
   /* ── v96: PWA install card ── */
@@ -1218,6 +1230,7 @@
 
   /* ── v98: Habit best-streak badge ── */
   .hb-best{font-size:11px;color:var(--ink-faint);padding:3px 4px 1px;letter-spacing:.02em}
+  .hb-best.at-peak{color:var(--gold)}
 
   /* ── v98: AFT regression card ── */
   .aft-regress{background:rgba(156,74,52,.12);border:1px solid rgba(156,74,52,.4);border-radius:9px;padding:11px 13px;margin-bottom:10px}
@@ -2177,6 +2190,7 @@
     <div class="weight-memorial" id="weightMemorial"></div>
 
     <div class="weight-mirror">
+      <div class="weight-sync-footer" id="wmSyncFooter"></div>
       <div class="wm-nudge" id="wmNudge"></div>
       <div class="wm-row">
         <button class="wm-btn" id="wmOpen">⚖️ Open the Weight app</button>
@@ -2955,7 +2969,7 @@ function render(){
   const undone=total-done;
   if(S.missedYesterday && S.streak===0){
     warn.className="rd-warn show"; warn.style.color="var(--blood)";
-    warn.innerHTML="💥 Streak broken — you missed a day. Clear every order today to start rebuilding.";
+    warn.innerHTML="💥 Streak broken — you missed a day. Clear every order today to start forge-back.";
   } else if(undone>0 && S.streak>0){
     warn.className="rd-warn show"; warn.style.color="var(--ember)";
     warn.innerHTML=`⚠️ ${S.streak}-day streak AT RISK — ${undone} order${undone>1?'s':''} left. Don't lose it now.`;
@@ -3026,7 +3040,9 @@ function renderQuests(){
       const dueTag=q.due?`<span class="tag ${overdue?'overdue-tag':'due-tag'}">${overdue?'OVERDUE':'due '+q.due}</span>`:'';
       const ageDays=q.createdDate&&!q.done?dayDiff(q.createdDate,today):0;
       const ageTag=ageDays>3?`<span class="quest-age${ageDays>14?' old':''}">open ${ageDays}d</span>`:'';
-      const snoozeBtn=(!q.done&&q.due)?`<button class="q-snooze" data-qsnooze="${q.id}" title="Postpone 3 days">+3d</button>`:'';
+      const snoozeCount=q.snoozeCount||0;
+      const snoozeWarn=(!q.done&&snoozeCount>=2)?`<span class="oath-postpone-warn">postponed ${snoozeCount}×</span>`:'';
+      const snoozeBtn=(!q.done&&q.due)?`<button class="q-snooze" data-qsnooze="${q.id}" title="Postpone 3 days">+3d</button>${snoozeWarn}`:'';
       return `<li class="card ${q.done?'done':''}${overdue?' overdue':''}">
         <div class="check" data-q="${q.id}">${q.done?'✓':''}</div>
         <div class="c-body"><div class="c-name">${esc(q.name)}</div>
@@ -3210,6 +3226,7 @@ document.body.addEventListener("click",e=>{
     const base=q.due&&q.due>=localYMD()?q.due:localYMD();
     const nd=new Date(base+"T12:00:00"); nd.setDate(nd.getDate()+3);
     q.due=localYMD(nd);
+    q.snoozeCount=(q.snoozeCount||0)+1;
     save();render();
     toast(`Oath postponed to ${q.due}`);
     return;
@@ -3454,8 +3471,7 @@ function finishQuiz(){
   // first time passing: reward + convert to daily review + advance knowledge objective
   if(firstPass){
     S.gold+=20;
-    if(!S.skills.knowledge) S.skills.knowledge={xp:0};
-    S.skills.knowledge.xp+=50;
+    if(!S.pathXP) S.pathXP={}; S.pathXP.academic=(S.pathXP.academic||0)+50;
     // add daily review order if not present
     const reviewName="🧠 Review: "+t.name+" (retake quiz)";
     if(!S.dailies.some(d=>d.review===QZ.key)){
@@ -3952,6 +3968,9 @@ document.getElementById("lgSave").onclick=()=>{
   })).filter(ex=>ex.sets.length>0 && ex.name && ex.name!=="Custom exercise");
   if(!exercises.length){toast("Log at least one set first");return;}
   const note=document.getElementById("lgNote").value.trim()||null;
+  // Snapshot adaptive targets BEFORE adding the new workout so we can diff
+  const _exNames=exercises.map(e=>e.name);
+  const _tBefore={}; _exNames.forEach(n=>{ _tBefore[n]=computeTarget(n); });
   S.workouts.push({id:id(), date:new Date().toLocaleDateString(), ts:Date.now(), session:LG.session, duration:dur, rpe, exercises, note});
   if(!S.pathXP) S.pathXP={};
   S.pathXP.physical=(S.pathXP.physical||0)+25; S.gold+=8; S.totalDone++;
@@ -3961,7 +3980,9 @@ document.getElementById("lgSave").onclick=()=>{
   document.getElementById("lgNote").value="";
   buildLogForm(document.getElementById("lgSession").value);
   render();
-  toast(`<span class="t-xp">Workout logged · +25 Fitness XP +8 pts</span>`);
+  const _changed=_exNames.filter(n=>{const b=_tBefore[n],a=computeTarget(n);if(!b&&!a)return false;if(!b&&a)return true;if(b&&!a)return false;return b.target!==a.target;}).length;
+  const _adaptMsg=_changed>0?` · 🎯 ${_changed} target${_changed!==1?'s':''} updated`:'';
+  toast(`<span class="t-xp">Workout logged · +25 Fitness XP +8 pts${_adaptMsg}</span>`);
 };
 // best-set helpers for progress tracking
 function setVolume(ex,st){ // a single comparable number per set for "best"
@@ -4335,7 +4356,7 @@ function renderSkillBalance(){
     if(Math.abs(d)>=1) ctx+=`<div class="recovery-line">⚖️ <b>Weight trend:</b> ${d>0?"+":""}${d.toFixed(1)} lb since ${new Date(first.date).toLocaleDateString()} — ${d>0?"if this is muscle, your strength ratios will follow; watch the run":"lighter bodyweight raises your strength-to-weight ratios"}.</div>`;
   }
   if(ctx) lines+=ctx;
-  el.innerHTML=`<div class="recovery-card balance"><h3>📊 Whole-body balance (from your skill levels)</h3>${lines}</div>`;
+  el.innerHTML=`<div class="forge-recovery-card balance"><h3>📊 Whole-body balance (from your skill levels)</h3>${lines}</div>`;
 }
 
 function renderRecoveryAdvisory(){
@@ -4354,7 +4375,7 @@ function renderRecoveryAdvisory(){
   if(sore.length) lines+=`<div class="recovery-line">⚠️ <b>${sore.map(k=>AREA_LABEL[k]).join(", ")}</b> got hit hard — avoid loading ${sore.length>1?'them':'it'} heavily for a day or two.</div>`;
   if(freshSessions.length) lines+=`<div class="recovery-line">✅ Good to train now: <b>${freshSessions.map(sName).join(", ")}</b> — ${freshSessions.length>1?'these hit':'this hits'} muscles PT left fresh.</div>`;
   if(easeSessions.length) lines+=`<div class="recovery-line">🟠 Ease off / reduce volume: <b>${easeSessions.map(sName).join(", ")}</b> — overlaps what PT already worked.</div>`;
-  el.innerHTML=`<div class="recovery-card"><h3>♻️ Recovery-aware (from your PT log)</h3>${lines}</div>`;
+  el.innerHTML=`<div class="forge-recovery-card"><h3>♻️ Recovery-aware (from your PT log)</h3>${lines}</div>`;
 }
 
 // The coached "today" block: yesterday's read + today's session, fully explained, in order.
@@ -4707,6 +4728,15 @@ function renderWeight(){
     }).join("");
   } else {
     led.innerHTML=`<div class="aw-empty"><span class="big">⚖️</span>No promises mirrored yet. Export your ledger from the Weight app and tap "Update mirror" to bring it in.</div>`;
+  }
+  // sync-recency footer
+  const sfEl=document.getElementById("wmSyncFooter");
+  if(sfEl){
+    if(S.lastMirrorUpdate){
+      const sfD=Math.round((Date.now()-new Date(S.lastMirrorUpdate).getTime())/864e5);
+      const sfN=(S.weight.promises||[]).length;
+      sfEl.innerHTML=`Last synced ${sfD===0?"today":sfD+" day"+(sfD!==1?"s":"")+" ago"} · ${sfN} entr${sfN!==1?"ies":"y"}`;
+    } else { sfEl.innerHTML=""; }
   }
   // daily refresh nudge — fires when the mirror snapshot is from an earlier day
   const nudge=document.getElementById("wmNudge");
@@ -5362,7 +5392,13 @@ function renderHabits(){
   // count done today for the hint
   const doneCount=S.habits.filter(habitDoneToday).length;
   const hint=document.getElementById("habitStreakHint"); if(hint) hint.textContent=`${doneCount}/${S.habits.length} done today`;
-  wrap.innerHTML=S.habits.map(h=>{
+  // 7-day consistency banner
+  const last7=Array.from({length:7},(_,i)=>{const d=new Date();d.setDate(d.getDate()-i);return localYMD(d);});
+  const weekPcts=S.habits.map(h=>{const done=last7.filter(d=>(h.history||[]).includes(d)).length;return {name:h.name,pct:Math.round(done/7*100)};});
+  const avgWk=weekPcts.length?Math.round(weekPcts.reduce((s,h)=>s+h.pct,0)/weekPcts.length):0;
+  const atRisk=weekPcts.filter(h=>h.pct<57).map(h=>h.name);
+  const weekSummary=`<div class="orders-week-summary">7-day: <b>${avgWk}%</b>${atRisk.length?' · ⚠️ '+atRisk.slice(0,2).map(n=>esc(n)).join(', ')+' lagging':' · on pace'}</div>`;
+  wrap.innerHTML=weekSummary+S.habits.map(h=>{
     const st=habitStreakState(h);
     const done=st.state==="done";
     const graceIcon=(st.state==="grace"&&!h.graceUsed)?' ⏰':(h.graceUsed&&st.state!=="done"?' ⚠️':'');
@@ -5373,7 +5409,8 @@ function renderHabits(){
     else if(h.linkedSkill) note=`<div class="hb-note">Feeds: ${esc(h.linkedSkill)}</div>`;
     const best=h.bestStreak||0;
     const cur=st.streak||0;
-    const bestHtml=best>0?`<div class="hb-best">Best: ${best} day${best!==1?'s':''} ${cur>=best&&cur>0?' ⭐':''}</div>`:'';
+    const atPeak=cur>=best&&cur>0&&best>0;
+    const bestHtml=best>0?`<div class="hb-best${atPeak?' at-peak':''}">Best: ${best} day${best!==1?'s':''} ${atPeak?' ⭐':''}</div>`:'';
     const view=_hbView[h.id]||'strip';
     const calView=view==='month'?habitMonthGrid(h):habitHeatMap(h);
     const toggleBtn=(h.history&&h.history.length)?`<button class="hb-view-toggle ${view==='month'?'on':''}" data-hbview="${h.id}">${view==='month'?'60d':'Cal'}</button>`:'';
@@ -6255,13 +6292,13 @@ function disciplineLogHtml(){
   const avg=Math.round(log.reduce((s,e)=>s+e.pct,0)/log.length);
   const cells=log.map(e=>{
     const h=Math.max(4,Math.round(e.pct/100*28));
-    const col=e.pct>=100?"var(--jade)":e.pct>=50?"var(--gold)":"var(--ember)";
+    const col=e.pct>=100?"var(--jade)":e.pct>=50?"var(--gold)":e.pct>0?"var(--ember)":"var(--line)";
     return `<div class="disc-cell" title="${e.pct}% on ${e.date}" style="height:${h}px;background:${col}"></div>`;
   }).join('');
   return `<div class="td-card fn-card">
     <div class="td-h fn-h">7-Day Discipline <span class="disc-avg">${avg}% avg</span></div>
     <div class="disc-log">${cells}</div>
-    <div class="disc-legend">Orders completed per day — green=100%, amber≥50%, ember&lt;50%</div>
+    <div class="disc-legend">Orders completed per day — green=100%, gold≥50%, ember&gt;0%, grey=0%</div>
   </div>`;
 }
 
@@ -6293,7 +6330,7 @@ function copyDailyBrief(){
   const overdueCount=(S.quests||[]).filter(q=>!q.done&&q.due&&q.due<localYMD()).length;
   const activeQ=(S.quests||[]).filter(q=>!q.done).length;
   const brief=[
-    `DAILY BRIEF — ${name} · ${rank}`,
+    `FIELD BRIEF — ${name} · ${rank}`,
     `Date: ${date}`,
     `─────────────────────`,
     aftLine,
@@ -6397,7 +6434,10 @@ function renderToday(){
         `${daysLeft} day${daysLeft!==1?"s":""}`;
       commissionHtml=`<div class="commission-bar">⚔️ <b>${daysLeft}</b> days to commissioning <span class="commission-sub">· ${sub} remaining · The long march continues, ${firstName}.</span></div>`;
     } else if(daysLeft<=0){
-      commissionHtml=`<div class="commission-bar radiant">⚔️ ${firstName} — today is the day. You made it.</div>`;
+      const daysSince=Math.abs(daysLeft);
+      commissionHtml=daysSince===0
+        ?`<div class="commission-bar radiant">⚔️ ${firstName} — today is the day. You made it.</div>`
+        :`<div class="commission-bar radiant">⭐ Commissioned ${cd} · ${daysSince} day${daysSince!==1?'s':''} of commissioned service. Well done, ${firstName}.</div>`;
     }
   }
 
@@ -6450,12 +6490,16 @@ function renderToday(){
     const c=typeof aftCtx==="function"?aftCtx():{standard:"general"};
     const pass=lastAft.total>=(c.standard==="combat"?350:300);
     notes.push(`<div class="fn-row"><span class="fn-dot">⚔️</span><span>AFT: ${lastAft.total} pts <span style="color:${pass?"var(--jade)":"var(--ember)"}">(${pass?"passing":"below standard"})</span></span></div>`);
-    // AFT regression note
     if(S.aft.length>=2){
-      const prevAft=S.aft[S.aft.length-2];
-      if(lastAft.total < prevAft.total - 4){
-        notes.push(`<div class="fn-row"><span class="fn-dot">📉</span><span>Score dropped ${prevAft.total-lastAft.total} pts from last test</span><button class="td-go-sm" data-gototab="aft">→</button></div>`);
-      }
+      const prev=S.aft[S.aft.length-2];
+      const deltas=[
+        {name:"DL",delta:(lastAft.scores&&lastAft.scores.dl||0)-(prev.scores&&prev.scores.dl||0)},
+        {name:"HRP",delta:(lastAft.scores&&lastAft.scores.hrp||0)-(prev.scores&&prev.scores.hrp||0)},
+        {name:"SDC",delta:(lastAft.scores&&lastAft.scores.sdc||0)-(prev.scores&&prev.scores.sdc||0)},
+        {name:"Plank",delta:(lastAft.scores&&lastAft.scores.plank||0)-(prev.scores&&prev.scores.plank||0)},
+        {name:"Run",delta:(lastAft.scores&&lastAft.scores.run||0)-(prev.scores&&prev.scores.run||0)},
+      ].filter(d=>d.delta<0).map(d=>`${d.name} ${d.delta}`).join(" · ");
+      if(deltas) notes.push(`<div class="fn-row"><span class="fn-dot">📉</span><span>Last AFT: ${deltas}</span><button class="td-go-sm" data-gototab="aft">→</button></div>`);
     }
   }
   if(S.profile&&S.profile.gpa) notes.push(`<div class="fn-row"><span class="fn-dot">📊</span><span>GPA ${S.profile.gpa} · ${esc(S.branchGoal||"Branch TBD")}</span></div>`);
@@ -6524,7 +6568,7 @@ function renderToday(){
     if(left>0){
       const pips=[1,2,3].map(n=>`<div class="rm-pip${n<dayNum?' done':''}">${n<dayNum?'✓':n}</div>`).join('');
       recoveryHtml=`<div class="recovery-mode-card">
-        <div class="rm-title">⚡ Day ${dayNum} of rebuilding</div>
+        <div class="rm-title">⚡ Day ${dayNum} of forge-back</div>
         <div class="rm-body">${left===1?"One perfect day restores your momentum.":`${left} perfect days to restore your momentum.`} Today: complete all orders.</div>
         <div class="rm-pips">${pips}</div>
       </div>`;
@@ -6544,7 +6588,7 @@ function renderToday(){
   const discHtml=disciplineLogHtml();
 
   // ── Copy daily brief button (compact row)
-  const briefBtnHtml=`<div class="brief-row"><button class="brief-btn" data-copybriefbtn="1">📋 Copy today's brief</button></div>`;
+  const briefBtnHtml=`<div class="brief-row"><button class="brief-btn" data-copybriefbtn="1">📋 Copy field brief</button></div>`;
 
   // ── Assemble — creed always first, then guided flow
   const flow=[startHtml, sessHtml, weekCardHtml, ordersHtml, recoveryHtml, discHtml, bossHtml, streakHtml, commissionHtml, focusHtml, adaptHtml, neglectHtml, pathPips, notesHtml, fmHtml, briefBtnHtml, installHtml, notifPromptHtml].filter(Boolean).join("");
@@ -9086,8 +9130,8 @@ function skPass(skId){
   // maintain just refreshes the timer
   sk.lastQuestTs=Date.now();
   sk.history.push({ts:Date.now(),type:q.type,level:q.level});
-  // skill growth feeds the Knowledge track lightly (earned, not gamifying the skill itself)
-  if(!S.skills.knowledge)S.skills.knowledge={xp:0}; S.skills.knowledge.xp+=15;
+  // skill growth feeds the Academic path lightly (earned, not gamifying the skill itself)
+  if(!S.pathXP) S.pathXP={}; S.pathXP.academic=(S.pathXP.academic||0)+15;
   save();render();
   toast(q.type==="promote"?`⬆️ Promoted to Level ${sk.currentLevel} — ${esc(sk.name)}`:q.type==="decay"?`Reclaimed Level ${sk.currentLevel}`:`Maintained — ${esc(sk.name)}`);
 }
@@ -9106,7 +9150,7 @@ function skReachLevel(skId, level){
   skUpdatePeak(sk);
   sk.lastQuestTs=Date.now();
   sk.history.push({ts:Date.now(),type:prevType,level});
-  if(!S.skills.knowledge)S.skills.knowledge={xp:0}; S.skills.knowledge.xp+=15;
+  if(!S.pathXP) S.pathXP={}; S.pathXP.academic=(S.pathXP.academic||0)+15;
   save();render();
   if(typeof getTierLabelForLevel==="function"){
     const tierLabel=getTierLabelForLevel(sk,level);
@@ -9378,14 +9422,14 @@ function renderSkillTree(){
           parts.push(`<line x1="${tx.toFixed(1)}" y1="${ty.toFixed(1)}" x2="${lx.toFixed(1)}" y2="${ly.toFixed(1)}" stroke="${barkLite}" stroke-width="1.1" opacity=".5"/>`);
           const eff=skEffectiveLevel(leaf), peak=leaf.peakLevel||0, max=leaf.levels.length;
           const rad = 4 + Math.min(5,(peak/max)*5);
-          leaves.push(`<circle cx="${lx.toFixed(1)}" cy="${ly.toFixed(1)}" r="${rad.toFixed(1)}" fill="${skLeafColor(eff,max)}" stroke="rgba(0,0,0,.4)" stroke-width=".7"><title>${esc(leaf.name)} — ${eff>0?'Lv '+eff:'unproven'}${peak>eff?' · peak '+peak:''}</title></circle>`);
+          leaves.push(`<circle cx="${lx.toFixed(1)}" cy="${ly.toFixed(1)}" r="${rad.toFixed(1)}" fill="${skLeafColor(eff,max)}" stroke="rgba(0,0,0,.4)" stroke-width=".7" data-skid="${esc(leaf.id)}" style="cursor:pointer"><title>${esc(leaf.name)} — ${eff>0?'Lv '+eff:'unproven'}${peak>eff?' · peak '+peak:''}</title></circle>`);
           pushFadeRing(lx.toFixed(1), ly.toFixed(1), rad, leaf);
         });
       } else {
         const eff=skEffectiveLevel(node), peak=node.peakLevel||0, max=node.levels.length;
         const rad = 4.5 + Math.min(5.2,(peak/max)*5.2);
         const lblAnchor = Math.cos(a)<-0.2?"end":(Math.cos(a)>0.2?"start":"middle");
-        leaves.push(`<circle cx="${tx.toFixed(1)}" cy="${ty.toFixed(1)}" r="${rad.toFixed(1)}" fill="${skLeafColor(eff,max)}" stroke="rgba(0,0,0,.4)" stroke-width=".7"><title>${esc(node.name)} — ${eff>0?'Lv '+eff:'unproven'}${peak>eff?' · peak '+peak:''}</title></circle>`);
+        leaves.push(`<circle cx="${tx.toFixed(1)}" cy="${ty.toFixed(1)}" r="${rad.toFixed(1)}" fill="${skLeafColor(eff,max)}" stroke="rgba(0,0,0,.4)" stroke-width=".7" data-skid="${esc(node.id)}" style="cursor:pointer"><title>${esc(node.name)} — ${eff>0?'Lv '+eff:'unproven'}${peak>eff?' · peak '+peak:''}</title></circle>`);
         pushFadeRing(tx.toFixed(1), ty.toFixed(1), rad, node);
         leaves.push(`<text x="${(tx+Math.cos(a)*11).toFixed(0)}" y="${(ty+Math.sin(a)*11+3).toFixed(0)}" text-anchor="${lblAnchor}" font-size="10.5" fill="var(--ink-faint)" style="text-shadow:0 1px 3px #000,0 0 2px #000">${esc(node.name)}</text>`);
       }
@@ -9461,11 +9505,10 @@ function _treeWireGestures(){
   if(zi) zi.onclick=()=>treeZoom(1.25);
   if(zo) zo.onclick=()=>treeZoom(0.8);
   if(rz) rz.onclick=treeReset;
-  // map a client point to viewBox units (account for current scale)
   const scaleFactor=()=>{ const vb=svg.viewBox.baseVal; const r=svg.getBoundingClientRect(); return vb.width/r.width; };
-  let dragging=false, lastX=0, lastY=0;
-  const down=(x,y)=>{ dragging=true; lastX=x; lastY=y; svg.style.cursor="grabbing"; };
-  const move=(x,y)=>{ if(!dragging) return; const f=scaleFactor(); _treeView.x+=(x-lastX)*f; _treeView.y+=(y-lastY)*f; lastX=x; lastY=y; _treeApply(); };
+  let dragging=false, lastX=0, lastY=0, _moved=false;
+  const down=(x,y)=>{ dragging=true; lastX=x; lastY=y; _moved=false; svg.style.cursor="grabbing"; };
+  const move=(x,y)=>{ if(!dragging) return; if(Math.abs(x-lastX)+Math.abs(y-lastY)>4) _moved=true; const f=scaleFactor(); _treeView.x+=(x-lastX)*f; _treeView.y+=(y-lastY)*f; lastX=x; lastY=y; _treeApply(); };
   const up=()=>{ dragging=false; svg.style.cursor="grab"; };
   svg.addEventListener("mousedown",e=>{ down(e.clientX,e.clientY); e.preventDefault(); });
   window.addEventListener("mousemove",e=>move(e.clientX,e.clientY));
@@ -9483,6 +9526,16 @@ function _treeWireGestures(){
   },{passive:false});
   svg.addEventListener("touchend",up);
   svg.style.cursor="grab";
+  // tap a leaf → navigate to its skill card in the list view
+  svg.addEventListener("click",e=>{
+    if(_moved) return;
+    const skId=e.target.dataset.skid; if(!skId) return;
+    const nb=document.querySelector('#sideNav button[data-tab="skills"]'); if(nb) nb.click();
+    setTimeout(()=>{
+      const sk=(S.lifeSkills||[]).find(s=>s.id===skId);
+      if(sk){ const el=document.getElementById(`skcat-${sk.cat}`); if(el) el.scrollIntoView({behavior:"smooth",block:"start"}); }
+    },150);
+  });
 }
 
 function renderSkillsTab(){
@@ -9588,9 +9641,15 @@ function skProgressBlock(sk, eff){
     const tier=skTier(sk, eff);
     const tierPrefix = (tier && eff>0) ? `<span class="sk-tier-prefix">${esc(tier.label)}:</span> ` : "";
     const tierBadge = (tier && eff>0) ? ` <span class="sk-tier-tag">${esc(tier.label)}</span>` : "";
-    return `<div class="sk-card ${isSub?'sk-sub':''}">
+    const leafCol=typeof skLeafColor==="function"?skLeafColor(eff,sk.levels.length):"#6e7459";
+    const pathIcon=(typeof SK_PATH_ICON!=="undefined"&&SK_PATH_ICON[sk.cat])||"🌿";
+    const pathName=(typeof SK_CAT!=="undefined"&&SK_CAT[sk.cat])||sk.cat||"";
+    const maxLv=(sk.levels||[]).length||1;
+    const fillPct=Math.round((eff/maxLv)*100);
+    return `<div class="sk-card ${isSub?'sk-sub':''}" style="border-left:3px solid ${leafCol};--sk-fill:${fillPct}%">
       <div class="sk-card-top">
-        <div><div class="sk-card-name">${tierPrefix}${esc(sk.name)}${sk.auto?' <span class="sk-auto">auto</span>':''}</div></div>
+        <div><div class="sk-card-name">${tierPrefix}${esc(sk.name)}${sk.auto?' <span class="sk-auto">auto</span>':''}</div>
+        <div class="sk-card-world">${pathIcon} ${esc(pathName)}</div></div>
         <span class="sk-level-badge ${maxed?'maxed':''}">${eff>0?'Lv '+eff:'Unproven'}${tierBadge}${maxed?' · MAX':peakStr}</span>
         <button class="sk-copy-btn" data-skcopy="${sk.id}" title="Copy skill card">⧉</button>
         <button class="sk-card-edit" data-skedit="${sk.id}">✎</button>
@@ -9603,6 +9662,7 @@ function skProgressBlock(sk, eff){
       ${(sk.why||sk.whatYouDo||sk.howTo||sk.prep||sk.recover||sk.safety||sk.roadmap||sk.advance||sk.maintain)?`<details class="sk-info"><summary>ℹ️ Why, how &amp; how to level up</summary><div class="sk-info-body">${sk.why?`<p><b>Why:</b> ${esc(sk.why)}</p>`:''}${sk.whatYouDo?`<p><b>What you do:</b> ${esc(sk.whatYouDo)}</p>`:''}${sk.howTo?`<p><b>How:</b> ${esc(sk.howTo)}</p>`:''}${sk.prep?`<p class="sk-prep"><b>🤸 Warm-up before:</b> ${esc(sk.prep)}</p>`:''}${sk.recover?`<p class="sk-recover"><b>🧘 Stretch after:</b> ${esc(sk.recover)}</p>`:''}${skProgressBlock(sk,eff)}${sk.safety?`<p class="sk-safety">⚠️ ${esc(sk.safety)}</p>`:''}</div></details>`:''}
       <button class="sk-work" data-skwork="${sk.id}">▶ Work on this</button>
       <div class="sk-work-panel" id="skwork-${sk.id}"></div>
+      <div class="sk-level-bar"><div class="sk-level-fill" style="width:var(--sk-fill);background:${leafCol}"></div></div>
     </div>`;
   };
   const groupCard=sk=>{

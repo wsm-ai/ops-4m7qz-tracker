@@ -72,8 +72,7 @@ function finishQuiz(){
   // first time passing: reward + convert to daily review + advance knowledge objective
   if(firstPass){
     S.gold+=20;
-    if(!S.skills.knowledge) S.skills.knowledge={xp:0};
-    S.skills.knowledge.xp+=50;
+    if(!S.pathXP) S.pathXP={}; S.pathXP.academic=(S.pathXP.academic||0)+50;
     // add daily review order if not present
     const reviewName="🧠 Review: "+t.name+" (retake quiz)";
     if(!S.dailies.some(d=>d.review===QZ.key)){

@@ -108,8 +108,8 @@ function skPass(skId){
   // maintain just refreshes the timer
   sk.lastQuestTs=Date.now();
   sk.history.push({ts:Date.now(),type:q.type,level:q.level});
-  // skill growth feeds the Knowledge track lightly (earned, not gamifying the skill itself)
-  if(!S.skills.knowledge)S.skills.knowledge={xp:0}; S.skills.knowledge.xp+=15;
+  // skill growth feeds the Academic path lightly (earned, not gamifying the skill itself)
+  if(!S.pathXP) S.pathXP={}; S.pathXP.academic=(S.pathXP.academic||0)+15;
   save();render();
   toast(q.type==="promote"?`⬆️ Promoted to Level ${sk.currentLevel} — ${esc(sk.name)}`:q.type==="decay"?`Reclaimed Level ${sk.currentLevel}`:`Maintained — ${esc(sk.name)}`);
 }
@@ -128,7 +128,7 @@ function skReachLevel(skId, level){
   skUpdatePeak(sk);
   sk.lastQuestTs=Date.now();
   sk.history.push({ts:Date.now(),type:prevType,level});
-  if(!S.skills.knowledge)S.skills.knowledge={xp:0}; S.skills.knowledge.xp+=15;
+  if(!S.pathXP) S.pathXP={}; S.pathXP.academic=(S.pathXP.academic||0)+15;
   save();render();
   if(typeof getTierLabelForLevel==="function"){
     const tierLabel=getTierLabelForLevel(sk,level);

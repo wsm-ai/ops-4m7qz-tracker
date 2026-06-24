@@ -92,6 +92,7 @@ document.body.addEventListener("click",e=>{
     const base=q.due&&q.due>=localYMD()?q.due:localYMD();
     const nd=new Date(base+"T12:00:00"); nd.setDate(nd.getDate()+3);
     q.due=localYMD(nd);
+    q.snoozeCount=(q.snoozeCount||0)+1;
     save();render();
     toast(`Oath postponed to ${q.due}`);
     return;

@@ -167,6 +167,120 @@ Eight features ranked by cadet impact. All are honest, offline-safe, and require
 
 ---
 
+---
+
+## 10. FM beginner prescription — auto-assign sets, reps, weights, and rest
+
+**Value:** The FM tab tells a cadet *what* to do (e.g. "Reverse lunge — 3–4 sets") but never tells them *how many reps, how much weight, how long to rest, or how hard to push.* Someone who has never been to a gym, has no concept of effort limits, and has never lifted a weight has no frame of reference for those decisions. Without concrete numbers, they either under-train (wasting the session) or over-train (getting hurt and quitting). A per-session prescription card — showing exact sets × reps, specific starting weights for gym mode, rest periods, and a one-sentence effort guide — turns the FM tab from a menu into a training manual anyone can open on day one.
+
+**Design principle:** Assume the user has *never* done any of this before. Every number is a "start here" floor, not a recommendation based on any prior fitness. The first-day minimums are lower than most people need — that is intentional. Adding reps is easy; recovering from an injury in week one is not.
+
+**What gets prescribed per exercise:**
+- `sets × reps` (or `sets × hold-time` for isometrics/planks)
+- **No-equipment:** a plain-English effort cue ("stop when you could still do 2 clean reps — the set should feel like work but never a grind")
+- **Gym mode:** a specific starting weight, stated as the lightest sensible load for the movement (not a percentage — a cadet with no 1RM history can't use percentages)
+- **Rest:** explicit rest period between sets (strength = 2–3 min, accessories = 60–90s, conditioning = 90s)
+- **When to progress:** one weekly rule: "when all sets felt like you had at least 3 reps left, add 1 rep next session (bodyweight) or 5 lbs (gym)"
+- **First-day option:** a "just starting" tier — 2 sets at the low end — for someone truly coming off the couch
+
+**Per-session prescriptions (no-equipment / gym):**
+
+**Session 1 — Lower + Push**
+| Exercise | Sets | Reps | Rest |
+|---|---|---|---|
+| Reverse lunge | 3 | 8/leg | 90s |
+| Single-leg glute bridge | 3 | 10/leg | 60s |
+| Hand-release push-ups | 3 | 6–8 (first-day: 3–5) | 90s |
+| Pike push-ups | 2 | 6–8 | 90s |
+| Hollow-body hold | 3 | 20s | 45s |
+| Shrimp squat (assisted) | 2 | 5/leg | 90s |
+
+Gym additions (replace bodyweight equivalents):
+| Exercise | Start Weight | Sets | Reps | Rest |
+|---|---|---|---|---|
+| Trap-bar / barbell deadlift | 65 lbs (bar + 10 lb plates) | 3 | 5 | 3 min |
+| Goblet squat | 15 lbs | 3 | 10 | 90s |
+| DB bench press | 15 lbs / hand | 3 | 10 | 90s |
+| Overhead press | 10 lbs / hand | 3 | 10 | 90s |
+| Leg press | 70 lbs | 3 | 12 | 90s |
+
+**Session 2 — Run**
+| Workout | Protocol | First-day option |
+|---|---|---|
+| Intervals | 4 × 400m at "can't talk" pace, 90s walk between | 3 × 200m, 2 min walk |
+| Tempo run | 15 min at "only a few words" pace | 10 min |
+| Long easy run | 25 min conversational | 15 min walk/jog |
+| Timed 2-mile | Run 2 miles as fast as you can sustain; record time | Same — it's a test |
+
+Gym (treadmill / rower):
+- Treadmill: same duration/protocol; add 1% incline minimum
+- Rower intervals: 4 × 250m at full effort, 90s rest
+
+**Session 3 — Upper + Core**
+| Exercise | Sets | Reps | Rest |
+|---|---|---|---|
+| Doorway / towel rows | 3 | 8–10 | 90s |
+| Decline push-ups | 3 | 6–8 | 90s |
+| Plank | 3 | 20–30s | 45s |
+| Side plank | 2/side | 15–20s | 45s |
+| Superman / back extension | 3 | 10 | 45s |
+| Towel pull-aparts | 2 | 15 | 45s |
+| Grip squeeze | 3 | 30s | 30s |
+
+Gym:
+| Exercise | Start Weight | Sets | Reps | Rest |
+|---|---|---|---|---|
+| Lat pulldown | 40 lbs | 3 | 10 | 90s |
+| Seated cable row | 35 lbs | 3 | 10 | 90s |
+| Incline DB press | 15 lbs/hand | 3 | 10 | 90s |
+| Cable face pulls | 20 lbs | 3 | 15 | 60s |
+| Hanging knee raises | bodyweight | 3 | 8 | 60s |
+| Farmer's carry | 25 lbs/hand | 3 | 40 ft | 90s |
+
+**Session 4 — AFT Circuit**
+Do 3 rounds. Rest 2 min between rounds. *Do not rush — control beats speed on week one.*
+| Exercise | Reps / Duration | Notes |
+|---|---|---|
+| Shuttle sprints | 4 lengths (~25m each) | Walk the first set if needed |
+| Bear crawl | 20 ft forward, 20 ft back | Knees 2 inches off the floor |
+| Hand-release push-ups | 10 (first-day: 5) | Full stop at the bottom |
+| Squat jumps | 8 | Land soft — bend the knees on landing |
+| Plank | 30s | Stop before form breaks |
+| 200m run / jog | 1 lap (~50s–90s) | Easy to moderate pace |
+
+Gym circuit (same structure, swap):
+- Sled push 25m → 25m return: start with no extra weight beyond the sled
+- Loaded carry: 25 lbs/hand × 40 ft
+- Box jump: 12" box, 6–8 reps
+- Rower 200m: all-out
+
+**Session 5 — Mobility + Balance**
+Already prescriptive (hold times and progression levels are in the existing tab). No changes needed.
+
+**Effort guide (plain English, applies to all sessions):**
+> "When you're doing a strength set, it should feel like hard work by the last 2 reps — but you should be able to do 2 or 3 more if you absolutely had to. That's the line. If you couldn't do another rep, you went too heavy or too long. If you could've done 6 more, add reps next session. Pain, shaking joints, or sharp sensations mean stop immediately — soreness the next day is normal, sharp pain during is not."
+
+**Signs you went too hard:**
+- Can't sleep (nervous system overloaded)
+- Still sore 3+ days later in the same area
+- Form fell apart during the set
+- Heart rate didn't come down within 5 min after the session
+
+**Signs you went too easy (progress next session):**
+- All sets felt like a warm-up
+- Finished the last rep with energy to spare on every set
+- Heart rate was barely elevated during conditioning
+
+**Implementation sketch:**
+- Add a `BEGINNER_RX` constant to `src/tabs/plan.js`: a nested object keyed by `s1–s5`, each entry containing an array of `{name, sets, reps, rest, gym?: {weight, reps, rest}}` objects matching the exercises already listed in the EX_HOWTO/session structures.
+- In `renderPlan()`, after rendering each session's `data-sess` exercise list, inject a `<div class="rx-card">` containing a compact table from `BEGINNER_RX[sessId]`.
+- CSS: `.rx-card{background:rgba(111,158,84,.07);border:1px solid rgba(111,158,84,.25);border-radius:9px;padding:11px 14px;margin-top:10px}` `.rx-table{width:100%;font-size:12px;border-collapse:collapse}` `.rx-table td,th{padding:4px 8px;border-bottom:1px solid rgba(255,255,255,.04)}` — styled as a green field-manual card.
+- The gym toggle already controls which exercise list is shown; `rxCard` checks `S.gymMode` and renders the matching prescription.
+- No new state fields. `BEGINNER_RX` is static data — it's the field manual, not user progress.
+- A "first-day tier" note at the top of the rx-card: `<p class="rx-note">New to this? Do the lower number first. Add reps when the sets feel genuinely easy — not before.</p>`
+
+---
+
 ## Implementation order recommendation
 
 | Priority | Feature | Effort | Impact |
@@ -175,8 +289,9 @@ Eight features ranked by cadet impact. All are honest, offline-safe, and require
 | 2 | Baseline test nudge on Dawn | Very low | High (training system input) |
 | 3 | AFT score history sparkline | Low | High (trend visibility) |
 | 4 | Qualification log + auto-leveling | Medium | High (verified competency record) |
-| 5 | Oath path breakdown | Low | Medium (balance awareness) |
-| 6 | FM weekly goal from AFT gap | Low | Medium (prescription) |
-| 7 | Oath archive search | Low | Medium (history access) |
-| 8 | Daily order completion time | Low | Medium (behavioral insight) |
-| 9 | Skill decay grace period | Medium | Medium (fairness / realism) |
+| 5 | FM beginner prescription | Medium | High (critical — makes FM tab actionable for a true beginner) |
+| 6 | Oath path breakdown | Low | Medium (balance awareness) |
+| 7 | FM weekly goal from AFT gap | Low | Medium (prescription) |
+| 8 | Oath archive search | Low | Medium (history access) |
+| 9 | Daily order completion time | Low | Medium (behavioral insight) |
+| 10 | Skill decay grace period | Medium | Medium (fairness / realism) |

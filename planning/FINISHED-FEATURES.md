@@ -1,6 +1,6 @@
 # Operations PWA — Finished Features & Project Reference
 
-This document is the permanent record. It holds completed visual overhaul phases, previous session prompts, and a full description of the project's design language and architecture. Use it as a reference when continuing work — you do not need to re-derive what's already been built.
+This document is the permanent record. It holds all completed features, visual overhaul phases, and the project's design language and architecture. Use it as a reference when continuing work — you do not need to re-derive what's already been built.
 
 ---
 
@@ -27,42 +27,56 @@ The app's organizing metaphor is Yggdrasil, the Norse world-tree. Every skill is
 
 | Key | Path name | World | Icon | Color |
 |---|---|---|---|---|
-| `tactical` | Path of War | Fólkvangr | ⚔️ | `#7a3e3e` dark red |
-| `physical` | Path of the Body | Midgard | 🌿 | `#7a5c2a` dark amber |
-| `cognitive` | Path of the Mind | Well of Mimir | 🌀 | `#3a5c7a` dark steel blue |
-| `physiological` | Path of Vitality | Asgard | ❤️ | `#3a6b4a` dark green |
-| `technical` | Path of the Craft | Nidavellir | ⚙️ | `#4a4a6b` dark indigo |
-| `leadership` | Path of Command | Valhalla | ⭐ | `#6b5a2a` dark gold |
-| `academic` | Path of Knowledge | Jotunheim | 📚 | `#5a3a6b` dark violet |
-| `personal` | Path of the Self | Alfheim | 🌱 | `#3a6b3a` dark sage |
-| `hearth` | Path of the Hearth | Vanaheim | 🔥 | `#7a4a2a` dark ember |
-| `roots` | Path of Roots | Niflheim | 🌾 | `#4a5a3a` dark moss |
+| `tactical` | Path of War | Fólkvangr | ⚔️ | `--blood: #9c4a34` brick red |
+| `physical` | Path of the Body | Midgard | 🌿 | `--jade: #6f9e54` OD green |
+| `cognitive` | Path of the Mind | Well of Mimir | 🌀 | `--violet: #7c93a8` slate blue |
+| `physiological` | Path of Vitality | Asgard | ❤️ | `--jade: #6f9e54` OD green |
+| `technical` | Path of the Craft | Nidavellir | ⚙️ | `--ember: #c8772e` signal amber |
+| `leadership` | Path of Command | Valhalla | ⭐ | `--gold: #b8a06a` coyote tan |
+| `academic` | Path of Knowledge | Jotunheim | 📚 | `--gold: #b8a06a` coyote tan |
+| `personal` | Path of the Self | Alfheim | 🌱 | `--jade: #6f9e54` OD green |
+| `hearth` | Path of the Hearth | Vanaheim | 🔥 | `--ember: #c8772e` signal amber |
+| `roots` | Path of Roots | Niflheim | 🌾 | `--jade: #6f9e54` OD green |
 
-### Color palette (CSS variables)
+### Color palette (CSS variables — current as of v109)
 
 ```
---bg:        #080b08    (near-black, forest floor)
---panel:     #0e1209    (card background)
---panel-2:   #111408    (nested card)
---line:      #1e2318    (border default)
---ink:       #d4cdb8    (primary text)
---ink-dim:   #9a9480    (secondary text)
---ink-faint: #5a5649    (muted text)
---gold:      #b8a06a    (earned / peak)
---gold-bright: #d4b87a  (highlight)
---ember:     #c87440    (warning / fading / fire)
---jade:      #5a8a5a    (growth / promote)
---violet:    #7c64c8    (cognitive / memory)
---blood:     #8a3a3a    (tactical / danger)
+--bg:          #14160f    (dark forest green-black — body background)
+--panel:       #1c1f15    (card / panel background)
+--panel-2:     #252a1c    (nested card / inner panel)
+--line:        #343a26    (border default)
+--ink:         #e8ead9    (primary text)
+--ink-dim:     #a4ab8e    (secondary text)
+--ink-faint:   #6e7459    (muted text)
+--gold:        #b8a06a    (coyote tan — earned / peak)
+--gold-bright: #d9c48a    (light tan — highlight / header)
+--ember:       #c8772e    (signal amber — warning / fading / fire)
+--jade:        #6f9e54    (OD green — growth / promote)
+--violet:      #7c93a8    (slate blue — cognitive / memory)
+--blood:       #9c4a34    (brick red — tactical / danger)
+--shadow:      0 8px 30px rgba(0,0,0,.6)
 ```
+
+### Body background layers (v109)
+
+The body uses a stacked `background` of 7 layers (top to bottom):
+1. Crown of Yggdrasil — `radial-gradient` gold ellipse from above (rgba(184,160,106,.14))
+2. Deep roots — `radial-gradient` jade tinge from below (rgba(111,158,84,.11))
+3. Side vignettes — two `radial-gradient` forest shadows on the flanks
+4. **Dark walnut annual rings** — `repeating-linear-gradient` at 90° (rgba(120,65,12,.13))
+5. **Medium grain bands** — `repeating-linear-gradient` at 89.4° (rgba(165,92,18,.15))
+6. **Fine tight grain** — `repeating-linear-gradient` at 88° (rgba(185,105,22,.16))
+7. Base solid color — `var(--bg)` (#14160f)
+
+The wood grain (layers 4–6) creates a dark walnut table texture, warm amber against the forest-green base, visible in the gaps between panel cards.
 
 ### Visual character
 
-- Background: deep forest green-black, not pure black. Subtle radial gradients at viewport center for atmospheric depth.
-- Cards: dark panel backgrounds with colored borders and corner bracket accents (`::before` / `::after` CSS).
-- Typography: slightly loose letter-spacing on labels; small-caps for path names and military titles.
+- Background: dark forest green with wood grain texture and Yggdrasil atmospheric gradients.
+- Cards: `.card` surfaces also carry subtle grain (`repeating-linear-gradient` at 88°/89.5°, opacity 0.05–0.06) layered above the panel gradient.
+- Typography: slightly loose letter-spacing on labels; small-caps for path names and military titles; `ui-monospace` for scores and data.
 - Icons: emoji for path/tab icons (avoids font loading); SVG for all skill emblems (inline, generated in JS).
-- No hover effects that require pointer cursor assumptions (mobile-first).
+- Per-tab atmosphere: each of the 18 tabs has scoped `#view-*` CSS giving it a distinct chamber feel (see Phase 3 below).
 
 ---
 
@@ -110,7 +124,7 @@ src/
 ```bash
 python scripts/build.py   # assemble index.html from src/
 npm run check             # syntax-check assembled script
-npm run regress           # headless 17-tab test, assert 0 pageerror
+npm run regress           # headless 18-tab test, assert 0 pageerror
 npm run package           # build zip + preview
 ```
 
@@ -124,15 +138,95 @@ npm run package           # build zip + preview
 
 ---
 
-## Completed Visual Overhaul Features
+## Completed Features by Version
+
+---
+
+### v96 — AFT Prep + Daily Engagement
+**Files changed:** `src/core/constants.js`, `src/tabs/aft.{html,js}`, `src/tabs/today.js`, `src/tabs/log.{html,js}`, `src/core/events.js`, `src/core/init.js`
+
+1. **AFT test date + per-event improvement math** — `S.aftTestDate` input on AFT tab; `aftPrepCard()` computes event-level improvement targets and days-to-test countdown.
+2. **All-time personal records board** — `aftPrCard()` on AFT tab showing best-ever per-event score; `.aft-pr-card` CSS.
+3. **Session log note field** — `<textarea id="lgNote">` on Log tab; note saved with each session entry.
+4. **Quest / oath due dates** — `qDue` input, `due` field on quest object, `overdue` CSS class, overdues sorted first in the list.
+5. **PWA install prompt on Dawn** — `beforeinstallprompt` captured, dismissed state in `DEFAULT`, install/dismiss card rendered in Field Notes.
+6. **Push notifications for streak protection** — `Notification.requestPermission()` flow, `scheduleStreakNotif()` in `init.js`, opt-in card on Dawn.
+
+---
+
+### v97 — Habit Heat Maps + Weight Log
+**Files changed:** `src/tabs/dailies.{html,js}`, `src/tabs/profile.js`, `src/tabs/log.js`, `src/tabs/quests.html`, `src/core/state.js`, `src/core/constants.js`, `src/core/events.js`, `src/tabs/today.js`, `src/tabs/plan.js`
+
+1. **Habit streak calendar / heat-map** — `habitHeatMap()` in `dailies.js`; last-90-days heat grid, `.habit-heat-row` / `.heat-sq` CSS.
+2. **Daily weight tracking on Profile** — weight log input, 30-day sparkline via `miniSparkline()`.
+3. **PT session calendar (last 30 days)** — `.pt-cal-dot` grid in Log tab history; each session leaves a dot.
+4. **Quest / oath archive** — `questArchive:[]` in DEFAULT, completed oaths pushed to archive, `#qArchive` rendered in Oaths tab.
+5. **Session-level RPE** — `<select id="lgRpe">` on Log tab; saved with each session, shown in history.
+6. **Dawn overdue oath count** — overdueCount computed and pushed to Field Notes with link to Oaths tab.
+7. **Baseline test history sparkline** — `miniSparkline()` for each baseline (pushup/plank/2-mile) in Plan tab adaptive targets section.
+
+---
+
+### v98 — Discipline Tracking + Boss Sync
+**Files changed:** `src/core/state.js`, `src/core/constants.js`, `src/tabs/today.js`, `src/tabs/aft.js`, `src/tabs/log.js`, `src/core/events.js`
+
+1. **Quest sorting by urgency** — overdue first, then soonest due date, then no date; in `state.js` render.
+2. **Active boss on Dawn tab** — `dawnBossHtml()` card showing highest-HP active objective.
+3. **Habit best streak badge** — `hb-best` class shows all-time best run in each habit's header.
+4. **Daily completion log (7-day discipline score)** — `streakLog:[]` in DEFAULT; 7-day bar chart `disciplineLogHtml()` on Dawn.
+5. **AFT score drop detection** — `aftRegressionCard()` detects per-event regressions across last 2 tests, `.aft-regress` styling.
+6. **Workout weekly volume summary** — `.week-summary` in Log history; sets/reps/exercises totaled for the current week.
+7. **Printable daily OPORD** — `copyDailyBrief()` formats today's state as clipboard-ready text; triggered by Dawn copy button.
+
+---
+
+### v99 — Trophy System + Timeline
+**Files changed:** `src/tabs/trophies.{html,js}`, `src/tabs/skills.js`, `src/tabs/dailies.js`, `src/tabs/plan.js`, `src/core/skills-core.js`, `src/core/events.js`, `src/core/constants.js`, `src/tabs/today.js`
+
+1. **Rune name tooltips on Carved Rings** — `#trophyDetail` panel, click → reveals tier name, ability description, level date.
+2. **Trophy unlock toast on skill level-up** — `getTierLabelForLevel` check in `skills-core.js` triggers 🏺 toast when a tier boundary is crossed.
+3. **Skill level-history timeline** — collapsible history entries under each skill card; `.sk-hist-item` / `.sk-hist-sep` CSS.
+4. **Per-event AFT delta badges** — inline `trend()` function in `aft.js` shows ▲/▼ per event vs. previous test.
+5. **Habit streak calendar (monthly toggle)** — `habitMonthGrid()` adds calendar month grid view; toggle button switches heat vs. month.
+6. **Baseline PR history cards** — `blPrCard()` in `plan.js`; best-ever for each baseline test shown in Plan tab.
+7. **Oath completion time tracking** — `createdDate` set at creation; archive shows days-to-complete and age tag.
+8. **Dawn streak-recovery mode** — `streakBrokenDate` in DEFAULT; `.recovery-mode-card` rendered for 3 days after streak break, guiding re-entry.
+
+---
+
+### v100 — Tree Decay + Navigation Polish
+**Files changed:** `src/tabs/today.js`, `src/core/state.js`, `src/core/events.js`, `src/core/tree.js`, `src/tabs/skills.js`, `src/core/training.js`, `src/_shell.html`
+
+1. **Path XP progress bar on Dawn** — `pathPipsHtml()` shows XP pips per path in the Dawn header row.
+2. **Quest "snooze" (+3 days)** — `q-snooze` button; bumps due date, increments `snoozeCount`.
+3. **Weekly training summary card on Dawn** — `weekTrainCardHtml()` + `weekTrainingStats()` shows this-week session count and type breakdown.
+4. **Skill decay countdown ring on the Tree** — `pushFadeRing()` in `tree.js`; concentric amber ring around leaves within 20% of their fade window.
+5. **Overdue oath count badge on nav button** — `<span class="nav-badge">` in nav, populated in `state.js`; visible in mobile strip and sidebar.
+6. **AFT test countdown on Dawn** — days-to-AFT pushed to Field Notes from `S.aftTestDate`.
+7. **Habit "grace day" visual indicator** — `graceIcon` (⏰ available, ⚠️ used) displayed in habit card header.
+8. **Export / share a single skill card** — `sk-copy-btn` copies skill name + level + tier + ladder to clipboard.
+
+---
+
+### v101 — Theme Sweep + 9 Features
+**Files changed:** `src/core/skills-core.js`, `src/tabs/today.js`, `src/core/events.js`, `src/tabs/dailies.js`, `src/tabs/aft.js`, `src/core/constants.js`, `src/tabs/weight.js`, `src/core/tree.js`, `src/tabs/skills.js`, `src/styles/main.css`
+
+1. **Fix skill XP → pathXP.academic** — silent bug where leveling Knowledge skills credited wrong path; fixed in `skPass()` and `skReachLevel()`.
+2. ~~Post-log adaptive target toast~~ — **NOT IMPLEMENTED.** The diff-before/after logic and "🎯 N targets climbed" toast was never added to `log.js`. Remaining in `IMPROVEMENTS-v101.md`.
+3. **AFT per-event delta note on Dawn** — per-event deltas vs. previous test pushed to Field Notes with 📉 icon and link.
+4. **Quest snooze fatigue counter** — `q.snoozeCount` incremented; `.oath-postpone-warn` badge shown when count > 1.
+5. **Habit 7-day consistency summary** — `.orders-week-summary` bar above the daily list; this-week done/total count.
+6. **Commissioning memento card** — past-commission date shows "Commissioned [date] · N days of commissioned service" on Dawn.
+7. **Weight mirror sync-recency indicator** — `S.lastMirrorUpdate` in DEFAULT; `.weight-sync-footer` shows last sync date in Weight tab.
+8. **Tree leaf tap → skill card navigation** — `data-skid` on leaf circles; tap opens target path deck in Skills tab and scrolls to card.
+9. **Yggdrasil skill card theming** — path-colored left border, world path badge, level fill bar (`--sk-col`, `--sk-fill`) on every skill card.
+10. **Full Yggdrasil theme sweep** — vocabulary (Oaths/Orders/Postpone), `.forge-recovery-card`, discipline bar rename, CSS color semantics, radial gradients.
 
 ---
 
 ### Phase 1 — Skill Cards + Path Deck UI
 **Shipped: v102**
 **Files changed:** `src/tabs/skills.js`, `src/styles/main.css`, `src/core/tree.js`, `src/tabs/awards.js`
-
-**What was built:**
 
 The skills tab was transformed from a flat scrolling list into a **deck-based card interface**. Each of the 10 paths became a collapsible `.sk-deck` container. The most recently active path (highest `pathXP[cat]`) expands by default; all others collapse.
 
@@ -173,11 +267,9 @@ The skills tab was transformed from a flat scrolling list into a **deck-based ca
 **Shipped: v102 (skills tab) + v103 (carved rings tab)**
 **Files changed:** `src/tabs/skills.js`, `src/tabs/trophies.js`, `src/styles/main.css`
 
-**What was built:**
-
 Every skill gets a unique SVG sigil that evolves as the skill's level grows. The sigil is generated entirely in JavaScript as an inline SVG string — no images, no fonts, no external assets.
 
-**The sigil system lives in `src/tabs/skills.js`** as the `skEmblemSvg` IIFE (immediately-invoked function expression). It is globally available to `trophies.js` which loads after it.
+**The sigil system lives in `src/tabs/skills.js`** as the `skEmblemSvg` IIFE. It is globally available to `trophies.js` which loads after it.
 
 **Tier system:**
 | Tier | Threshold | Visual character |
@@ -189,38 +281,27 @@ Every skill gets a unique SVG sigil that evolves as the skill's level grows. The
 | 4 — Refined | 61–80% | Secondary ornamentation |
 | 5 — Mastered | 81–100% | Full complexity, all elements |
 
-**Variation seed:** `Math.abs(hash(skill.id)) % 4` → 0–3. Controls which variant of each ornament appears (pommel shape, rune glyph, leaf shape, etc.) so skills on the same path look related but not identical.
-
-**Shared outer ring** (`_ring`): wraps every sigil. Starts as a plain circle; gains tick marks at tier 2, double ring at tier 4. The ring's opacity and stroke-width grow with level.
+**Variation seed:** `Math.abs(hash(skill.id)) % 4` → 0–3. Controls which variant of each ornament appears so skills on the same path look related but not identical.
 
 **Per-path motifs:**
 
 | Path | Motif | Progression summary |
 |---|---|---|
-| `tactical` | Rune-sword | Vertical blade → crossguard emerges → pommel (shape varies by seed) → rune mark on blade |
+| `tactical` | Rune-sword | Vertical blade → crossguard → pommel (seed variant) → rune mark on blade |
 | `physical` | Ember flame | Teardrop outline → inner flame → side tongue → ember base arc → crown flame |
-| `cognitive` | Rune-eye (Odin's eye) | Almond outline → iris ring → pupil dot → brow arc → lashes + rune marks |
-| `physiological` | Valknut | Single triangle → two triangles → three triangles → inner detail → outer circle |
-| `technical` | Gear / circuit node | 4-tooth gear → 6 teeth → 8 teeth + bore → inner shape + spokes → circuit traces |
-| `leadership` | Crown | Center spire → side spires → more spires → jewels at points → base band ornamentation |
-| `academic` | Open rune-scroll / tome | Scroll bar + curl ends → open book form → text lines per page → chapter marks → page curl + bookmark |
-| `personal` | Seed to sprout | Oval seed → taproot line → sprout shoot + leaf → two leaves → full small tree |
-| `hearth` | Hearthstone arch | Ember dot → flame teardrop → arch opening arc → full arch with pillars → keystone rune |
-| `roots` | Root network | Horizontal root bar → T-branch → 4-branch system → secondary branchlets → knotwork taproot node |
+| `cognitive` | Rune-eye | Almond outline → iris ring → pupil dot → brow arc → lashes + rune marks |
+| `physiological` | Valknut | Single triangle → two → three → inner detail → outer circle |
+| `technical` | Gear / circuit node | 4-tooth gear → 6 → 8 + bore → inner shape + spokes → circuit traces |
+| `leadership` | Crown | Center spire → side spires → more → jewels → base band ornamentation |
+| `academic` | Open rune-scroll | Scroll bar + curls → open book → text lines → chapter marks → page curl + bookmark |
+| `personal` | Seed to sprout | Oval seed → taproot → sprout + leaf → two leaves → full small tree |
+| `hearth` | Hearthstone arch | Ember dot → flame → arch arc → full arch with pillars → keystone rune |
+| `roots` | Root network | Horizontal bar → T-branch → 4-branch → secondary branchlets → knotwork node |
 
-**Color:** sigils use `skLeafColor(eff, max)` — the same color as the skill's leaf on the Yggdrasil tree, so the sigil and tree leaf are visually linked. Cold gray when low; ember gold at peak.
+**Color:** sigils use `skLeafColor(eff, max)` — the same color as the skill's leaf on the Yggdrasil tree.
 
-**On skill cards (skills tab):**
-- Sigil rendered at 48×48 in `.sk-card-emblem`
-- Uses **current effective level** (`eff`) — shows your present state
-- If not started: shows a dashed placeholder circle
-
-**On Carved Rings tab (trophies tab):**
-- Sigil rendered at 62×62 in `.trophy-ring-sigil`
-- Uses **peak level** (`sk.peakLevel`) — permanent record of highest ever reached
-- Even if a skill decays, the Carved Rings still shows the peak-tier sigil
-- Clicking the sigil shows the detail panel for that peak-level ability
-- Unstarted skills show as ghost cards (opacity 0.28, desaturated)
+**On skill cards:** sigil at 48×48 using current effective level.
+**On Carved Rings:** sigil at 62×62 using peak level — permanent record of highest ever reached.
 
 ---
 
@@ -228,49 +309,60 @@ Every skill gets a unique SVG sigil that evolves as the skill's level grows. The
 **Shipped: v103**
 **Files changed:** `src/tabs/trophies.js`, `src/styles/main.css`
 
-**What was built:**
+The Carved Rings tab was redesigned from a horizontal row layout into a **sigil card grid**.
 
-The Carved Rings tab ("every level earned, kept here") was redesigned from a horizontal row layout (skill name + chip row side-by-side) into a **sigil card grid**.
-
-**New layout:**
 - Path sections remain `<details>` accordions (paths with earned rings open by default)
-- Inside each path: responsive grid of ring cards (`repeat(auto-fill, minmax(118px, 1fr))`)
-- Each card:
-  ```
-  ┌─────────────────┐
-  │   [62px sigil]  │  ← peak-level sigil, clickable → detail
-  │  Skill Name     │
-  │  Tier · L4/8   │
-  │ ● ● ● ● ○ ○ ○ ○ │  ← chip row (earned = colored)
-  └─────────────────┘
-  ```
+- Inside each path: responsive grid (`repeat(auto-fill, minmax(118px, 1fr))`)
+- Each card: 62px sigil (clickable → detail panel) + skill name + tier label + chip row
 - Chips shrank to 22×22 to fit neatly under the sigil
-- Path progress bar + earned/total count in the header unchanged
 
 ---
 
-## Previous Session Prompts (for historical reference)
+### Phase 3 — Per-Tab Visual Atmosphere
+**Shipped: v104–v109**
+**Files changed:** `src/styles/main.css`, `src/tabs/aft.js`
 
-### v101 — Yggdrasil theme sweep + 10 features
-Implemented 10 features:
-1. Fix skill XP → pathXP.academic (silent bug)
-2. Post-log adaptive target toast
-3. AFT per-event delta on Dawn
-4. Quest snooze fatigue counter
-5. Habit 7-day consistency summary
-6. Commissioning memento card
-7. Weight mirror sync-recency footer
-8. Tree leaf tap → skill card navigation
-9. Yggdrasil skill card theming (colored left border, world path badge, level fill bar)
-10. Full Yggdrasil theme sweep (vocabulary, color semantics, radial gradients)
+All 18 tabs received `#view-*` scoped CSS giving each a distinct chamber feel. Every card and element within a tab is themed by its tab's identity.
 
-### v102 — Visual Overhaul Phase 1 (skill deck UI) + sigil system (skills tab)
-- Transformed skills tab to deck-based card interface
-- Added per-skill sigil SVG generation system
-- Added sigils to skill cards (using current effective level)
-- Tree-leaf tap → opens target deck then scrolls
+**Tab themes:**
 
-### v103 — Carved Rings tab overhaul + sigil integration
-- Overhauled Carved Rings from chip rows to sigil grid cards
-- Sigils in Carved Rings show peak-level (permanent record)
-- Chips shrunk to fit under sigil in card grid
+| Tab | Theme concept | Key treatments |
+|---|---|---|
+| Dawn (`today`) | First light over Asgard | Gold atmospheric gradient strip at top; gold-glow section headers; `.fn-card` with corner rune accents; commissioning bar pulses gold |
+| Oaths (`quests`) | Sworn word on parchment | Gold left-border cards; ember left-border for overdue; wax-seal dot on due-dated cards; sepia archive with small-caps |
+| Orders (`dailies`) | Military orders board | Dark board background; square checkboxes; jade flash animation on task completion (`@keyframes order-done`); monospace week summary |
+| AFT (`aft`) | Combat readiness — measurement-forward | Black card background; large 54px total score display (`.aft-score-big`, added in JS `showAftResult()`); faint date label; ember border; crosshatch sparkline grid |
+| Log (`log`) | Warrior's journal | Ruled ledger line at 40px (red vertical rule via gradient); gold date headers; monospace exercise rows |
+| Plan (`plan`) | Tactical map — grid paper | Crosshatch grid on view background; amber coach card with gold left-border |
+| Awards (`awards`) | Trophy case / shadow box | Navy-shifted card background; gold aw-title; amber member/event card tints |
+| Records (`records`) | Stone inscription | Embossed section headers; gold-tinted history/checklist cards |
+| Profile (`profile`) | Personnel dossier | `.adder::before` "PERSONNEL FILE" folder tab; amber border; gold form section labels; blood-tinted blood card |
+| Weight (`weight`) | Sacred oath on vellum | Amber atmospheric gradient; gold vow text; amber ledger entries with left-border |
+| Board (`board`) | The Muster — cyber prep | Dark board background; violet left-border items; jade border on done items |
+| Shop (`shop`) | The Mead Hall | Gold section header; ember-tinted reward cards |
+| Objectives (`bosses`) | Trials — fortress under siege | Blood-tinted boss cards; ember name color; HP bar gets a striped overlay (`.hpfill::after`) |
+| Grove (`garden`) | Grove of the World Tree | Jade section headers |
+| Quizzes (`quizzes`) | Well of Mimir | Violet-tinted quiz cards; jade tint for passed |
+| Test & Train (`test`) | Cognitive measurement | Steel-blue test cards; violet mem-block cards |
+| Skills (`skills`) | Yggdrasil deck | Jade section header; 2px jade top border on `.adder` |
+| Carved Rings (`trophies`) | Permanent record | Gold section header with subtle glow |
+
+**New CSS additions in Phase 3:**
+- `@keyframes pulse-gold` — commissioning bar heartbeat
+- `@keyframes order-done` — jade flash on Orders completion
+- `.aft-score-big` — 54px monospace total score
+- `.aft-score-pass` / `.aft-score-fail` — color-coded pass/fail label under score
+- Profile `.adder::before` folder tab with clip-path shape and "PERSONNEL FILE" label
+
+**AFT JS change (v108):** `showAftResult()` in `src/tabs/aft.js` now extracts the total score into a `<div class="aft-score-big">` above the event rows. The `<h3>` was reduced to a small date label.
+
+**Wood grain (v109):** `body` background gained 3 repeating-linear-gradient layers (fine/medium/coarse) for dark walnut texture. `li.card` also gained a subtle grain overlay. See "Body background layers" section above.
+
+---
+
+## Open Items Remaining
+
+**From v101:**
+- Post-log adaptive target toast — when a workout is saved and adaptive targets change, show "🎯 N targets climbed" toast. Needs diff-before/after in `log.js` save handler.
+
+**All of v102** — none of the 10 features are implemented (see `IMPROVEMENTS-v102.md`).

@@ -532,6 +532,8 @@ function skProgressBlock(sk, eff){
     }
     const pracDays=sk.lastQuestTs&&sk.currentLevel>0?Math.round((Date.now()-sk.lastQuestTs)/864e5):null;
     const pracFoot=pracDays!==null?(pracDays===0?"practiced today":`practiced ${pracDays}d ago`):"";
+    const streak=typeof skStreak==="function"?skStreak(sk):0;
+    const streakFoot=streak>=2?`<span class="sk-streak">🔥 ${streak}-day streak</span>`:"";
 
     // Target level tick + footer
     const tgt=sk.targetLevel&&sk.targetLevel>0&&sk.targetLevel<=maxLv?sk.targetLevel:null;
@@ -563,7 +565,7 @@ function skProgressBlock(sk, eff){
       <div class="sk-level-bar"><div class="sk-level-fill" style="background:${leafCol}"></div>${tgtPct?`<div class="sk-tgt-tick" style="left:${tgtPct}%"></div>`:''}${_nextPct?`<div class="sk-tgt-tick-next" style="left:${_nextPct}%" title="${_nextStage} target: L${_nextTgt}"></div>`:''}</div>
       ${(()=>{const noted=(sk.history||[]).filter(h=>h.note).slice(-3).reverse();return noted.length?`<div class="sk-log-recent">${noted.map(h=>`<div class="sk-log-entry"><span class="sk-log-entry-ts">${new Date(h.ts).toLocaleDateString()}</span> ${esc(h.note.slice(0,80))}</div>`).join('')}</div>`:'';})()}
       <div class="sk-card-footer">
-        <div class="sk-card-footer-left">${fadeFoot}${pracFoot?`<span class="sk-prac-foot">${pracFoot}</span>`:''}${tgtFoot}</div>
+        <div class="sk-card-footer-left">${fadeFoot}${pracFoot?`<span class="sk-prac-foot">${pracFoot}</span>`:''}${streakFoot}${tgtFoot}</div>
         <div class="sk-footer-actions">
           ${!sk.auto && sk.currentLevel>0 ? `<button class="sk-practice-btn" data-skpractice="${esc(sk.id)}" title="Reset fade timer — mark as practiced outside the app">practiced</button>` : ''}
           <button class="sk-copy-btn" data-skcopy="${sk.id}" title="Copy skill card">⧉ copy</button>
@@ -654,6 +656,33 @@ function skProgressBlock(sk, eff){
     if(_skHeatmapVisible) renderHeatmap();
     hmBtn.onclick=()=>{ _skHeatmapVisible=!_skHeatmapVisible; hmBtn.classList.toggle("active",_skHeatmapVisible); if(hmEl){hmEl.style.display=_skHeatmapVisible?"block":"none"; if(_skHeatmapVisible)renderHeatmap();} };
   }
+  // assessment toggle
+  const assBtn=document.getElementById("skAssessToggle");
+  const assEl=document.getElementById("skAssessWrap");
+  if(assBtn){
+    assBtn.classList.toggle("active",_skAssessVisible);
+    if(assEl) assEl.style.display=_skAssessVisible?"block":"none";
+    if(_skAssessVisible) renderSkillAssessment();
+    assBtn.onclick=()=>{ _skAssessVisible=!_skAssessVisible; assBtn.classList.toggle("active",_skAssessVisible); if(assEl){assEl.style.display=_skAssessVisible?"block":"none"; if(_skAssessVisible)renderSkillAssessment();} };
+  }
+  // gap map toggle
+  const gmBtn=document.getElementById("skGapMapToggle");
+  const gmEl=document.getElementById("skGapMapWrap");
+  if(gmBtn){
+    gmBtn.classList.toggle("active",_gapMapVisible);
+    if(gmEl) gmEl.style.display=_gapMapVisible?"block":"none";
+    if(_gapMapVisible) renderSkillGapMap();
+    gmBtn.onclick=()=>{ _gapMapVisible=!_gapMapVisible; gmBtn.classList.toggle("active",_gapMapVisible); if(gmEl){gmEl.style.display=_gapMapVisible?"block":"none"; if(_gapMapVisible)renderSkillGapMap();} };
+  }
+  // weekly queue toggle
+  const wqBtn=document.getElementById("skWeeklyToggle");
+  const wqEl=document.getElementById("skWeeklyQueue");
+  if(wqBtn){
+    wqBtn.classList.toggle("active",_skWeeklyVisible);
+    if(wqEl) wqEl.style.display=_skWeeklyVisible?"block":"none";
+    if(_skWeeklyVisible) renderWeeklyQueue();
+    wqBtn.onclick=()=>{ _skWeeklyVisible=!_skWeeklyVisible; wqBtn.classList.toggle("active",_skWeeklyVisible); if(wqEl){wqEl.style.display=_skWeeklyVisible?"block":"none"; if(_skWeeklyVisible)renderWeeklyQueue();} };
+  }
   // populate the right-side category jump bar (only cats that have skills)
   const jb=document.getElementById("skJumpbar");
   if(jb){
@@ -676,4 +705,86 @@ function copySkillsSummary(){
     return `[${pm.name}]\n${lines.join("\n")}`;
   }).join("\n\n");
   navigator.clipboard.writeText(text).then(()=>toast("📋 Skills summary copied")).catch(()=>toast("Copy failed"));
+}
+function updateAllSkillTargets(){
+  const stage=typeof careerStage==="function"?careerStage():"MS2";
+  let n=0;
+  S.lifeSkills.forEach(sk=>{
+    const seed=SEED_SKILLS.find(s=>s.name===sk.name);
+    if(!seed||!seed.targets||seed.targets[stage]==null) return;
+    const newTgt=seed.targets[stage];
+    if(sk.targetLevel==null||sk.targetLevel<newTgt){ sk.targetLevel=newTgt; n++; }
+  });
+  if(n>0){ save(); renderSkillsTab(); toast(`↑ ${n} skill target${n!==1?"s":""} updated to ${stage}`); }
+  else toast(`All targets already at ${stage} level`);
+}
+let _skWeeklyVisible=false;
+function renderWeeklyQueue(){
+  const el=document.getElementById("skWeeklyQueue"); if(!el) return;
+  const urgent=(S.lifeSkills||[])
+    .filter(s=>!s.group&&s.currentLevel>0&&!s.auto)
+    .map(s=>({s,days:skDaysLeft(s),state:skFadeState(s)}))
+    .filter(x=>x.state!=='current'||(x.days!==null&&x.days<=7))
+    .sort((a,b)=>(a.days!==null?a.days:-999)-(b.days!==null?b.days:-999));
+  if(!urgent.length){ el.innerHTML=`<div class="sk-wq-empty">All started skills have ≥8 days remaining — nothing urgent this week.</div>`; return; }
+  el.innerHTML=urgent.map(({s,days,state})=>{
+    const eff=skEffectiveLevel(s), maxLv=(s.levels||[]).length||1;
+    const leafCol=typeof skLeafColor==="function"?skLeafColor(eff,maxLv,s):"#6e7459";
+    const overdue=state==='decayed', atRisk=state==='at-risk';
+    const dayStr=days===null?"overdue":days<=0?"overdue":`${days}d left`;
+    const dayCol=days===null||days<=0?'var(--blood)':days<=3?'var(--ember)':'var(--gold)';
+    return `<div class="sk-wq-row">
+      <div class="sk-wq-emblem">${skEmblemSvg(s,eff,maxLv)||`<div class="sk-wq-dot" style="background:${leafCol}"></div>`}</div>
+      <div class="sk-wq-info">
+        <div class="sk-wq-name">${esc(s.name)}${overdue?' <span class="sk-wq-tag blood">decayed</span>':atRisk?' <span class="sk-wq-tag amber">at risk</span>':''}</div>
+        <div class="sk-wq-days" style="color:${dayCol}">${dayStr}</div>
+      </div>
+      <button class="sk-wq-btn" data-skpractice="${esc(s.id)}">✓ practiced</button>
+    </div>`;
+  }).join('');
+}
+let _skAssessVisible=false;
+let _gapMapVisible=false;
+function renderSkillGapMap(){
+  const el=document.getElementById("skGapMapWrap"); if(!el) return;
+  const stages=['MS1','MS2','MS3','LDAC','MS4','commission','O1'];
+  const curStage=typeof careerStage==="function"?careerStage():"MS2";
+  const seedByName={};
+  (typeof SEED_SKILLS!=="undefined"?SEED_SKILLS:[]).forEach(s=>{ if(s.targets) seedByName[s.name]=s.targets; });
+  const rows=SK_CAT_ORDER.map(cat=>{
+    const pm=PATH_META[cat]; if(!pm) return '';
+    const cols=stages.map(stage=>{
+      const skills=(S.lifeSkills||[]).filter(s=>s.cat===cat&&!s.group&&s.levels&&s.levels.length&&seedByName[s.name]&&seedByName[s.name][stage]!=null);
+      if(!skills.length) return `<td class="sk-gm-td">—</td>`;
+      const behind=skills.filter(s=>skEffectiveLevel(s)<seedByName[s.name][stage]).length;
+      const color=behind===0?'var(--jade)':behind<=2?'var(--ember)':'var(--blood)';
+      const isCur=stage===curStage;
+      return `<td class="sk-gm-td${isCur?' sk-gm-cur':''}" style="color:${color}">${behind===0?'✓':behind}</td>`;
+    }).join('');
+    return `<tr><td class="sk-gm-path">${pm.icon} ${esc(SK_CAT[cat]||cat)}</td>${cols}</tr>`;
+  }).filter(Boolean).join('');
+  el.innerHTML=`<div class="sk-gap-map"><table class="sk-gm-table">
+    <thead><tr><th></th>${stages.map(s=>`<th class="sk-gm-stage${s===curStage?' sk-gm-cur':''}">${s}</th>`).join('')}</tr></thead>
+    <tbody>${rows}</tbody>
+  </table>
+  <div class="sk-gm-legend"><span style="color:var(--jade)">✓ on track</span> · <span style="color:var(--ember)">1–2 behind</span> · <span style="color:var(--blood)">3+ behind</span> · current stage highlighted</div>
+  </div>`;
+}
+function renderSkillAssessment(){
+  const el=document.getElementById("skAssessWrap"); if(!el) return;
+  const stage=typeof careerStage==="function"?careerStage():"MS2";
+  const rows=(S.lifeSkills||[])
+    .filter(sk=>!sk.group&&sk.levels&&sk.targetLevel!=null)
+    .map(sk=>{ const eff=skEffectiveLevel(sk); return {sk,eff,gap:sk.targetLevel-eff}; })
+    .sort((a,b)=>b.gap-a.gap);
+  if(!rows.length){ el.innerHTML=`<div class="sk-assess-empty">No skill targets set. Open a skill card, use the Work panel to set a target, or tap ↑ sync to auto-fill from your career stage.</div>`; return; }
+  const pm=PATH_META||{};
+  el.innerHTML=`<div class="sk-assessment-table">
+    <div class="sk-assess-head"><span>Stage: ${stage}</span><span>${rows.filter(r=>r.gap<=0).length} / ${rows.length} at target</span></div>
+    ${rows.map(r=>{
+      const pathCol=(pm[r.sk.cat]&&pm[r.sk.cat].color)||"var(--ink-faint)";
+      const gapStr=r.gap>0?`<span class="sk-assess-gap behind">−${r.gap}</span>`:(r.gap<0?`<span class="sk-assess-gap ahead">+${Math.abs(r.gap)}</span>`:`<span class="sk-assess-gap met">✓</span>`);
+      return `<div class="sk-assess-row"><span class="sk-assess-path" style="color:${pathCol}">${SK_PATH_ICON[r.sk.cat]||"•"}</span><span class="sk-assess-name">${esc(r.sk.name)}</span><span class="sk-assess-lv">L${r.eff}</span><span class="sk-assess-tgt">→L${r.sk.targetLevel}</span>${gapStr}</div>`;
+    }).join("")}
+  </div>`;
 }

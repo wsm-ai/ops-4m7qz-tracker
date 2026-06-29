@@ -86,6 +86,7 @@ function load(){
     merged.counseling=r.counseling||[];
     merged.checklists=r.checklists||[];
     merged.gpaHistory=r.gpaHistory||[];
+    merged.milestones=r.milestones||[];
     merged.questArchive=r.questArchive||[];
     merged.streakLog=r.streakLog||[];
     merged.streakBrokenDate=r.streakBrokenDate||null;
@@ -221,6 +222,7 @@ function render(){
   if(typeof renderPalace==="function") renderPalace();
   if(typeof renderStudy==="function") renderStudy();
   if(typeof renderToday==="function") renderToday();
+  if(typeof renderSkillNotes==="function") renderSkillNotes();
   if(typeof renderHistory==="function") renderHistory();
   if(typeof renderCounsel==="function") renderCounsel();
   if(typeof renderChecklists==="function") renderChecklists();
@@ -330,9 +332,12 @@ function renderDailies(){
     if(!d.doneTs) return activeLogDays>=7;
     return (Date.now()-d.doneTs)/864e5>7;
   };
-  el.innerHTML=S.dailies.map(d=>{
+  el.innerHTML=S.dailies.map((d,i)=>{
     const pausedHtml=d.paused?`<span class="order-paused">⏸ paused</span><button class="order-pause-btn" data-dpause="${d.id}" data-dpausestate="0" title="Resume">Resume</button>`:`<button class="order-pause-btn" data-dpause="${d.id}" data-dpausestate="1" title="Pause">⏸</button>`;
+    const upBtn=i>0?`<button class="daily-move-btn" data-moveup="${d.id}" title="Move up">▲</button>`:`<button class="daily-move-btn" style="visibility:hidden" aria-hidden="true">▲</button>`;
+    const downBtn=i<S.dailies.length-1?`<button class="daily-move-btn" data-movedown="${d.id}" title="Move down">▼</button>`:`<button class="daily-move-btn" style="visibility:hidden" aria-hidden="true">▼</button>`;
     return `<li class="card ${d.done?'done':''}${d.paused?' paused':''}">
+      <div class="daily-move-col">${upBtn}${downBtn}</div>
       <div class="check" data-d="${d.id}">${d.done?'✓':''}</div>
       <div class="c-body"><div class="c-name">${esc(d.name)}</div>
         <div class="c-meta">${diffTag('daily',d.diff)}${pathTag(d.path)}${d.best?`<span class="tag streakt">🔥 best ${d.best}</span>`:''}${isStale(d)?`<span class="order-stale" title="Not done in 7+ days — consider revising">⚠ stale</span>`:''}</div></div>

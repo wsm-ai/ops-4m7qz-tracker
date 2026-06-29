@@ -218,6 +218,32 @@ function renderToday(){
     }
   }
 
+  // ── Upcoming milestones
+  const today0=localYMD();
+  const upcomingMs=(S.milestones||[])
+    .filter(m=>m.date>=today0)
+    .sort((a,b)=>a.date<b.date?-1:1)
+    .slice(0,3);
+  let milestoneHtml="";
+  if(upcomingMs.length){
+    const nearest=upcomingMs[0];
+    const daysTo=Math.ceil((new Date(nearest.date+"T12:00:00")-Date.now())/864e5);
+    const urgentColor=daysTo<=7?"var(--ember)":"var(--jade)";
+    const pastMs=(S.milestones||[]).filter(m=>m.date<today0).sort((a,b)=>b.date<a.date?-1:1)[0];
+    const originDate=pastMs?new Date(pastMs.date+"T12:00:00"):new Date(Date.now()-30*864e5);
+    const totalSpan=new Date(nearest.date+"T12:00:00")-originDate;
+    const elapsed=Date.now()-originDate;
+    const pct=Math.max(0,Math.min(100,Math.round(100*elapsed/totalSpan)));
+    const restPills=upcomingMs.slice(1).map(m=>{
+      const d=Math.ceil((new Date(m.date+"T12:00:00")-Date.now())/864e5);
+      return `<span class="ms-pill"><b>${d===0?"today":`in ${d}d`}</b> · ${esc(m.label)}</span>`;
+    }).join("");
+    milestoneHtml=`<div class="milestone-bar-wrap">
+      <div class="milestone-bar-label">📍 <b>${esc(nearest.label)}</b> — ${daysTo===0?"today":`${daysTo}d away`}</div>
+      <div class="milestone-bar"><div class="milestone-bar-fill" style="width:${pct}%;background:${urgentColor}"></div></div>
+    </div>${restPills?`<div class="milestone-dawn">${restPills}</div>`:""}`;
+  }
+
   // ── Orders counts (used by both the inline card and streak protection)
   const ordersLeft=(S.dailies||[]).filter(d=>!d.done).length;
   const ordersTotal=(S.dailies||[]).length;
@@ -278,6 +304,24 @@ function renderToday(){
       ].filter(d=>d.delta<0).map(d=>`${d.name} ${d.delta}`).join(" · ");
       if(deltas) notes.push(`<div class="fn-row"><span class="fn-dot">📉</span><span>Last AFT: ${deltas}</span><button class="td-go-sm" data-gototab="aft">→</button></div>`);
     }
+    // F5: AFT linear trend projection (need ≥3 entries)
+    if(S.aft.length>=3){
+      const aftSorted=S.aft.slice().sort((a,b)=>a.date<b.date?-1:1);
+      const n=aftSorted.length;
+      const xs=aftSorted.map((_,i)=>i);
+      const ys=aftSorted.map(a=>a.total);
+      const sx=xs.reduce((s,v)=>s+v,0), sy=ys.reduce((s,v)=>s+v,0);
+      const sxy=xs.reduce((s,v,i)=>s+v*ys[i],0), sx2=xs.reduce((s,v)=>s+v*v,0);
+      const denom=n*sx2-sx*sx;
+      if(denom){
+        const slope=(n*sxy-sx*sy)/denom;
+        const intercept=(sy-slope*sx)/n;
+        const nextPts=Math.round(intercept+slope*n);
+        const trend=slope>0?`▲ +${slope.toFixed(1)} pts/test`:(slope<0?`▼ ${slope.toFixed(1)} pts/test`:"→ flat");
+        const clr=slope>0?"var(--jade)":(slope<-2?"var(--ember)":"var(--ink-dim)");
+        notes.push(`<div class="fn-row"><span class="fn-dot">📈</span><span>AFT trend: <span style="color:${clr}">${trend}</span> → projected ${nextPts} pts next test</span><button class="td-go-sm" data-gototab="aft">→</button></div>`);
+      }
+    }
   }
   if(S.profile&&S.profile.gpa) notes.push(`<div class="fn-row"><span class="fn-dot">📊</span><span>GPA ${S.profile.gpa} · ${esc(S.branchGoal||"Branch TBD")}</span></div>`);
   if(S.profile&&S.profile.bloodType){
@@ -287,6 +331,17 @@ function renderToday(){
   if(S.aftTestDate){const _aftD=Math.ceil((new Date(S.aftTestDate+"T12:00:00")-Date.now())/864e5);if(_aftD>=0&&_aftD<=60)notes.push(`<div class="fn-row"><span class="fn-dot">⏳</span><span>AFT in ${_aftD===0?"today":_aftD+" day"+(_aftD!==1?"s":"")} · <span style="color:${_aftD<=14?"var(--ember)":"var(--ink-dim)"}">stay on plan</span></span><button class="td-go-sm" data-gototab="aft">→</button></div>`);}
   const overdueCount=(S.quests||[]).filter(q=>!q.done&&q.due&&q.due<localYMD()).length;
   if(overdueCount>1) notes.push(`<div class="fn-row"><span class="fn-dot">⚠️</span><span>${overdueCount} overdue oaths</span><button class="td-go-sm" data-gototab="quests">→</button></div>`);
+  // F4: quest due within 7 days
+  const dueSoon7=(S.quests||[]).filter(q=>{
+    if(q.done||!q.due) return false;
+    const d=Math.ceil((new Date(q.due+"T12:00:00")-Date.now())/864e5);
+    return d>=0&&d<=7;
+  });
+  if(dueSoon7.length){
+    const names=dueSoon7.slice(0,2).map(q=>esc(q.title||"Quest")).join(" · ");
+    const more=dueSoon7.length>2?` +${dueSoon7.length-2} more`:"";
+    notes.push(`<div class="fn-row"><span class="fn-dot">🚩</span><span>${dueSoon7.length} oath${dueSoon7.length!==1?"s":""} due within 7 days: ${names}${more}</span><button class="td-go-sm" data-gototab="quests">→</button></div>`);
+  }
   // fading-soon digest: show all skills within 20% of their fade window, not just the worst one
   const fadingSoon=(S.lifeSkills||[]).filter(s=>!s.group&&s.currentLevel>0)
     .map(s=>({s,days:typeof skDaysLeft==="function"?skDaysLeft(s):null}))
@@ -329,7 +384,7 @@ function renderToday(){
       const _eff=typeof skEffectiveLevel==="function"?skEffectiveLevel(_focal):_focal.currentLevel;
       const _dl=typeof skDaysLeft==="function"?skDaysLeft(_focal):null;
       const _dlStr=_dl!==null?`, ${_dl}d until fade`:'';
-      notes.push(`<div class="fn-row"><span class="fn-dot">🎯</span><span><b>Skill of the day:</b> ${esc(_focal.name)} — L${_eff}${_dlStr} · Practice it, then tap 'practiced' on its card.</span><button class="td-go-sm" data-gototab="skills">→</button></div>`);
+      notes.push(`<div class="fn-row"><span class="fn-dot">🎯</span><span><b>Skill of the day:</b> ${esc(_focal.name)} — L${_eff}${_dlStr}</span><button class="td-go-sm" data-skpractice="${esc(_focal.id)}" title="Mark as practiced — resets fade timer">✓ practiced</button><button class="td-go-sm" data-gototab="skills">→</button></div>`);
     }
   }
   const notesHtml=notes.length?`<div class="td-card fn-card"><div class="td-h fn-h">Field Notes</div>${notes.join("")}</div>`:"";
@@ -469,6 +524,21 @@ function renderToday(){
     }
   }
 
+  // ── Path health snapshot — one row per active path, jade/ember based on decay ratio
+  let pathSummaryHtml="";
+  {
+    const pathRows=SK_CAT_ORDER.map(cat=>{
+      const skills=(S.lifeSkills||[]).filter(s=>s.cat===cat&&!s.group&&s.currentLevel>0);
+      if(!skills.length) return '';
+      const atRisk=skills.filter(s=>skFadeState(s)!=='current').length;
+      const avgLvl=(skills.reduce((a,s)=>a+skEffectiveLevel(s),0)/skills.length).toFixed(1);
+      const color=atRisk>skills.length/2?'var(--ember)':'var(--jade)';
+      const pm=PATH_META[cat]; if(!pm) return '';
+      return `<div class="path-summary-row"><span class="path-summary-icon">${pm.icon}</span><span class="path-summary-name">${esc(pm.name)}</span><span class="path-summary-stat" style="color:${color}">${skills.length} active · avg L${avgLvl}${atRisk?' · ⚠ '+atRisk:''}</span></div>`;
+    }).filter(Boolean).join('');
+    if(pathRows) pathSummaryHtml=`<div class="td-card fn-card path-summary-strip"><div class="td-h fn-h">Path Health</div>${pathRows}</div>`;
+  }
+
   // ── Path XP pips
   const pathPips=pathPipsHtml();
 
@@ -485,7 +555,7 @@ function renderToday(){
   const briefBtnHtml=`<div class="brief-row"><button class="brief-btn" data-copybriefbtn="1">📋 Copy field brief</button></div>`;
 
   // ── Assemble — creed always first, then guided flow
-  const flow=[startHtml, sessHtml, weekCardHtml, ordersHtml, recoveryHtml, discHtml, bossHtml, streakHtml, commissionHtml, focusHtml, adaptHtml, neglectHtml, pathPips, notesHtml, academicHtml, omlHtml, cnAlertHtml, qualAlertHtml, fmHtml, briefBtnHtml, installHtml, notifPromptHtml].filter(Boolean).join("");
+  const flow=[startHtml, sessHtml, weekCardHtml, ordersHtml, recoveryHtml, discHtml, bossHtml, streakHtml, commissionHtml, milestoneHtml, pathSummaryHtml, focusHtml, adaptHtml, neglectHtml, pathPips, notesHtml, academicHtml, omlHtml, cnAlertHtml, qualAlertHtml, fmHtml, briefBtnHtml, installHtml, notifPromptHtml].filter(Boolean).join("");
 
   el.innerHTML=`<div class="td-creed">🌲 <span>${creed}</span></div>`+(
     flow

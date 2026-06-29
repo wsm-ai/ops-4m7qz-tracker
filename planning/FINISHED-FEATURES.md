@@ -537,3 +537,85 @@ All 18 tabs received `#view-*` scoped CSS giving each a distinct chamber feel. E
 6. **Weekly training load summary (F6)** — Field Notes on Today tab shows a `🏋️ This week:` row counting all workout sessions logged since Monday, total run distance (mi), and total reps. Computed from `S.workouts[]` filtered to the current ISO week using `w.ts` timestamp. Includes a "Log →" nav button.
 
 7. **GPA goal + projected graduation GPA (F7)** — `S.profile.gpaGoal` (float) added to DEFAULT. `pfGpaGoal` number input below the GPA semester log in profile.html. `renderGpaProjection()` in `profile.js` fits a linear regression through `S.gpaHistory[]` by semester index and extrapolates to semester 8. Shows "Projected graduation GPA: X.XX" in jade if at or above goal, ember if below. Saved by profile save handler. CSS `.gpa-projection`.
+
+---
+
+### v120 — 6 Features: Skill assessment, milestones, quest alerts, AFT trend, new skills
+**Files changed:** `src/core/constants.js`, `src/core/state.js`, `src/core/events.js`, `src/core/migration.js`, `src/core/skills-data.js`, `src/tabs/skills.html`, `src/tabs/skills.js`, `src/tabs/today.js`, `src/tabs/profile.html`, `src/tabs/profile.js`, `src/styles/main.css`, `sw.js`
+
+1. **Skill target sync button (F1)** — `↑ sync` button in the Skills tab toolbar (`data-updateskilltgts`, `id="skSyncTargets"`). Calls `updateAllSkillTargets()` in `skills.js`: iterates all skills, finds `seed.targets[careerStage()]`, updates `sk.targetLevel` if null or behind (never downgrades manual overrides). Shows toast "↑ N skill targets updated to MS2". Handler wired via `events.js` `data-updateskilltgts`.
+
+2. **Skill assessment panel (F3)** — `📊` toggle button in Skills tab toolbar (`id="skAssessToggle"`). When active, shows a flat gap table (`#skAssessWrap`, `.sk-assessment-table`) sorted by gap descending: path icon, skill name, current level, target level, gap (behind in ember, ahead in jade, met = ✓). Module-level `_skAssessVisible` flag. `renderSkillAssessment()` in `skills.js`. CSS `.sk-assessment-table`, `.sk-assess-head`, `.sk-assess-row`, `.sk-assess-gap.*`, `.sk-assess-empty`.
+
+3. **User milestones (F2)** — `S.milestones[]` array added to `DEFAULT` (constants.js) and explicitly merged in `load()` (state.js). Profile tab has a milestone form: `#pfMsLabel` (label input), `#pfMsDate` (date input), `#pfMsAdd` (add button), `#pfMilestones` (rendered list). `renderMilestones()` in `profile.js` lists upcoming/past milestones with delete buttons. Milestone delete uses local `addEventListener("click", data-msdel)` in `profile.js`. Dawn tab (`renderToday()`) shows up to 3 upcoming milestones in a `.milestone-dawn` pill row below the commission countdown. CSS `.milestone-row`, `.milestone-date`, `.milestone-label`, `.milestone-when`, `.milestone-del`, `.milestone-dawn`, `.ms-pill`.
+
+4. **Quest due-soon alert (F4)** — Field Notes row in `renderToday()` scans `S.quests[]` for open quests with `q.due` within 0–7 days. Shows "🚩 N oaths due within 7 days: [name] · [name]" with a Quests nav button.
+
+5. **AFT linear trend projection (F5)** — When `S.aft.length >= 3`, `renderToday()` fits a linear regression through total scores (sorted by date), computes slope (pts/test), and projects next score. Field Notes shows "📈 AFT trend: ▲ +N.N pts/test → projected NNN pts next test" in jade/ember based on slope direction.
+
+6. **New skills: Strength programming + Military writing (F6)** — Two new skills added to `SEED_SKILLS` (skills-data.js). **Strength programming** (cat:`physical`, parent:`Fitness programming` — new group also added, 8-level ladder from template-following to real-time coaching, fadeDays:60). **Military writing** (cat:`leadership`, 8-level ladder from BLUF paragraph to doctrine-quality OPORDs under time pressure, fadeDays:90). Both have `targets:{MS1–O1}` and full advance/maintain arrays. `SKILL_LADDER_VER` bumped **90→91**.
+
+---
+
+### v121 — 6 Features + 2 new skills: Milestone progress bar, skill streak, daily reorder, practiced quick-log, AFT sparklines, new skills
+**Files changed:** `src/tabs/today.js`, `src/tabs/skills.js`, `src/tabs/aft.js`, `src/core/skills-core.js`, `src/core/state.js`, `src/core/events.js`, `src/core/skills-data.js`, `src/core/migration.js`, `src/styles/main.css`, `sw.js`
+
+1. **Milestone countdown progress bar (F1)** — The nearest upcoming milestone in Dawn now shows as a `.milestone-bar-wrap` panel with a label ("📍 Label — Nd away") and a 5px fill bar (jade, amber if ≤7 days). Progress computed from the most recent past milestone (or 30 days before) as origin to the target date. Additional upcoming milestones still render as `.ms-pill` chips below. CSS `.milestone-bar-wrap`, `.milestone-bar-label`, `.milestone-bar`, `.milestone-bar-fill`.
+
+2. **Skill streak — consecutive practice days (F2)** — `skStreak(sk)` added to `skills-core.js`: iterates `sk.history[]` sorted descending, counts consecutive calendar days (by ISO date string) with at least one entry going back from today. If streak ≥ 2, leaf card footer shows `🔥 N-day streak` in `.sk-streak` (ember color). Rendered in `skills.js` after `pracFoot`.
+
+3. **Daily orders up/down reorder buttons (F3)** — `renderDailies()` in `state.js` now passes the index `(d, i)` to the map and renders a `.daily-move-col` column with `▲` / `▼` buttons (`data-moveup` / `data-movedown`) on each order row. Up arrow hidden (visibility:hidden) on first item; down arrow hidden on last. Handlers in `events.js` swap adjacent array elements and call `renderDailies()`. CSS `.daily-move-col`, `.daily-move-btn`.
+
+4. **Skill-of-the-day "practiced" quick-log on Dawn (F4)** — The focal skill row in Today Field Notes now includes a `✓ practiced` button (`data-skpractice="[skId]"`) inline. Tapping it calls the existing `skPractice()` handler, which resets the fade timer and calls `save(); render()`. No new handler needed — the `data-skpractice` delegation already existed in `events.js` from v111.
+
+5. **AFT event trend sparklines (F5)** — `showAftResult()` in `aft.js`: for each event row, computes `evVals` from all `S.aft[]` entries sorted by date. If ≥ 2 entries exist, renders `miniSparkline(evVals, 60, 16)` in a `.aft-event-spark` span inline with the event score. CSS `.aft-event-spark` (inline-flex, vertical-align:middle, opacity:.8).
+
+6. **New skills: Rucking technique + Army history & officership (F6)** — Two skills added to `SEED_SKILLS`. **Rucking technique** (cat:`physical`, parent:`Endurance`, fadeDays:90, 6-level ladder from fit/load basics through teaching others; targets MS1–O1). **Army history & officership** (cat:`leadership`, fadeDays:180, 6-level ladder from naming major battles through facilitating peer discussions; targets MS1–O1). `SKILL_LADDER_VER` bumped **91→92**. Total skills: **111**.
+
+---
+
+### v122 — Full skills expansion: 64 new skills across all 10 paths
+**Files changed:** `src/core/skills-data.js`, `src/core/migration.js`, `sw.js`
+
+Pure skills expansion session — no UI changes. Added 64 new skills to `SEED_SKILLS`. `SKILL_LADDER_VER` bumped **92→93**. Total skills: **175**.
+
+**Tactical batch (8 skills, parent:"Soldier tasks"):** Marksmanship (M17/pistol) — 7 levels, Familiar→Instructor; CBRN/NBC awareness — 8 levels, Aware→Evaluator; Grenade employment — 6 levels, Aware→Certifier; Military law & ROE — 8 levels, Aware→Advisor; Battle drills — 8 levels, Aware→Evaluator; SALUTE/spot reporting — 6 levels, Know it→Teach it; Rappelling & vertical movement — 6 levels, Aware→Rigger; Operational planning (MDMP) — 9 levels, Aware→Staff Officer (cat:`leadership`, standalone).
+
+**Physical batch (4 skills):** Combat water survival (parent:`Endurance`, 7 levels); Obstacle course (parent:`Endurance`, 6 levels); Cycling/cross-training (parent:`Endurance`, 6 levels); Gymnastics/bodyweight skills (parent:`Strength`, 8 levels).
+
+**Cognitive batch (3 skills, parent:"Reasoning"):** Critical thinking — 8 levels; Decision science — 7 levels; Spatial reasoning — 7 levels.
+
+**Physiological batch (3 skills):** Recovery tracking (parent:`Daily inputs`, 6 levels); Injury prevention & prehab (standalone, 7 levels); Vision training (parent:`Body markers`, 6 levels).
+
+**Technical batch — Core CS (5 skills):** Version control/Git (8 levels); SQL & databases (9 levels); Bash/shell scripting (parent:`Linux / command line`, 8 levels); Cloud computing (9 levels); Data structures & algorithms (10 levels).
+
+**Technical batch — Cyber/Security (8 skills):** Systems programming C/C++ (9 levels); Web application development (9 levels); Penetration testing methodology (9 levels); Digital forensics & incident response (9 levels); Malware analysis (8 levels); Cryptography applied (8 levels); Network defense/blue team (9 levels); Reverse engineering (8 levels).
+
+**Technical batch — DevOps & Emerging (5 skills):** DevOps/containerization (8 levels); PowerShell/Windows administration (7 levels); CTF/competitive security (8 levels); Machine learning/AI fundamentals (8 levels); Software testing (7 levels).
+
+**Leadership batch (4 skills):** Brief preparation & delivery (7 levels); Ethics & moral reasoning (7 levels); Cross-cultural competence (6 levels); Project management (8 levels).
+
+**Academic batch (10 skills):** Statistics & data analysis (9 levels); Research skills (parent:`Learning systems`, 7 levels); Geopolitics & foreign policy (7 levels); Spanish (parent:`Languages`, 8 levels ILR); French (parent:`Languages`, 8 levels ILR); Mandarin Chinese (parent:`Languages`, 8 levels ILR, fadeDays:21); Arabic (parent:`Languages`, 8 levels ILR, fadeDays:21); Russian (parent:`Languages`, 8 levels ILR, fadeDays:21); Philosophy & ethics (7 levels); Economics fundamentals (7 levels).
+
+**Personal/Hearth/Roots batch (14 skills):** Professional networking (7L); Interview skills (7L); Tax preparation (5L); Investing & wealth building (8L); Home & life maintenance (7L); Health literacy (6L); Legal literacy (6L); Mindfulness & meditation (7L, fadeDays:14); Sleep optimization (7L, fadeDays:14); Mental health literacy (6L); Vehicle preparedness (6L, parent:`Sustainment`); Amateur radio/backup communications (6L, parent:`Sustainment`); Self-awareness (7L, parent:`Character`); Gratitude & positive reframing (5L, parent:`Character`, fadeDays:14).
+
+### v123 — 6 UX + intelligence features, 4 new skills, full technical & leadership hierarchies
+**Files changed:** `src/tabs/today.js`, `src/tabs/skills.js`, `src/tabs/skills.html`, `src/tabs/records.html`, `src/tabs/records.js`, `src/core/state.js`, `src/core/skills-data.js`, `src/core/migration.js`, `src/styles/main.css`, `sw.js`
+
+`SKILL_LADDER_VER` bumped **93→94**. SW bumped to `operations-v123`. Total skills: **186** (4 new leaf skills + 7 new group nodes).
+
+**Feature 1 — Path health snapshot on Dawn:** `renderToday()` in `today.js` now builds a `pathSummaryHtml` block listing every active path (one row: icon, name, active skill count, avg level, at-risk count). Color-coded jade/ember based on decay ratio. Appears between the milestone bar and Warrior's Focus. CSS `.path-summary-strip`, `.path-summary-row`, `.path-summary-icon`, `.path-summary-name`, `.path-summary-stat`.
+
+**Feature 2 — Skill gap heatmap by career stage:** New `renderSkillGapMap()` in `skills.js`, toggled by 🗺️ button in the Skills toolbar. Renders a table: one row per path, columns = career stages (MS1→O1). Each cell shows ✓ (on track), count of skills behind, or — (no targets). Current stage column highlighted gold. `_gapMapVisible` module flag. CSS `.sk-gap-map`, `.sk-gm-table`, `.sk-gm-cur`, `.sk-gm-path`, `.sk-gm-td`, `.sk-gm-stage`, `.sk-gm-legend`.
+
+**Feature 3 — Skill notes search / history viewer:** New `renderSkillNotes()` in `records.js`, called from `render()` in `state.js`. Shows all `history[]` entries with a `note` field across all skills, sorted descending by timestamp, filterable by a `#skNoteSearch` text input. Added "Skill Notes" section at top of `records.html`. CSS `.sk-note-entry`, `.sk-note-header`, `.sk-note-skill`, `.sk-note-date`, `.sk-note-text`.
+
+**Feature 4 — Weekly skill practice planner:** New `renderWeeklyQueue()` in `skills.js`, toggled by 🗓️ button in Skills toolbar. Shows all started non-auto skills with `skDaysLeft(sk) ≤ 7` OR `skFadeState !== 'current'`, sorted by urgency. Each row shows sigil, name, days remaining, and a quick ✓ practiced button. `_skWeeklyVisible` module flag. CSS `.sk-weekly-queue`, `.sk-wq-row`, `.sk-wq-info`, `.sk-wq-name`, `.sk-wq-days`, `.sk-wq-tag`, `.sk-wq-btn`, `.sk-wq-emblem`.
+
+**Feature 5 — New skills + skill hierarchies:** 4 new leaf skills added; 7 group nodes added to create hierarchies in the technical (4 groups) and leadership (3 groups) paths. All 23 technical skills and 13 leadership skills now have `parent` assignments. Migration reconciler automatically updates existing saves.
+
+New groups — **technical:** `Foundations` (Linux, Networking, Git, SQL, Cloud, DSA, Bash); `Programming` (Python, Java, JavaScript, C/C++, Web app dev, ML/AI); `Cybersecurity` (Cybersecurity fundamentals, Pen testing, DFIR, Malware analysis, Cryptography, Network defense, Reverse engineering, CTF); `DevOps & ops` (DevOps/containerization, PowerShell, Software testing). **Leadership:** `Communication` (Public speaking, Negotiation, Brief prep, Military writing, Parliamentary procedure); `Command skills` (Drill & ceremony, Counseling, Army history & officership, Ethics, Cross-cultural); `Operations & planning` (Decision-making, MDMP, Project management, Obstacle leadership).
+
+New leaf skills: **Combatives (physical control)** (physical, parent:`Close-Quarters Combat`, 7L, MACP Level 1–2 ladder, fadeDays:90); **Obstacle leadership** (leadership, parent:`Operations & planning`, 6L, individual→platoon evaluation, fadeDays:90); **Second language retention** (cognitive, parent:`Memory`, 5L, passive recognition→6-month no-decay maintenance, fadeDays:30); **Wilderness medicine / CASEVAC** (tactical, parent:`Soldier tasks`, 7L, WFA→WFR→platoon CASEVAC lead, fadeDays:180).
+
+**Feature 6 — Tree layout audit:** `PAGEERRORS 0` confirmed; tree renders with updated hierarchy structure. Headless `--shot` screenshot has a pre-existing visibility limitation in the test runner.

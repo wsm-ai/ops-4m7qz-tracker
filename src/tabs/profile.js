@@ -116,9 +116,21 @@ function fmtMeasDate(ds){
   const ago = days<=0?"today" : days===1?"1 day ago" : days<60?days+" days ago" : Math.round(days/30)+" months ago";
   return d.toLocaleDateString()+" ("+ago+")";
 }
+function renderMilestones(){
+  const el=document.getElementById("pfMilestones"); if(!el) return;
+  const ms=S.milestones||[];
+  if(!ms.length){ el.innerHTML=`<div style="font-size:12px;color:var(--ink-faint);margin-bottom:6px">No milestones added yet. Add key dates (LDAC, commissioning exams, etc.) to see them on Dawn.</div>`; return; }
+  const today=localYMD();
+  el.innerHTML=ms.slice().sort((a,b)=>a.date<b.date?-1:1).map(m=>{
+    const past=m.date<today;
+    const days=Math.ceil((new Date(m.date+"T12:00:00")-Date.now())/864e5);
+    const when=past?`${Math.abs(days)}d ago`:(days===0?"today":`in ${days}d`);
+    return `<div class="milestone-row"><span class="milestone-date">${m.date}</span><span class="milestone-label">${esc(m.label)}</span><span class="milestone-when" style="color:${past?"var(--ink-faint)":"var(--jade)"}">${when}</span><button class="milestone-del" data-msdel="${m.id}">✕</button></div>`;
+  }).join("");
+}
 function renderProfile(){
   if(!document.getElementById("pfWt")) return;
-  renderGpaHistory();
+  renderGpaHistory(); renderMilestones();
   const p=S.profile||{}, l=S.lifts||{};
   const setv=(id,v)=>{const el=document.getElementById(id); if(el&&document.activeElement!==el) el.value=(v??"");};
   setv("pfName",S.name); setv("pfRank",S.rank); setv("pfPos",S.position); setv("pfBranch",S.branchGoal);
@@ -234,6 +246,27 @@ if(_pfSave) _pfSave.onclick=()=>{
   save(); render();
   toast("🪪 Profile saved — strength skills updated");
 };
+
+// ===== Milestones =====
+const _pfMsAdd=document.getElementById("pfMsAdd");
+if(_pfMsAdd) _pfMsAdd.onclick=()=>{
+  const lbl=document.getElementById("pfMsLabel").value.trim();
+  const dt=document.getElementById("pfMsDate").value;
+  if(!lbl||!dt){ toast("Enter a label and date"); return; }
+  if(!S.milestones) S.milestones=[];
+  S.milestones.push({id:Date.now().toString(36),label:lbl,date:dt});
+  document.getElementById("pfMsLabel").value="";
+  document.getElementById("pfMsDate").value="";
+  save(); renderMilestones();
+  toast("Milestone added");
+};
+// milestone delete handled by event delegation via data-msdel
+const _pfMsWrap=document.getElementById("pfMilestones");
+if(_pfMsWrap) _pfMsWrap.addEventListener("click",e=>{
+  const btn=e.target.closest("[data-msdel]"); if(!btn) return;
+  S.milestones=(S.milestones||[]).filter(m=>m.id!==btn.dataset.msdel);
+  save(); renderMilestones();
+});
 
 // ===== Blood type: emergency card + scientifically-valid donation facts =====
 // Compatibility is real transfusion science (ABO/Rh), not invented.

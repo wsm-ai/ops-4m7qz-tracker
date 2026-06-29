@@ -64,6 +64,7 @@ const DEFAULT = {
   navLabels:true,    // side rail shows labels (true) or icons only (false)
   navExpanded:false, // whether the "More" nav section is open
   missedTraining:[], // [{date:"YYYY-MM-DD", session:"s1"}] — auto-tracked missed sessions, last 28 days
+  milestones:[],   // [{id, label, date:"YYYY-MM-DD"}] — user-defined ROTC/life milestones shown on Dawn
   gpaHistory:[],   // [{id, term, gpa, hours, standing, note}] — semester-by-semester record
   profile:{ birthdate:null, heightIn:null, heightDate:null, weightLb:null, weightDate:null, sex:null, bloodType:null, units:"imperial", notes:"", commissionDate:null, gpa:null, weightGoal:null, gpaGoal:null, languages:[], clearance:{level:null,grantedDate:null,notes:""} },
   lifts:{ deadliftLb:null, squatLb:null, benchLb:null, liftDate:null },  // best lifts for bodyweight-relative skills

@@ -1,3 +1,24 @@
+// ===== Skill Notes search =====
+function renderSkillNotes(){
+  const el=document.getElementById("skNotesArea"); if(!el) return;
+  const srch=document.getElementById("skNoteSearch");
+  if(srch) srch.oninput=()=>renderSkillNotes();
+  const q=(srch?srch.value||"":"").toLowerCase().trim();
+  const entries=[];
+  (S.lifeSkills||[]).forEach(sk=>{
+    (sk.history||[]).filter(h=>h.note).forEach(h=>{
+      if(!q||sk.name.toLowerCase().includes(q)||h.note.toLowerCase().includes(q))
+        entries.push({sk,h});
+    });
+  });
+  entries.sort((a,b)=>b.h.ts-a.h.ts);
+  if(!entries.length){ el.innerHTML=`<div style="font-size:12.5px;color:var(--ink-faint)">${q?"No notes match that search.":"No skill notes yet — open a skill card, expand the ladder, and use the Work panel to add a practice note."}</div>`; return; }
+  el.innerHTML=entries.map(({sk,h})=>`<div class="sk-note-entry">
+    <div class="sk-note-header"><span class="sk-note-skill">${esc(sk.name)}</span><span class="sk-note-date">${new Date(h.ts).toLocaleDateString()}</span></div>
+    <div class="sk-note-text">${esc(h.note)}</div>
+  </div>`).join("");
+}
+
 // ===== History / Trends =====
 function trendLine(vals, w, h, color, lowerBetter){
   const nums=vals.filter(v=>v!=null); if(nums.length<2) return `<div class="hist-nodata">Need 2+ data points</div>`;

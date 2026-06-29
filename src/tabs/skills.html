@@ -38,9 +38,16 @@
     <div id="skSummaryBar" class="sk-summary-bar"></div>
     <div class="sk-toolbar-row">
       <input id="skSearch" class="sk-search-input" placeholder="Find a skill…" autocomplete="off" spellcheck="false">
+      <button id="skWeeklyToggle" class="sk-hm-toggle" title="This week: skills due to fade within 7 days">🗓️</button>
+      <button id="skAssessToggle" class="sk-hm-toggle" title="Assessment view: skill levels vs. career-stage targets">📊</button>
+      <button id="skGapMapToggle" class="sk-hm-toggle" title="Gap map: which paths are behind by career stage">🗺️</button>
       <button id="skHeatmapToggle" class="sk-hm-toggle" title="Toggle 90-day practice calendar">📅</button>
       <button class="sk-copy-summary-btn" data-copyskillssummary="1" title="Copy plain-text skills summary to clipboard">📋</button>
+      <button class="sk-hm-toggle" data-updateskilltgts="1" id="skSyncTargets" title="Update all skill targets to your current career stage">↑ sync</button>
     </div>
+    <div id="skWeeklyQueue" class="sk-weekly-queue" style="display:none"></div>
+    <div id="skAssessWrap" style="display:none"></div>
+    <div id="skGapMapWrap" style="display:none"></div>
     <div id="skHeatmap" class="sk-heatmap-wrap" style="display:none"></div>
 
     <div class="sec-h" style="margin-top:18px"><h2>Your Tree</h2>

@@ -170,6 +170,15 @@ function skPractice(skId){
   save();render();
   toast(`✓ Practiced — ${esc(sk.name)} fade timer reset`);
 }
+// Count consecutive calendar days with at least one history entry going backward from today.
+function skStreak(sk){
+  if(!sk.history||!sk.history.length) return 0;
+  const days=new Set(sk.history.map(h=>new Date(h.ts).toISOString().slice(0,10)));
+  let streak=0, d=new Date();
+  d.setHours(12,0,0,0);
+  while(days.has(d.toISOString().slice(0,10))){ streak++; d.setDate(d.getDate()-1); }
+  return streak;
+}
 // "Work on this" — route a skill to the right trainer/plan/protocol
 function skWorkGuidance(sk){
   if(!sk) return "";

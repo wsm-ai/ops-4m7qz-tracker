@@ -8,11 +8,12 @@ You are continuing work on **Operations**, a gamified ROTC life-tracker PWA buil
 
 1. `CLAUDE.md` — the binding rulebook (hard rules, workflow, file layout)
 2. `planning/FINISHED-FEATURES.md` — design language, color palette, completed features, project identity
-3. `planning/IMPROVEMENTS-v120.md` — the features to implement this session, with full rationale, implementation sketches, and CSS snippets
+3. `planning/IMPROVEMENTS-v124.md` — the features to implement this session, with full rationale, implementation sketches, and CSS snippets
+4. `planning/IMPROVEMENTS-skills-expansion.md` — the comprehensive skills backlog (60+ new skills across all paths, with ladder sketches and tier names); consult this whenever adding skills so you don't duplicate effort or miss obvious gaps
 
-**Read `IMPROVEMENTS-v120.md` in full before writing a single line of code.** It is the authoritative spec for everything below. The implementation sketches, CSS, and data structures in that file are the designs to follow — do not improvise around them.
+**Read `IMPROVEMENTS-v124.md` in full before writing a single line of code.** It is the authoritative spec for everything below. The implementation sketches, CSS, and data structures in that file are the designs to follow — do not improvise around them.
 
-**Current version: v119.** The service worker is at `operations-v119` in `sw.js`. `SKILL_LADDER_VER` is currently **90** (in `src/core/migration.js`).
+**Current version: v123.** The service worker is at `operations-v123` in `sw.js`. `SKILL_LADDER_VER` is currently **94** (in `src/core/migration.js`).
 
 ---
 
@@ -47,15 +48,23 @@ All visual overhaul phases and features through v117 are complete. Full record i
 
 **v119 (7 features + career-stage target system):** Career-stage skill targets (auto goal-line ticks on skill cards from `targets:{MS1…O1}` in seed data, `careerStage()` in migration.js, dim next-stage secondary tick in leafCard), Habit streak calendar (60-day perfect-day calendar on Dailies with `S.dailyHistory[]`), Skill export / print view (📋 copy-to-clipboard skills summary button in Skills toolbar), Qualification expiry alerts on Today tab (60-day look-ahead, expired overdue styling), Boss sprint mode (`b.todayCommit`, daily HP commitment bar with progress + missed warning), Weekly training load summary in Today Field Notes (sessions/mi/reps from `S.workouts[]`), GPA goal + projected graduation GPA (linear regression through semester history, jade/ember vs. goal). `SKILL_LADDER_VER` bumped to **90**. SW bumped to `operations-v119`.
 
+**v120 (6 features):** Skill target sync button (↑ sync in Skills toolbar, `updateAllSkillTargets()`, `data-updateskilltgts`), Skill assessment panel (📊 toggle, flat gap table sorted by behind-ness, `renderSkillAssessment()`), User milestones (`S.milestones[]`, Profile form, `renderMilestones()`, dawn `.milestone-dawn` pill row for up to 3 upcoming), Quest due-soon alert in Today Field Notes (🚩 oaths due ≤7 days), AFT linear trend projection in Today Field Notes (≥3 entries, slope + projected next score), New skills: Strength programming (physical/Fitness programming group, 8 levels) + Military writing (leadership, 8 levels). `SKILL_LADDER_VER` bumped to **91**. SW bumped to `operations-v120`.
+
+**v121 (6 features + 2 new skills):** Milestone countdown progress bar on Dawn (`.milestone-bar-wrap` panel with fill bar, jade/amber based on proximity, progress computed from last past milestone as origin), Skill streak counter (`skStreak(sk)` in skills-core.js, `🔥 N-day streak` in leaf card footer if ≥2, `.sk-streak` CSS), Daily orders up/down reorder buttons (`.daily-move-col` with `▲`/`▼` `data-moveup`/`data-movedown` buttons, handlers swap adjacent array elements and call `renderDailies()`), Skill-of-the-day "practiced" quick-log on Dawn (inline `✓ practiced` button with `data-skpractice` on focal skill row, uses existing handler from v111), AFT event trend sparklines (`miniSparkline(evVals, 60, 16)` per event row in `showAftResult()`, `.aft-event-spark`). New skills: Rucking technique (physical/Endurance, 6 levels, fadeDays:90) + Army history & officership (leadership, 6 levels, fadeDays:180). `SKILL_LADDER_VER` bumped to **92**. SW bumped to `operations-v121`. Total skills: **111**.
+
+**v122 (skills expansion — 64 new skills):** Pure data session. Added 64 skills to `SEED_SKILLS` in `src/core/skills-data.js`. No UI changes. Covers: tactical (Marksmanship M17, CBRN, Grenade employment, Military law & ROE, Battle drills, SALUTE/spot reporting, Rappelling, MDMP/Operational planning); physical (Combat water survival, Obstacle course, Cycling, Gymnastics/bodyweight); cognitive (Critical thinking, Decision science, Spatial reasoning); physiological (Recovery tracking, Injury prevention & prehab, Vision training); technical core CS (Git, SQL & databases, Bash scripting, Cloud computing, Data structures & algorithms); technical cyber/security (Systems programming C/C++, Web app dev, Penetration testing, DFIR, Malware analysis, Cryptography, Network defense/blue team, Reverse engineering); technical DevOps (DevOps/containerization, PowerShell, CTF/competitive security, ML/AI fundamentals, Software testing); leadership (Brief prep & delivery, Ethics & moral reasoning, Cross-cultural competence, Project management); academic (Statistics & data analysis, Research skills, Geopolitics, Spanish, French, Mandarin, Arabic, Russian, Philosophy & ethics, Economics fundamentals); personal/hearth/roots (Professional networking, Interview skills, Tax prep, Investing, Home maintenance, Health literacy, Legal literacy, Mindfulness, Sleep optimization, Mental health literacy, Vehicle preparedness, Amateur radio, Self-awareness, Gratitude). `SKILL_LADDER_VER` bumped to **93**. SW bumped to `operations-v122`. Total skills: **175**.
+
+**v123 (6 UX + intelligence features + skill hierarchies):** Path health snapshot on Dawn (`.path-summary-strip` card listing every active path: icon, name, active skill count, avg level, at-risk count; color jade/ember by decay ratio). Skill gap heatmap (🗺️ toggle on Skills toolbar, `renderSkillGapMap()`, table paths × career stages, jade/ember/blood cells). Skill notes search on Records tab (`renderSkillNotes()` at top, `#skNoteSearch` filter, all `history[].note` entries sorted desc). Weekly skill practice planner (🗓️ toggle, `renderWeeklyQueue()`, skills with `skDaysLeft ≤ 7` or decayed, urgency-sorted with ✓ practiced button). 4 new leaf skills: Combatives (physical control) (physical, 7L); Obstacle leadership (leadership, 6L); Second language retention (cognitive, 5L); Wilderness medicine / CASEVAC (tactical, 7L). Skill hierarchies: 7 new group nodes for technical (Foundations, Programming, Cybersecurity, DevOps & ops) and leadership (Communication, Command skills, Operations & planning) paths; `parent:` assigned to 36 existing skills; migration auto-reconciler backfills existing saves. `SKILL_LADDER_VER` bumped to **94**. SW bumped to `operations-v123`. Total skills: **186**.
+
 ---
 
 ## Features to implement this session
 
-These are drawn from `planning/IMPROVEMENTS-v119.md`. Read that file now — the sketches here are summaries only.
+These are drawn from `planning/IMPROVEMENTS-v124.md`. Read that file now — the sketches here are summaries only.
 
 ---
 
-*Features for this session are in `planning/IMPROVEMENTS-v120.md`.*
+*Features for this session are in `planning/IMPROVEMENTS-v124.md`.*
 
 ---
 
@@ -64,7 +73,7 @@ These are drawn from `planning/IMPROVEMENTS-v119.md`. Read that file now — the
 Follow this exactly, in order:
 
 ### Phase 0 — Orient before writing a single line
-1. Read `CLAUDE.md`, `planning/FINISHED-FEATURES.md`, and `planning/IMPROVEMENTS-v118.md` in full.
+1. Read `CLAUDE.md`, `planning/FINISHED-FEATURES.md`, and `planning/IMPROVEMENTS-v124.md` in full.
 2. For each feature, read the **specific source files** that will be touched before editing them:
    - Use `Grep` to find where the function/element you're adding near lives.
    - Use `Read` with `offset` + `limit` to read the exact surrounding code.
@@ -85,12 +94,12 @@ Follow this exactly, in order:
 12. If a build or check fails: read the error, find the source file that's wrong, fix it, rebuild.
 
 ### Phase 3 — Ship
-13. Bump `sw.js`: `operations-v117` → `operations-v118` (increment once per session; increment again if you ship a second batch).
-14. Bump `SKILL_LADDER_VER` in `src/core/migration.js` (currently **90**) **only** if any skill ladder/tier/guidance text changed.
+13. Bump `sw.js`: `operations-v123` → `operations-v124` (increment once per session; increment again if you ship a second batch).
+14. Bump `SKILL_LADDER_VER` in `src/core/migration.js` (currently **94**) **only** if any skill ladder/tier/guidance text changed.
 15. `npm run package` — produces `dist/operations.zip`. Must complete without error.
-16. Delete the now-implemented improvements doc: `rm planning/IMPROVEMENTS-v118.md`. It has been recorded in `FINISHED-FEATURES.md` — no need to keep the draft.
-17. **Create the next session's improvements doc** — write `planning/IMPROVEMENTS-v119.md` (increment to match the next version). Populate it with the best 5–6 features you'd suggest next, ranked by cadet impact, following the same format as the doc you just deleted: feature title, value paragraph, implementation sketch with file names + code snippets, CSS. Ask Wyatt if he has specific requests before writing it, but default to writing it if he doesn't respond.
-18. **Update `NEXT-SESSION-PROMPT.md`** — change every `v117`/`v118` reference to the new version numbers so the next session prompt is self-consistent (the improvements doc name, the SW bump line, the "what's already done" blurb).
+16. Delete the now-implemented improvements doc: `rm planning/IMPROVEMENTS-v124.md`. It has been recorded in `FINISHED-FEATURES.md` — no need to keep the draft.
+17. **Create the next session's improvements doc** — write `planning/IMPROVEMENTS-v125.md` (increment to match the next version). Populate it with the best 5–6 features you'd suggest next, ranked by cadet impact, following the same format as the doc you just deleted: feature title, value paragraph, implementation sketch with file names + code snippets, CSS. When the session includes adding new skills, draw candidates from `planning/IMPROVEMENTS-skills-expansion.md` (prioritized Tier 1 first) rather than inventing new ones — the expansion doc already has ladders sketched and the tier list sorted by career relevance. Ask Wyatt if he has specific requests before writing it, but default to writing it if he doesn't respond.
+18. **Update `NEXT-SESSION-PROMPT.md`** — change every `v123`/`v124` reference to the new version numbers so the next session prompt is self-consistent (the improvements doc name, the SW bump line, the "what's already done" blurb).
 19. Tell Wyatt to **hard-refresh / reopen the app** so the new service worker activates and any migrations run.
 
 ### What not to do
@@ -111,7 +120,7 @@ npm run check                 # must say SYNTAX OK
 npm run regress               # must say PAGEERRORS 0
 
 # After all features, before reporting done:
-# bump sw.js: operations-v119 → operations-v120
+# bump sw.js: operations-v123 → operations-v124
 npm run package               # produces dist/operations.zip
 ```
 

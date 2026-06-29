@@ -112,6 +112,9 @@ document.body.addEventListener("click",e=>{
   if(t.dataset.d){const d=S.dailies.find(x=>x.id===t.dataset.d);if(d&&!d.done){d.done=true;d.doneTs=Date.now();const v=VALUES.daily[d.diff];grant(v.xp,v.g,"Order executed",d.path||"tactical");const allNow=S.dailies.filter(x=>!x.paused).every(x=>x.done);if(allNow){onPerfectDay();}}else if(d&&d.done){d.done=false;save();render();}return}
   // pause / resume daily order
   if(t.dataset.dpause){const d=S.dailies.find(x=>x.id===t.dataset.dpause);if(d){d.paused=!!parseInt(t.dataset.dpausestate);save();renderDailies();}return}
+  // reorder daily orders
+  if(t.dataset.moveup){const idx=S.dailies.findIndex(d=>d.id===t.dataset.moveup);if(idx>0){[S.dailies[idx-1],S.dailies[idx]]=[S.dailies[idx],S.dailies[idx-1]];save();renderDailies();}return}
+  if(t.dataset.movedown){const idx=S.dailies.findIndex(d=>d.id===t.dataset.movedown);if(idx<S.dailies.length-1){[S.dailies[idx],S.dailies[idx+1]]=[S.dailies[idx+1],S.dailies[idx]];save();renderDailies();}return}
   // boss checkpoint tick
   if(t.dataset.bcheck){
     const b=S.bosses.find(x=>x.id===t.dataset.bcheck);
@@ -205,6 +208,8 @@ document.body.addEventListener("click",e=>{
   if(t.dataset.copybriefbtn){ if(typeof copyDailyBrief==="function") copyDailyBrief(); return; }
   // copy skills summary
   if(t.dataset.copyskillssummary){ if(typeof copySkillsSummary==="function") copySkillsSummary(); return; }
+  // update all skill targets to current stage
+  if(t.dataset.updateskilltgts){ if(typeof updateAllSkillTargets==="function") updateAllSkillTargets(); return; }
   // global tab navigation — any button with data-gototab anywhere in the app
   const goBtn=t.closest("[data-gototab]");
   if(goBtn){

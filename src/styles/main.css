@@ -580,6 +580,9 @@
   li.card.paused{opacity:.45}
   .order-paused{font-size:10px;color:var(--ink-faint);margin-left:auto;align-self:center}
   .order-pause-btn{background:none;border:1px solid var(--line);color:var(--ink-faint);border-radius:5px;padding:2px 7px;font-size:10px;cursor:pointer;font-family:inherit;margin-left:4px}
+  .daily-move-col{display:flex;flex-direction:column;gap:1px;margin-right:4px;flex-shrink:0}
+  .daily-move-btn{background:none;border:none;color:var(--ink-faint);cursor:pointer;font-size:9px;padding:1px 4px;line-height:1;border-radius:3px}
+  .daily-move-btn:hover{color:var(--ink);background:rgba(255,255,255,.05)}
   /* Test tab */
   .test-card{background:var(--panel);border:1px solid var(--line);border-radius:11px;padding:14px;margin-bottom:12px}
   .test-head{display:flex;align-items:center;justify-content:space-between;gap:10px}
@@ -1450,6 +1453,7 @@
   .sk-hist-item.promote{color:var(--jade)}
   /* AFT inline delta badge */
   .aft-event-delta{font-size:13px;font-weight:600;margin-left:5px}
+  .aft-event-spark{display:inline-flex;align-items:center;margin-left:8px;vertical-align:middle;opacity:.8}
   /* Baseline PR card */
   .bl-pr-card{background:var(--panel-2);border:1px solid var(--line);border-radius:10px;padding:13px 14px;margin-bottom:10px}
   .bl-pr-title{font-size:12px;font-weight:700;letter-spacing:.07em;text-transform:uppercase;color:var(--ember);margin-bottom:8px}
@@ -1996,6 +2000,7 @@
 .sk-practice-btn{background:rgba(111,158,84,.1);border:1px solid rgba(111,158,84,.3);color:var(--jade);padding:3px 8px;border-radius:6px;font-size:11px;cursor:pointer;font-family:inherit;transition:background .15s}
 .sk-practice-btn:active{background:rgba(111,158,84,.25)}
 .sk-prac-foot{font-size:10px;color:var(--ink-faint);margin-left:6px}
+.sk-streak{font-size:10px;color:var(--ember);margin-left:6px}
 /* ── Feature: Skill search (v112) */
 .sk-search-input{width:100%;background:var(--panel-2);border:1px solid var(--line);color:var(--ink);padding:9px 11px;border-radius:9px;font-family:inherit;font-size:13px;margin-bottom:10px;box-sizing:border-box}
 .sk-search-input::placeholder{color:var(--ink-faint)}
@@ -2075,6 +2080,33 @@
 .sk-summary-stat.atrisk{color:var(--ember);border-color:rgba(200,119,46,.35)}
 .sk-summary-stat.decayed{color:var(--blood);border-color:rgba(156,74,52,.35)}
 .sk-heatmap-wrap{background:var(--panel);border:1px solid var(--line);border-radius:10px;padding:12px 14px;margin-bottom:12px}
+/* ── v120: Skill assessment panel ── */
+.sk-assessment-table{background:var(--panel);border:1px solid var(--line);border-radius:10px;padding:10px 12px;margin-bottom:12px}
+.sk-assess-head{display:flex;justify-content:space-between;font-size:11px;color:var(--ink-faint);margin-bottom:8px;padding-bottom:6px;border-bottom:1px solid var(--line)}
+.sk-assess-row{display:grid;grid-template-columns:22px 1fr 40px 44px 36px;align-items:center;gap:6px;padding:4px 0;border-bottom:1px solid rgba(52,58,38,.5);font-size:12px}
+.sk-assess-row:last-child{border-bottom:none}
+.sk-assess-path{font-size:14px;text-align:center}
+.sk-assess-name{color:var(--ink);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.sk-assess-lv{color:var(--ink-dim);font-size:11px;text-align:right}
+.sk-assess-tgt{color:var(--gold);font-size:11px;text-align:right}
+.sk-assess-gap{font-size:11px;font-weight:600;text-align:right}
+.sk-assess-gap.behind{color:var(--ember)}
+.sk-assess-gap.ahead{color:var(--jade)}
+.sk-assess-gap.met{color:var(--jade)}
+.sk-assess-empty{font-size:12px;color:var(--ink-faint);padding:8px 0}
+/* ── v120: Milestones ── */
+.milestone-row{display:grid;grid-template-columns:90px 1fr auto auto;align-items:center;gap:6px;padding:5px 0;border-bottom:1px solid rgba(52,58,38,.4);font-size:12px}
+.milestone-row:last-child{border-bottom:none}
+.milestone-date{color:var(--ink-faint);font-size:11px}
+.milestone-label{color:var(--ink)}
+.milestone-when{font-size:11px;white-space:nowrap}
+.milestone-del{background:none;border:none;color:var(--ink-faint);cursor:pointer;font-size:11px;padding:2px 5px}
+.milestone-dawn{font-size:12px;color:var(--ink-dim);padding:6px 12px;background:var(--panel);border:1px solid var(--line);border-radius:8px;margin-bottom:8px;display:flex;flex-wrap:wrap;gap:8px;align-items:center}
+.ms-pill{color:var(--ink-dim)}.ms-pill b{color:var(--gold)}
+.milestone-bar-wrap{background:var(--panel);border:1px solid var(--line);border-radius:8px;padding:8px 12px;margin-bottom:8px}
+.milestone-bar-label{font-size:12px;color:var(--ink-dim);margin-bottom:5px}
+.milestone-bar{height:5px;background:rgba(52,58,38,.4);border-radius:3px;overflow:hidden}
+.milestone-bar-fill{height:100%;border-radius:3px;transition:width 0.3s}
 /* ── v119: Daily perfect-day calendar ── */
 .daily-cal-grid{display:grid;grid-template-columns:repeat(10,1fr);gap:2px;margin-top:6px}
 .daily-cal-label{font-size:11px;color:var(--ink-dim);margin-bottom:4px}
@@ -2109,3 +2141,45 @@
 .rd-hist-row:last-child{border-bottom:none}
 .rd-hist-wpm{font-weight:700;color:var(--ink);min-width:52px}
 .rd-comprehension{font-size:10.5px;background:var(--panel-2);border:1px solid var(--line);border-radius:4px;padding:1px 5px}
+
+/* ── v123: Weekly skill practice queue (Skills tab) ── */
+.sk-weekly-queue{background:var(--panel);border:1px solid var(--line);border-radius:8px;padding:10px 12px;margin:6px 0}
+.sk-wq-empty{font-size:12.5px;color:var(--ink-faint)}
+.sk-wq-row{display:flex;align-items:center;gap:10px;padding:6px 0;border-bottom:1px solid var(--line)}
+.sk-wq-row:last-child{border-bottom:none}
+.sk-wq-emblem{flex:none;width:36px;height:36px;display:grid;place-items:center}
+.sk-wq-dot{width:20px;height:20px;border-radius:50%}
+.sk-wq-info{flex:1;min-width:0}
+.sk-wq-name{font-size:12.5px;font-weight:700;color:var(--ink)}
+.sk-wq-days{font-size:11px;font-weight:700;margin-top:1px}
+.sk-wq-tag{font-size:10px;font-weight:700;border-radius:3px;padding:1px 4px;vertical-align:middle}
+.sk-wq-tag.blood{background:var(--blood);color:#fff}
+.sk-wq-tag.amber{background:var(--ember);color:#fff}
+.sk-wq-btn{font-size:11.5px;font-weight:700;background:var(--panel-2);border:1px solid var(--line);border-radius:6px;padding:5px 9px;color:var(--jade);cursor:pointer;white-space:nowrap;font-family:inherit}
+.sk-wq-btn:active{opacity:.8}
+
+/* ── v123: Skill gap heatmap (Skills tab) ── */
+.sk-gap-map{overflow-x:auto;margin:6px 0}
+.sk-gm-table{border-collapse:collapse;width:100%;font-size:11.5px}
+.sk-gm-table th,.sk-gm-table td{padding:4px 6px;border:1px solid var(--line);text-align:center}
+.sk-gm-table thead th{background:var(--panel-2);color:var(--ink-dim);font-size:10px;letter-spacing:.06em;text-transform:uppercase}
+.sk-gm-path{text-align:left!important;color:var(--ink-dim);white-space:nowrap}
+.sk-gm-td{font-weight:700}
+.sk-gm-cur{background:rgba(184,160,106,.1)!important;font-weight:800}
+.sk-gm-stage{font-weight:700}
+.sk-gm-legend{font-size:11px;color:var(--ink-faint);margin-top:6px;padding:0 2px}
+
+/* ── v123: Skill notes search (Records tab) ── */
+.sk-note-entry{background:var(--panel);border:1px solid var(--line);border-radius:8px;padding:10px 12px;margin:6px 0}
+.sk-note-header{display:flex;justify-content:space-between;align-items:baseline;margin-bottom:4px}
+.sk-note-skill{font-size:12.5px;font-weight:700;color:var(--gold)}
+.sk-note-date{font-size:11px;color:var(--ink-faint)}
+.sk-note-text{font-size:13px;color:var(--ink-dim);line-height:1.5}
+
+/* ── v123: Path health snapshot (Dawn) ── */
+.path-summary-strip{}
+.path-summary-row{display:flex;align-items:center;gap:.5rem;padding:.2rem 0;font-size:.8rem;border-bottom:1px solid var(--line)}
+.path-summary-row:last-child{border-bottom:none}
+.path-summary-icon{width:1.4rem;text-align:center}
+.path-summary-name{flex:1;color:var(--ink-dim)}
+.path-summary-stat{color:var(--jade);font-size:.75rem}

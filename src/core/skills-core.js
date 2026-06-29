@@ -64,9 +64,22 @@ function fmtLvl(n){ return (Math.round(n*10)/10).toFixed(1); }
 function skEffectiveLevel(sk){
   if(sk.currentLevel<=0) return 0;
   const elapsed=Date.now()-(sk.lastQuestTs||Date.now());
-  const intervals=Math.floor(elapsed/(sk.fadeDays*864e5));
+  const fd=sk.fadeDays||30;
+  // 20% grace buffer: a skill doesn't drop the instant fadeDays elapses
+  const grace=fd*0.2;
+  const intervals=Math.floor(elapsed/((fd+grace)*864e5));
   // a started skill never decays below level 1 — it can be reverted but never lost
   return Math.max(1, sk.currentLevel - intervals);
+}
+// "current" = within fadeDays, "at-risk" = in grace period (fadeDays to fadeDays+grace), "decayed" = dropped
+function skFadeState(sk){
+  if(sk.currentLevel<=0) return "current";
+  const elapsed=Date.now()-(sk.lastQuestTs||Date.now());
+  const fd=sk.fadeDays||30;
+  const grace=fd*0.2;
+  if(elapsed<fd*864e5) return "current";
+  if(elapsed<(fd+grace)*864e5) return "at-risk";
+  return "decayed";
 }
 // keep peakLevel = highest level ever held (current or effective, whichever is higher seen)
 function skUpdatePeak(sk){
@@ -76,7 +89,10 @@ function skUpdatePeak(sk){
 }
 function skDaysLeft(sk){
   if(sk.currentLevel<=0) return null;
-  const next=(sk.lastQuestTs||Date.now())+sk.fadeDays*864e5;
+  const fd=sk.fadeDays||30;
+  const grace=fd*0.2;
+  // returns days until the skill actually drops (after the grace buffer)
+  const next=(sk.lastQuestTs||Date.now())+(fd+grace)*864e5;
   return Math.ceil((next-Date.now())/864e5);
 }
 // generate the active quest for a skill: maintain current, reclaim decayed, or promote
@@ -115,7 +131,7 @@ function skPass(skId){
 }
 // Mark that you've reached a specific level on a skill, by tapping that rung in its card.
 // This is the embedded, per-skill version of the old promotion quest: the rung IS the button.
-function skReachLevel(skId, level){
+function skReachLevel(skId, level, note){
   const sk=S.lifeSkills.find(x=>x.id===skId); if(!sk) return;
   if(sk.auto){ toast("This skill levels automatically from your measured results."); return; }
   const max=sk.levels.length;
@@ -127,7 +143,9 @@ function skReachLevel(skId, level){
   sk.currentLevel=level;
   skUpdatePeak(sk);
   sk.lastQuestTs=Date.now();
-  sk.history.push({ts:Date.now(),type:prevType,level});
+  const entry={ts:Date.now(),type:prevType,level};
+  if(note&&note.trim()) entry.note=note.trim();
+  sk.history.push(entry);
   if(!S.pathXP) S.pathXP={}; S.pathXP.academic=(S.pathXP.academic||0)+15;
   save();render();
   if(typeof getTierLabelForLevel==="function"){
@@ -142,31 +160,49 @@ function skSkip(skId){
   // skipping a maintenance just dismisses it until next interval; decay still applies naturally
   toast("Left for later — the skill will keep fading until you prove it");
 }
+// Reset the fade timer for a skill practiced outside the app — no level change.
+// For skills that can't be tested in-app (land nav, swimming, etc.) but were genuinely practiced.
+function skPractice(skId){
+  const sk=S.lifeSkills.find(x=>x.id===skId); if(!sk) return;
+  if(sk.auto){ toast("This skill levels automatically from measured results — it can't be manually refreshed."); return; }
+  if(sk.currentLevel<=0){ toast("Tap a rung first to set your level, then use Practiced to maintain it."); return; }
+  sk.lastQuestTs=Date.now();
+  save();render();
+  toast(`✓ Practiced — ${esc(sk.name)} fade timer reset`);
+}
 // "Work on this" — route a skill to the right trainer/plan/protocol
 function skWorkGuidance(sk){
   if(!sk) return "";
   const go=(tab,label)=>`<button class="sk-work-go" data-gototab="${tab}">${label} →</button>`;
+  const maxLv=(sk.levels||[]).length||1;
+  const eff=typeof skEffectiveLevel==="function"?skEffectiveLevel(sk):sk.currentLevel;
+  const nextLvl=eff+1;
+  const placeholder=sk.advance&&sk.advance[nextLvl-1]?sk.advance[nextLvl-1]:"What did you practice? Add a brief note for your own record.";
+  const noteInput=!sk.auto?`<div class="sk-note-wrap"><label class="sk-tgt-set-label">Practice note (optional — saved with next level-up)<textarea class="sk-note-input" data-sknote="${sk.id}" rows="2" placeholder="${esc(placeholder)}" maxlength="300"></textarea></label></div>`:"";
+  const tgtInput=`<div class="sk-tgt-set"><label class="sk-tgt-set-label">Target level (optional)<input type="number" class="sk-tgt-inp-work" data-sktgtlv="${sk.id}" min="1" max="${maxLv}" value="${sk.targetLevel||''}"></label></div>`;
   // cognitive skills with a test trainer
   const testMap={"Reaction speed":"reaction","Cognitive / processing speed":"procspeed","Working memory (n-back)":"nback","Memory span":"digitspan","Attention / sustained focus":"gonogo","Mental math":"mathsprint","Pattern recognition":"patterns","Typing speed & accuracy":"typing"};
-  if(testMap[sk.name]) return `<div class="sk-work-body">Train this directly in the Test tab — run the <b>${esc(sk.name)}</b> test, and your level updates from the result.${go("test","Open Test tab")}</div>`;
-  if(sk.name==="Memory technique") return `<div class="sk-work-body">Use the <b>Memory Track</b> in the Test tab: build a memory palace and run spaced-repetition decks. Practicing either keeps this skill sharp.${go("test","Open Memory Track")}</div>`;
-  if(sk.name==="ROTC knowledge (quizzes)") return `<div class="sk-work-body">Pass quiz banks in the Quiz tab — each one you pass raises this skill. Build a study plan there for any graded test.${go("quizzes","Open Quiz tab")}</div>`;
-  if(sk.cat==="academic") return `<div class="sk-work-body">Study with active recall and spacing: make a spaced-repetition deck in the Test tab's Memory Track, and build a study plan in the Quiz tab if you have a graded test coming.${go("test","Memory Track")} ${go("quizzes","Study plans")}</div>`;
-  if(sk.cat==="cognitive") return `<div class="sk-work-body">Practice in the Test tab — pick the closest trainer and run it regularly.${go("test","Open Test tab")}</div>`;
+  if(testMap[sk.name]) return `<div class="sk-work-body">Train this directly in the Test tab — run the <b>${esc(sk.name)}</b> test, and your level updates from the result.${go("test","Open Test tab")}</div>${noteInput}${tgtInput}`;
+  if(sk.name==="Memory technique") return `<div class="sk-work-body">Use the <b>Memory Track</b> in the Test tab: build a memory palace and run spaced-repetition decks. Practicing either keeps this skill sharp.${go("test","Open Memory Track")}</div>${noteInput}${tgtInput}`;
+  if(sk.name==="ROTC knowledge (quizzes)") return `<div class="sk-work-body">Pass quiz banks in the Quiz tab — each one you pass raises this skill. Build a study plan there for any graded test.${go("quizzes","Open Quiz tab")}</div>${noteInput}${tgtInput}`;
+  if(sk.cat==="academic") return `<div class="sk-work-body">Study with active recall and spacing: make a spaced-repetition deck in the Test tab's Memory Track, and build a study plan in the Quiz tab if you have a graded test coming.${go("test","Memory Track")} ${go("quizzes","Study plans")}</div>${noteInput}${tgtInput}`;
+  if(sk.cat==="cognitive") return `<div class="sk-work-body">Practice in the Test tab — pick the closest trainer and run it regularly.${go("test","Open Test tab")}</div>${noteInput}${tgtInput}`;
   if(sk.cat==="physiological"){
-    if(sk.name==="Resting heart rate") return `<div class="sk-work-body">This improves with cardio over time. Log your resting pulse in Profile → Vitals to track it; lower over months = fitter.${go("profile","Log vitals")}</div>`;
-    return `<div class="sk-work-body">${esc(sk.whatYouDo||"Practice the self-test described above regularly and log your progress.")}</div>`;
+    if(sk.name==="Resting heart rate") return `<div class="sk-work-body">This improves with cardio over time. Log your resting pulse in Profile → Vitals to track it; lower over months = fitter.${go("profile","Log vitals")}</div>${noteInput}${tgtInput}`;
+    return `<div class="sk-work-body">${esc(sk.whatYouDo||"Practice the self-test described above regularly and log your progress.")}</div>${noteInput}${tgtInput}`;
   }
-  if(sk.cat==="physical") return `<div class="sk-work-body">Train this in your PT sessions — the FM tab tells you what to prioritize, and logging workouts in the Log tab keeps the skill from fading.${go("plan","Open FM plan")} ${go("log","Log a workout")}</div>`;
+  if(sk.cat==="physical") return `<div class="sk-work-body">Train this in your PT sessions — the FM tab tells you what to prioritize, and logging workouts in the Log tab keeps the skill from fading.${go("plan","Open FM plan")} ${go("log","Log a workout")}</div>${noteInput}${tgtInput}`;
   // generic practice protocol
-  return `<div class="sk-work-body"><b>Practice protocol:</b> ${esc(sk.whatYouDo||"Find a real situation to practice the next level's ability, do it deliberately, then mark the level reached on its rung when you can do it reliably.")} When you can perform the next level reliably, tap that level's rung above to mark it.</div>`;
+  return `<div class="sk-work-body"><b>Practice protocol:</b> ${esc(sk.whatYouDo||"Find a real situation to practice the next level's ability, do it deliberately, then mark the level reached on its rung when you can do it reliably.")} When you can perform the next level reliably, tap that level's rung above to mark it.</div>${tgtInput}`;
 }
 // ============ THE TREE VIEW — a living branching diagram of the whole skill tree ============
 // Trunk = the cadet. Limbs = Paths. Boughs = sub-path branches. Leaves = skills.
 // A leaf's colour runs from faded (low/decayed) to bright jade (mastered); its size grows with peak.
 // This is the project's symbolism made literal: one tree, tended over a career.
-function skLeafColor(eff, max){
+// optional sk param: if provided and in at-risk grace period, show amber instead of normal color
+function skLeafColor(eff, max, sk){
   if(eff<=0) return "#3a4030";                 // unproven — bare twig
+  if(sk && typeof skFadeState==="function" && skFadeState(sk)==="at-risk") return "rgb(204,138,45)"; // amber — in grace period
   const t=Math.max(0,Math.min(1,(eff-1)/(Math.max(1,max)-1)));
   // interpolate ember (low) -> gold (mid) -> jade (high)
   const lerp=(a,b,f)=>Math.round(a+(b-a)*f);

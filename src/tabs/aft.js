@@ -131,6 +131,11 @@ function renderAft(){
   // wire test-date input
   const tdInput=document.getElementById("aftTestDateInput");
   if(tdInput){tdInput.value=S.aftTestDate||"";tdInput.onchange=()=>{S.aftTestDate=tdInput.value||null;save();renderAft();};}
+  // target-setter collapsible — inject once after tdInput's parent, replacing any previous
+  const _prevTgt=document.querySelector('.aft-target-set');
+  if(_prevTgt) _prevTgt.remove();
+  const tgtSetHtml=`<details class="aft-target-set"><summary style="font-size:12px;color:var(--ink-faint);cursor:pointer">Set event targets…</summary><div class="aft-target-grid">${["hrp","sdc","run","dl","plank"].map(k=>`<label class="aft-tgt-label">${k.toUpperCase()}<input class="aft-tgt-inp" data-afttgt="${k}" type="number" min="0" max="100" step="1" value="${(S.aftEventTargets&&S.aftEventTargets[k])||""}"></label>`).join("")}</div></details>`;
+  if(tdInput&&tdInput.parentElement) tdInput.parentElement.insertAdjacentHTML("afterend",tgtSetHtml);
   // render prep card
   const prepEl=document.getElementById("aftPrepArea");
   if(prepEl) prepEl.innerHTML=aftPrepCard();
@@ -149,6 +154,16 @@ function renderAft(){
     }).join("");
   }
   if(S.aft.length){ showAftResult(S.aft[S.aft.length-1]); }
+  // mini trend sparkline — insert before history element, replacing any previous one
+  const _prevTrend=document.querySelector('.aft-trend-wrap');
+  if(_prevTrend) _prevTrend.remove();
+  const last7=(S.aft||[]).slice(-7);
+  if(last7.length>=2){
+    const svg=typeof miniSparkline==="function"?miniSparkline(last7.map(t=>t.total),200,44):"";
+    if(svg) hist.insertAdjacentHTML("beforebegin",
+      `<div class="aft-trend-wrap">${svg}<div class="aft-trend-range">${Math.min(...last7.map(t=>t.total))} – ${Math.max(...last7.map(t=>t.total))} pts</div></div>`
+    );
+  }
 }
 function fmFocusLine(){
   const a=(S.aft||[])[S.aft.length-1]; if(!a) return null;
@@ -194,6 +209,13 @@ function vo2Benchmark(){
   if(v<m[0]) band="below average"; else if(v<m[1]) band="average"; else if(v<m[2]) band="above average"; else if(v<m[3]) band="excellent"; else band="superior";
   return {v, band, line:`VO₂ max ${v} — ${band} aerobic fitness for your age. This is the engine behind your 2-mile run; steady zone-2 work plus intervals raises it over weeks.`};
 }
+const DRILL={
+  hrp: gap=>gap>40?"3×max-effort HRP daily, rest 90s between sets":gap>20?"2×max-effort + 1×sub-max (75%) every session":"Maintain — one max set every 2 days",
+  sdc: gap=>gap>30?"Add 2 practice SDC runs/week at race pace":"Maintain pace — add one rep-effort run/week",
+  run: gap=>gap>40?"4×400m intervals 3×/week + one long easy run":"Tempo runs 2×/week — target pace at test intensity",
+  dl:  gap=>gap>30?"3×5 DL at challenging weight, add 5 lbs weekly":"Maintain — 2×5 at current weight",
+  plank:gap=>gap>30?"Plank 3×/day to max hold, add 5s each session":"One max hold daily, 5s progression every 3 days",
+};
 function showAftResult(a){
   const el=document.getElementById("aftResult");
   const prev = S.aft.length>1 ? S.aft[S.aft.indexOf(a)-1] : null;
@@ -228,7 +250,7 @@ function showAftResult(a){
   el.innerHTML=`<div class="aft-result-card">
     <h3>Latest — ${a.date}</h3>
     <div class="aft-score-big">${a.total}<span class="${scoreCls}">${scoreLabel}</span></div>
-    ${events.map(e=>`<div class="aft-event ${e.k===weakest.k?'weak':''}"><span>${e.label}${e.k===weakest.k?' ← weakest':''}</span><span class="ev-score">${e.s} pts${trend(e)}${e.s<60?' ⚠️':''}</span></div>`).join("")}
+    ${events.map(e=>{const gap=100-e.s; const drill=DRILL[e.k]?DRILL[e.k](gap):""; const tgt=S.aftEventTargets&&S.aftEventTargets[e.k]; const tgtHtml=tgt&&e.s!=null?`<span class="aft-tgt-gap" style="color:${e.s>=tgt?'var(--jade)':'var(--ember)'}">${e.s>=tgt?"✓ target":"↑ "+(tgt-e.s)+" to target"}</span>`:""; return `<div class="aft-event ${e.k===weakest.k?'weak':''}"><span>${e.label}${e.k===weakest.k?' ← weakest':''}</span><span class="ev-score">${e.s} pts${trend(e)}${e.s<60?' ⚠️':''}</span>${tgtHtml}${drill?`<div class="aft-drill">${drill}</div>`:''}</div>`;}).join("")}
     <div class="aft-focus">📍 <b>Plan focus:</b> ${focus} ${failing.length?`<br><br>⚠️ ${failing.length} event(s) below the 60-pt minimum — fix immediately to avoid a no-go.`:nearMin.length?`<br><br>⚠️ ${nearMin.map(e=>e.label).join(", ")} sitting near the 60-pt floor — keep a buffer.`:''}</div>
   </div>`;
 }
@@ -263,5 +285,9 @@ document.getElementById("aftSave").onclick=()=>{
   ["aDl","aHrp","aSdc","aPlank","aRun"].forEach(i=>document.getElementById(i).value="");
   toast(`<span class="t-xp">AFT logged: ${total} pts</span> · plan re-tuned`);
 };
+document.addEventListener("input",e=>{
+  const k=e.target.dataset&&e.target.dataset.afttgt;
+  if(k){if(!S.aftEventTargets)S.aftEventTargets={hrp:null,sdc:null,run:null,dl:null,plank:null};S.aftEventTargets[k]=parseInt(e.target.value)||null;save();}
+});
 
 /* ---------------- WORKOUT LOG ---------------- */

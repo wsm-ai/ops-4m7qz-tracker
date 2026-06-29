@@ -35,10 +35,23 @@ function renderHistory(){
   el.innerHTML=`<div class="hist-grid">${blocks.join("")}</div>`;
 }
 // ===== Counseling log =====
+let _cnFilter="all", _cnSearch="";
 function renderCounsel(){
   const el=document.getElementById("counselArea"); if(!el) return;
-  const items=(S.counseling||[]).slice().sort((a,b)=>new Date(b.date)-new Date(a.date));
-  if(!items.length){ el.innerHTML=`<div style="font-size:12.5px;color:var(--ink-faint)">No entries yet.</div>`; return; }
+  // wire filter bar
+  document.querySelectorAll("[data-cnfilter]").forEach(btn=>{
+    btn.classList.toggle("on",btn.dataset.cnfilter===_cnFilter);
+    btn.onclick=()=>{ _cnFilter=btn.dataset.cnfilter; renderCounsel(); };
+  });
+  const srch=document.getElementById("cnSearch");
+  if(srch){ srch.value=_cnSearch; srch.oninput=e=>{ _cnSearch=e.target.value; renderCounsel(); }; }
+  let items=(S.counseling||[]).slice().sort((a,b)=>new Date(b.date)-new Date(a.date));
+  if(_cnFilter!=="all") items=items.filter(c=>c.type===_cnFilter);
+  if(_cnSearch.trim()){
+    const q=_cnSearch.toLowerCase();
+    items=items.filter(c=>(c.summary||"").toLowerCase().includes(q)||(c.people||"").toLowerCase().includes(q));
+  }
+  if(!items.length){ el.innerHTML=`<div style="font-size:12.5px;color:var(--ink-faint)">${(S.counseling||[]).length?"No entries match this filter.":"No entries yet."}</div>`; return; }
   const typeLabel={event:"Event",monthly:"Monthly",developmental:"Developmental",received:"Received",given:"Given"};
   el.innerHTML=items.map(c=>`<div class="cn-card">
     <div class="cn-top"><span class="cn-type">${typeLabel[c.type]||c.type}</span><span class="cn-date">${new Date(c.date).toLocaleDateString()}</span><button class="hb-del" data-cndel="${c.id}">✕</button></div>
@@ -160,4 +173,29 @@ ${counselRows?`<h2>Counseling Log (last 5)</h2><ul>${counselRows}</ul>`:""}
 }
 const _rptBtn=document.getElementById("battleBuddyBtn");
 if(_rptBtn) _rptBtn.onclick=exportBattleBuddyReport;
+
+/* ---- Counseling bulk import ---- */
+{
+  const cnBulkText=document.getElementById("cnBulkText");
+  const cnBulkPreview=document.getElementById("cnBulkPreview");
+  const cnBulkPreviewBtn=document.getElementById("cnBulkPreviewBtn");
+  const cnBulkCommit=document.getElementById("cnBulkCommit");
+  if(cnBulkPreviewBtn&&cnBulkText&&cnBulkPreview&&cnBulkCommit){
+    let _cnParsed=[];
+    cnBulkPreviewBtn.onclick=()=>{
+      const lines=cnBulkText.value.split("\n").map(l=>l.trim()).filter(l=>l&&!l.startsWith("#"));
+      _cnParsed=lines.map(l=>{const p=l.split("|").map(s=>s.trim()); if(!p[2]&&!p[0]) return null; return {id:id(),date:p[0]||localYMD(),type:p[1]||"event",people:"",summary:p[2]||"",plan:p[3]||"",followUp:p[4]||""};}).filter(Boolean);
+      if(!_cnParsed.length){cnBulkPreview.innerHTML=`<div style="color:var(--ink-faint)">Nothing to preview — use: Date | Type | Summary | Plan | FollowUp</div>`;cnBulkCommit.style.display="none";return;}
+      cnBulkPreview.innerHTML=`<b>${_cnParsed.length} entr${_cnParsed.length===1?"y":"ies"} ready:</b><ul style="margin:6px 0 0 14px">${_cnParsed.map(c=>`<li>${esc(c.date)} [${esc(c.type)}] ${esc(c.summary.slice(0,50))}</li>`).join("")}</ul>`;
+      cnBulkCommit.style.display="";
+    };
+    cnBulkCommit.onclick=()=>{
+      if(!S.counseling) S.counseling=[];
+      _cnParsed.forEach(e=>S.counseling.push(e));
+      save(); render(); toast(`📝 Added ${_cnParsed.length} counseling entr${_cnParsed.length===1?"y":"ies"}`);
+      cnBulkText.value=""; cnBulkPreview.innerHTML=""; cnBulkCommit.style.display="none"; _cnParsed=[];
+    };
+  }
+  // bulk toggle handled by the main document.body click in awards.js
+}
 

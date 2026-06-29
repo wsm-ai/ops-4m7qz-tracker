@@ -1,4 +1,15 @@
-const SKILL_LADDER_VER=84;
+const SKILL_LADDER_VER=90;
+// Returns the user's current ROTC/Army career stage based on S.rank.
+function careerStage(){
+  const r=((S.profile&&S.profile.rank)||S.rank||"").toUpperCase();
+  if(r.includes("MS1")) return "MS1";
+  if(r.includes("MS2")) return "MS2";
+  if(r.includes("MS3")) return "MS3";
+  if(r.includes("LDAC")) return "LDAC";
+  if(r.includes("MS4")) return "MS4";
+  if(r.includes("O1")||r.includes("2LT")||r.includes("1LT")||r.includes("COMMISSION")) return "O1";
+  return "MS2"; // sensible default for a cadet
+}
 // onto existing seeded skills. Never touches level/history/peak.
 function mergeNewSeedSkills(){
   let changed=false;
@@ -56,6 +67,7 @@ function mergeNewSeedSkills(){
         fadeDays:s.fadeDays, auto:s.auto||null,
         why:s.why||null, whatYouDo:s.whatYouDo||null, howTo:s.howTo||null, prep:s.prep||null, recover:s.recover||null, safety:s.safety||null,
         roadmap:s.roadmap||null, advance:s.advance||null, maintain:s.maintain||null, tiers:s.tiers||null,
+        targetLevel:(s.targets&&s.targets[careerStage()]!=null?s.targets[careerStage()]:null),
         currentLevel:0, lastQuestTs:Date.now(), peakLevel:0,
         levels:(s.levels||[]).map((ability,i)=>({n:i+1,ability})), history:[], seeded:true
       });
@@ -105,6 +117,11 @@ function mergeNewSeedSkills(){
         if(s.advance && (ladderStale || JSON.stringify(ex.advance)!==JSON.stringify(s.advance))){ ex.advance=s.advance; changed=true; }
         if(s.maintain && (ladderStale || JSON.stringify(ex.maintain)!==JSON.stringify(s.maintain))){ ex.maintain=s.maintain; changed=true; }
         if(s.tiers && (ladderStale || JSON.stringify(ex.tiers)!==JSON.stringify(s.tiers))){ ex.tiers=s.tiers; changed=true; }
+        // Backfill targets from seed (never overwrite user's manual target)
+        if(s.targets && ex.targetLevel==null){
+          const stg=careerStage();
+          if(s.targets[stg]!=null){ ex.targetLevel=s.targets[stg]; changed=true; }
+        }
       }
     }
   });

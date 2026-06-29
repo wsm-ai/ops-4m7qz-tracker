@@ -31,12 +31,20 @@ function renderAwards(){
 }
 
 const MB_TYPE={founder:"★ Founder",charter:"Charter",regular:"Member",honorary:"Honorary"};
+let _mbFilter="all";
 function renderMemberships(){
   const el=document.getElementById("mbList"); if(!el) return;
   if(!S.memberships.length){ el.innerHTML=`<div class="aw-empty"><span class="big">🎟️</span>No memberships yet. Add organizations you belong to above.</div>`; return; }
-  // founders/charter weighted to the top, then by start year desc
+  // update filter button active state
+  document.querySelectorAll(".mb-filter").forEach(b=>b.classList.toggle("on",b.dataset.mbfilter===_mbFilter));
+  const curYear=new Date().getFullYear();
   const rank={founder:0,charter:1,regular:2,honorary:3};
-  const sorted=S.memberships.slice().sort((a,b)=>(rank[a.memberType]-rank[b.memberType])||((b.startYear||0)-(a.startYear||0)));
+  const isActive=m=>!m.endYear||m.endYear>=curYear;
+  let pool=S.memberships.slice();
+  if(_mbFilter==="active") pool=pool.filter(isActive);
+  else if(_mbFilter==="past") pool=pool.filter(m=>!isActive(m));
+  if(!pool.length){ el.innerHTML=`<div style="color:var(--ink-faint);font-size:12.5px;padding:8px 0">No ${_mbFilter==="all"?"memberships":_mbFilter+" memberships"} found.</div>`; return; }
+  const sorted=pool.sort((a,b)=>(rank[a.memberType]-rank[b.memberType])||((b.startYear||0)-(a.startYear||0)));
   el.innerHTML=sorted.map(m=>{
     const yrs=(m.startYear||"?")+" – "+(m.endYear||"present");
     const roles=(m.roles||[]).map(r=>`<div class="mb-role">${esc(r.title)}${r.startYear?` (${r.startYear}${r.endYear?'–'+r.endYear:'–present'})`:''}</div>`).join("");
@@ -85,10 +93,278 @@ function renderVolunteer(){
   log.innerHTML=S.volunteer.length?`<div class="sec-h" style="margin-top:6px"><h2>Log</h2></div>`+S.volunteer.slice().reverse().map(v=>`<div class="vol-log-row"><span>${v.year} · <b>${v.hours} hrs</b>${v.org?' · '+esc(v.org):''}</span><button class="del" data-voldel="${v.id}">✕</button></div>`).join(""):"";
 }
 
+/* ---------------- Academic Honors ---------------- */
+function renderAcademicHonors(){
+  const el=document.getElementById("ahGrid"); if(!el) return;
+  const ah=S.academicHonors||[];
+  if(!ah.length){el.innerHTML=`<div class="aw-empty"><span class="big">📚</span>No academic honors yet. Add Dean's List, scholarships, honor societies, or other academic recognitions above.</div>`;return;}
+  const sorted=ah.slice().sort((a,b)=>(b.year||0)-(a.year||0));
+  el.innerHTML=sorted.map(a=>{
+    const meta=[a.year?String(a.year):null, a.org?esc(a.org):null].filter(Boolean).join(" · ");
+    return `<div class="aw-card"><button class="aw-del" data-daoh="${a.id}">✕</button><div class="aw-ic">📚</div><div class="aw-title">${esc(a.title)}</div>${meta?`<div class="aw-meta">${meta}</div>`:""}${a.note?`<div class="aw-note">${esc(a.note)}</div>`:""}<div class="aw-date">added ${esc(a.date||"")}</div></div>`;
+  }).join("");
+}
+{
+  const ahSave=document.getElementById("ahAdd");
+  if(ahSave) ahSave.onclick=()=>{
+    const title=(document.getElementById("ahTitle").value||"").trim(); if(!title){toast("Enter a title");return;}
+    const org=(document.getElementById("ahOrg").value||"").trim();
+    const yr=parseInt(document.getElementById("ahYear").value)||null;
+    const note=(document.getElementById("ahNote").value||"").trim();
+    if(!S.academicHonors) S.academicHonors=[];
+    S.academicHonors.push({id:id(),ts:Date.now(),date:new Date().toLocaleDateString(),title,org:org||undefined,year:yr,note:note||undefined});
+    ["ahTitle","ahOrg","ahYear","ahNote"].forEach(x=>{const el=document.getElementById(x);if(el)el.value="";});
+    save(); renderAcademicHonors(); toast("📚 Academic honor added");
+  };
+}
+
+/* ---------------- ROTC Record ---------------- */
+function renderRotcRecord(){
+  const rr=S.rotcRecord||{positions:[],competitions:[],campResults:[]};
+  const posEl=document.getElementById("rpList"), compEl=document.getElementById("rcList"), campEl=document.getElementById("campList");
+  if(posEl) posEl.innerHTML=(rr.positions||[]).length?rr.positions.slice().sort((a,b)=>(b.startSem||"")>(a.startSem||"")?1:-1).map(p=>`<div class="rotc-item"><button class="aw-del" data-drotcpos="${p.id}">✕</button><div class="rotc-title">${esc(p.title)}</div><div class="rotc-meta">${p.startSem||""}${p.endSem?("–"+p.endSem):""}</div>${p.note?`<div class="aw-note">${esc(p.note)}</div>`:""}</div>`).join(""):`<div class="aw-empty" style="padding:10px">No positions yet.</div>`;
+  if(compEl) compEl.innerHTML=(rr.competitions||[]).length?rr.competitions.slice().sort((a,b)=>(b.year||0)-(a.year||0)).map(c=>`<div class="rotc-item"><button class="aw-del" data-drotccomp="${c.id}">✕</button><div class="rotc-title">${esc(c.name)}</div><div class="rotc-meta">${c.year||""}${c.placement?" · "+esc(c.placement):""}</div>${c.note?`<div class="aw-note">${esc(c.note)}</div>`:""}</div>`).join(""):`<div class="aw-empty" style="padding:10px">No competitions yet.</div>`;
+  if(campEl) campEl.innerHTML=(rr.campResults||[]).length?rr.campResults.slice().sort((a,b)=>(b.year||0)-(a.year||0)).map(c=>`<div class="rotc-item"><button class="aw-del" data-drotccamp="${c.id}">✕</button><div class="rotc-title">${esc(c.camp)}</div><div class="rotc-meta">${c.year||""}${c.rating?" · "+esc(c.rating):""}</div>${c.note?`<div class="aw-note">${esc(c.note)}</div>`:""}</div>`).join(""):`<div class="aw-empty" style="padding:10px">No camp results yet.</div>`;
+}
+{
+  const rpSave=document.getElementById("rpSave");
+  if(rpSave) rpSave.onclick=()=>{
+    const title=(document.getElementById("rpTitle").value||"").trim(); if(!title){toast("Enter a position title");return;}
+    const start=(document.getElementById("rpStart").value||"").trim();
+    const end=(document.getElementById("rpEnd").value||"").trim();
+    const note=(document.getElementById("rpNote").value||"").trim();
+    if(!S.rotcRecord) S.rotcRecord={positions:[],competitions:[],campResults:[]};
+    if(!S.rotcRecord.positions) S.rotcRecord.positions=[];
+    S.rotcRecord.positions.push({id:id(),title,startSem:start||undefined,endSem:end||undefined,note:note||undefined});
+    ["rpTitle","rpStart","rpEnd","rpNote"].forEach(x=>{const el=document.getElementById(x);if(el)el.value="";});
+    save(); renderRotcRecord(); toast("⭐ Position added");
+  };
+  const rcSave=document.getElementById("rcSave");
+  if(rcSave) rcSave.onclick=()=>{
+    const name=(document.getElementById("rcName").value||"").trim(); if(!name){toast("Enter a competition name");return;}
+    const yr=parseInt(document.getElementById("rcYear").value)||null;
+    const placement=(document.getElementById("rcPlacement").value||"").trim();
+    const note=(document.getElementById("rcNote").value||"").trim();
+    if(!S.rotcRecord) S.rotcRecord={positions:[],competitions:[],campResults:[]};
+    if(!S.rotcRecord.competitions) S.rotcRecord.competitions=[];
+    S.rotcRecord.competitions.push({id:id(),name,year:yr,placement:placement||undefined,note:note||undefined});
+    ["rcName","rcYear","rcPlacement","rcNote"].forEach(x=>{const el=document.getElementById(x);if(el)el.value="";});
+    save(); renderRotcRecord(); toast("⭐ Competition added");
+  };
+  const campSave=document.getElementById("campSave");
+  if(campSave) campSave.onclick=()=>{
+    const camp=(document.getElementById("campName").value||"").trim(); if(!camp){toast("Enter a camp name");return;}
+    const yr=parseInt(document.getElementById("campYear").value)||null;
+    const rating=(document.getElementById("campRating").value||"").trim();
+    const note=(document.getElementById("campNote").value||"").trim();
+    if(!S.rotcRecord) S.rotcRecord={positions:[],competitions:[],campResults:[]};
+    if(!S.rotcRecord.campResults) S.rotcRecord.campResults=[];
+    S.rotcRecord.campResults.push({id:id(),camp,year:yr,rating:rating||undefined,note:note||undefined});
+    ["campName","campYear","campRating","campNote"].forEach(x=>{const el=document.getElementById(x);if(el)el.value="";});
+    save(); renderRotcRecord(); toast("⭐ Camp result added");
+  };
+}
+
+/* ---------------- Wall → Résumé copy ---------------- */
+function copyWallResume(){
+  const lines=[];
+  const ah=S.academicHonors||[];
+  if(ah.length){ lines.push("ACADEMIC HONORS"); ah.slice().sort((a,b)=>(b.year||0)-(a.year||0)).forEach(a=>lines.push(`  ${a.title}${a.org?" — "+a.org:""}${a.year?" ("+a.year+")":""}${a.note?" · "+a.note:""}`)); }
+  if(S.awards.length){ lines.push("","AWARDS & HONORS"); S.awards.slice().sort((a,b)=>(b.year||0)-(a.year||0)).forEach(a=>lines.push(`  ${a.title}${a.org?" — "+a.org:""}${a.year?" ("+a.year+")":""}${a.note?" · "+a.note:""}`)); }
+  const rr=S.rotcRecord||{};
+  if((rr.positions||[]).length||(rr.competitions||[]).length||(rr.campResults||[]).length){
+    lines.push("","ROTC RECORD");
+    (rr.positions||[]).forEach(p=>lines.push(`  ${p.title}${p.startSem?" ("+p.startSem+(p.endSem?"–"+p.endSem:"")+")":""}`));
+    (rr.competitions||[]).forEach(c=>lines.push(`  ${c.name}${c.year?" ("+c.year+")":""}${c.placement?" — "+c.placement:""}`));
+    (rr.campResults||[]).forEach(c=>lines.push(`  ${c.camp}${c.year?" ("+c.year+")":""}${c.rating?" — "+c.rating:""}`));
+  }
+  if(S.memberships.length){ lines.push("","MEMBERSHIPS & LEADERSHIP"); S.memberships.slice().sort((a,b)=>(b.startYear||0)-(a.startYear||0)).forEach(m=>{ const yrs=m.endYear?`${m.startYear}–${m.endYear}`:m.startYear?`${m.startYear}–present`:""; const roles=(m.roles||[]).map(r=>r.title).join(", "); lines.push(`  ${m.org}${yrs?" ("+yrs+")":""}${m.memberType&&m.memberType!=="regular"?" — "+m.memberType:""}${roles?" · "+roles:""}`); }); }
+  if(S.events.length){ lines.push("","EVENTS & COMPETITIONS"); S.events.slice().sort((a,b)=>(b.year||0)-(a.year||0)).forEach(e=>lines.push(`  ${e.title}${e.org?" — "+e.org:""}${e.year?" ("+e.year+")":""}${e.role?" · "+e.role:""}`)); }
+  if(S.volunteer.length){ lines.push("","VOLUNTEER SERVICE"); const byOrg={}; S.volunteer.forEach(v=>{const k=v.org||"General";byOrg[k]=(byOrg[k]||0)+(parseFloat(v.hours)||0);}); Object.entries(byOrg).forEach(([org,h])=>lines.push(`  ${org}${h>0?": "+h+" hrs":""}`)); }
+  if((S.qualifications||[]).length){ lines.push("","QUALIFICATIONS"); S.qualifications.forEach(q=>{const cat=typeof QUAL_CATALOG!=="undefined"&&QUAL_CATALOG[q.key]?QUAL_CATALOG[q.key]:null; const name=q.key==="custom"?(q.label||q.key):cat?cat.fullName:q.key; lines.push(`  ${name}${q.date?" ("+q.date+")":""}`);});}
+  const langs=S.profile?.languages||[];
+  const clr=S.profile?.clearance;
+  if(langs.length||(clr&&clr.level&&clr.level!=="None")){ lines.push("","LANGUAGES & CLEARANCE"); langs.forEach(l=>lines.push(`  ${l.lang}${l.ilr?" — ILR "+l.ilr:""}${l.notes?" ("+l.notes+")":""}`)); if(clr&&clr.level&&clr.level!=="None") lines.push(`  Clearance: ${clr.level}${clr.grantedDate?" ("+clr.grantedDate+")":""}`); }
+  navigator.clipboard.writeText(lines.join("\n")).then(()=>toast("📋 Wall copied to clipboard")).catch(()=>toast("Copy failed — try again"));
+}
+{
+  const rb=document.getElementById("wallResumeBtn");
+  if(rb) rb.onclick=copyWallResume;
+}
+
+/* ---------------- Bulk-entry wizard ---------------- */
+function _bulkPreviewAw(lines){
+  return lines.map(l=>{const p=l.split("|").map(s=>s.trim()); if(p.length<1||!p[0]) return null; return {title:p[0],org:p[1]||"",year:parseInt(p[2])||null,note:p[3]||""};}).filter(Boolean);
+}
+function _bulkPreviewMb(lines){
+  return lines.map(l=>{const p=l.split("|").map(s=>s.trim()); if(!p[0]) return null; return {org:p[0],startYear:parseInt(p[1])||null,endYear:parseInt(p[2])||null,memberType:p[3]||"regular",note:p[4]||""};}).filter(Boolean);
+}
+function _bulkPreviewEv(lines){
+  return lines.map(l=>{const p=l.split("|").map(s=>s.trim()); if(p.length<1||!p[0]) return null; return {title:p[0],org:p[1]||"",year:parseInt(p[2])||null,role:p[3]||"",note:p[4]||""};}).filter(Boolean);
+}
+function _bulkPreviewVol(lines){
+  return lines.map(l=>{const p=l.split("|").map(s=>s.trim()); if(!p[0]) return null; return {org:p[0],year:parseInt(p[1])||null,hours:parseFloat(p[2])||0,note:p[3]||""};}).filter(Boolean);
+}
+function _bulkSetup(textId, previewId, previewBtnId, commitBtnId, parseFn, commitFn){
+  const textarea=document.getElementById(textId);
+  const previewEl=document.getElementById(previewId);
+  const previewBtn=document.getElementById(previewBtnId);
+  const commitBtn=document.getElementById(commitBtnId);
+  if(!textarea||!previewEl||!previewBtn||!commitBtn) return;
+  let _parsed=[];
+  previewBtn.onclick=()=>{
+    const lines=textarea.value.split("\n").map(l=>l.trim()).filter(l=>l&&!l.startsWith("#"));
+    _parsed=parseFn(lines);
+    if(!_parsed.length){previewEl.innerHTML=`<div style="color:var(--ink-faint)">Nothing to preview — check your format.</div>`; commitBtn.style.display="none"; return;}
+    previewEl.innerHTML=`<b>${_parsed.length} entr${_parsed.length===1?"y":"ies"} ready:</b><ul style="margin:6px 0 0 14px">${_parsed.map(x=>`<li>${esc(Object.values(x).filter(v=>v&&v!==0&&v!==null).slice(0,4).join(" · "))}</li>`).join("")}</ul>`;
+    commitBtn.style.display="";
+  };
+  commitBtn.onclick=()=>{ commitFn(_parsed); textarea.value=""; previewEl.innerHTML=""; commitBtn.style.display="none"; _parsed=[]; };
+}
+// Wire up all bulk panels after DOM ready
+{
+  const d=new Date().toLocaleDateString();
+  _bulkSetup("awBulkText","awBulkPreview","awBulkPreviewBtn","awBulkCommit",_bulkPreviewAw,parsed=>{
+    parsed.forEach(e=>{S.awards.push({id:id(),ts:Date.now(),date:d,kind:"award",title:e.title,org:e.org||undefined,year:e.year,note:e.note||undefined});});
+    save(); renderAwards(); toast(`🏆 Added ${parsed.length} award${parsed.length===1?"":"s"}`);
+  });
+  _bulkSetup("ahBulkText","ahBulkPreview","ahBulkPreviewBtn","ahBulkCommit",_bulkPreviewAw,parsed=>{
+    if(!S.academicHonors) S.academicHonors=[];
+    parsed.forEach(e=>{S.academicHonors.push({id:id(),ts:Date.now(),date:d,title:e.title,org:e.org||undefined,year:e.year,note:e.note||undefined});});
+    save(); renderAcademicHonors(); toast(`📚 Added ${parsed.length} academic honor${parsed.length===1?"":"s"}`);
+  });
+  _bulkSetup("mbBulkText","mbBulkPreview","mbBulkPreviewBtn","mbBulkCommit",_bulkPreviewMb,parsed=>{
+    parsed.forEach(e=>{S.memberships.push({id:id(),org:e.org,startYear:e.startYear,endYear:e.endYear||null,memberType:e.memberType||"regular",roles:[],note:e.note||""});});
+    save(); renderMemberships(); toast(`🎟️ Added ${parsed.length} membership${parsed.length===1?"":"s"}`);
+  });
+  _bulkSetup("evBulkText","evBulkPreview","evBulkPreviewBtn","evBulkCommit",_bulkPreviewEv,parsed=>{
+    parsed.forEach(e=>{S.events.push({id:id(),title:e.title,org:e.org||undefined,year:e.year,role:e.role||undefined,note:e.note||undefined});});
+    save(); renderEvents(); toast(`📅 Added ${parsed.length} event${parsed.length===1?"":"s"}`);
+  });
+  _bulkSetup("volBulkText","volBulkPreview","volBulkPreviewBtn","volBulkCommit",_bulkPreviewVol,parsed=>{
+    parsed.forEach(e=>{S.volunteer.push({id:id(),org:e.org,year:e.year,hours:e.hours,note:e.note||undefined});});
+    save(); renderVolunteer(); toast(`🫙 Added ${parsed.length} volunteer entr${parsed.length===1?"y":"ies"}`);
+  });
+}
+// Bulk panel toggle
+document.body.addEventListener("click",e=>{
+  const bt=e.target.closest("[data-bulktoggle]");
+  if(bt){ const wrap=document.getElementById(bt.dataset.bulktoggle); if(wrap){ const open=wrap.style.display!=="none"; wrap.style.display=open?"none":"block"; bt.textContent=open?"Bulk add…":"Hide bulk add"; } return; }
+  const mbfilter=e.target.closest("[data-mbfilter]");
+  if(mbfilter){ _mbFilter=mbfilter.dataset.mbfilter; renderMemberships(); return; }
+  const daoh=e.target.closest("[data-daoh]");
+  if(daoh){if(confirm("Remove this academic honor?")){S.academicHonors=(S.academicHonors||[]).filter(a=>a.id!==daoh.dataset.daoh);save();renderAcademicHonors();}return;}
+  const drotcpos=e.target.closest("[data-drotcpos]");
+  if(drotcpos){if(!S.rotcRecord) return; S.rotcRecord.positions=(S.rotcRecord.positions||[]).filter(p=>p.id!==drotcpos.dataset.drotcpos);save();renderRotcRecord();return;}
+  const drotccomp=e.target.closest("[data-drotccomp]");
+  if(drotccomp){if(!S.rotcRecord) return; S.rotcRecord.competitions=(S.rotcRecord.competitions||[]).filter(c=>c.id!==drotccomp.dataset.drotccomp);save();renderRotcRecord();return;}
+  const drotccamp=e.target.closest("[data-drotccamp]");
+  if(drotccamp){if(!S.rotcRecord) return; S.rotcRecord.campResults=(S.rotcRecord.campResults||[]).filter(c=>c.id!==drotccamp.dataset.drotccamp);save();renderRotcRecord();return;}
+});
+
+/* ---------------- Qualifications ---------------- */
+function renderQuals(){
+  const el=document.getElementById("qualsList"); if(!el) return;
+  const quals=S.qualifications||[];
+  if(!quals.length){
+    el.innerHTML=`<div class="aw-empty"><span class="big">🎗️</span>No qualifications logged yet. Log a CWST, BRM score, CLS, or land nav pass to automatically advance the matching skill.</div>`;
+    return;
+  }
+  const QCAT_COLOR={physical:"var(--jade)",tactical:"var(--blood)",cognitive:"var(--violet)"};
+  el.innerHTML=quals.slice().reverse().map(q=>{
+    const cat=typeof QUAL_CATALOG!=="undefined"&&QUAL_CATALOG[q.key]?QUAL_CATALOG[q.key]:null;
+    const fullName=q.key==="custom"?(q.label||q.key):cat?cat.fullName:q.key;
+    const catLabel=q.key==="custom"?"custom":cat?cat.cat:"";
+    const advancedLines=(q.skills||[]).filter(s=>s.toLevel>s.fromLevel).map(s=>`${esc(s.skillName)} L${s.fromLevel}→${s.toLevel}`).join(" · ");
+    const today2=typeof localYMD==="function"?localYMD():new Date().toISOString().slice(0,10);
+    const expiresNote=q.expires?(q.expires<=today2?`<span class="qual-expired">⚠️ expired ${q.expires}</span>`:`<span class="qual-expiry">expires ${q.expires}</span>`):"";
+    return `<div class="qual-card">
+      <button class="aw-del" data-qualdel="${q.id}">✕</button>
+      ${catLabel?`<span class="qual-badge" style="background:${QCAT_COLOR[catLabel]||'var(--ink-faint)'}">${catLabel}</span>`:''}
+      <div class="qual-name">${esc(fullName)}</div>
+      <div class="qual-meta">${q.date||''}${advancedLines?` · ${advancedLines}`:''}${expiresNote?` · ${expiresNote}`:''}</div>
+    </div>`;
+  }).join("");
+}
+
+// update the preview when a qual is selected
+{
+  const qsel=document.getElementById("qualKey");
+  const qprev=document.getElementById("qualPreview");
+  const qcustom=document.getElementById("qualCustomName");
+  function _qualUpdatePreview(){
+    if(!qsel||!qprev) return;
+    const key=qsel.value;
+    if(qcustom) qcustom.style.display=(key==="custom")?"":"none";
+    if(!key){qprev.innerHTML="";return;}
+    if(key==="custom"){qprev.innerHTML=`<div class="qual-preview"><b>Custom qualification</b> — logged by name only, no skill advancement.</div>`;return;}
+    if(typeof QUAL_CATALOG==="undefined"||!QUAL_CATALOG[key]){qprev.innerHTML="";return;}
+    const cat=QUAL_CATALOG[key];
+    const lines=cat.skills.map(s=>{
+      const sk=S.lifeSkills.find(x=>x.name===s.name);
+      const cur=sk?skEffectiveLevel(sk):0;
+      const adv=s.level>cur?` <b>L${cur}→${s.level}</b>`:` <span style="color:var(--ink-faint)">already at L${cur}≥${s.level}, no change</span>`;
+      return `<div class="qual-preview-row">${esc(s.name)}${adv}</div>`;
+    }).join("");
+    qprev.innerHTML=`<div class="qual-preview"><b>This will advance:</b>${lines}</div>`;
+  }
+  if(qsel) qsel.addEventListener("change",_qualUpdatePreview);
+  // save handler
+  const qsave=document.getElementById("qualSave");
+  if(qsave) qsave.onclick=()=>{
+    const key=qsel?qsel.value:""; if(!key){toast("Select a qualification first");return;}
+    const dateVal=document.getElementById("qualDate").value||new Date().toLocaleDateString();
+    const expiresVal=document.getElementById("qualExpires")?document.getElementById("qualExpires").value:"";
+    const clearForm=()=>{
+      if(qsel) qsel.value=""; if(qprev) qprev.innerHTML=""; if(qcustom){qcustom.value="";qcustom.style.display="none";}
+      if(document.getElementById("qualDate")) document.getElementById("qualDate").value="";
+      if(document.getElementById("qualExpires")) document.getElementById("qualExpires").value="";
+    };
+    // custom qualification — no catalog lookup, no skill advancement
+    if(key==="custom"){
+      const customName=(qcustom?qcustom.value.trim():""); if(!customName){toast("Enter a name for this qualification");return;}
+      if(!S.qualifications) S.qualifications=[];
+      const entry={id:id(),key:"custom",label:customName,date:dateVal,skills:[]};
+      if(expiresVal) entry.expires=expiresVal;
+      S.qualifications.push(entry);
+      save(); render(); toast(`🎗️ ${esc(customName)} logged`);
+      clearForm(); return;
+    }
+    const cat=typeof QUAL_CATALOG!=="undefined"?QUAL_CATALOG[key]:null; if(!cat){toast("Unknown qualification");return;}
+    const advancedSkills=[];
+    cat.skills.forEach(spec=>{
+      const sk=S.lifeSkills.find(x=>x.name===spec.name);
+      if(!sk) return; // skill not in this cadet's tree
+      const before=sk.currentLevel;
+      if(spec.level>before){
+        sk.currentLevel=spec.level;
+        skUpdatePeak(sk);
+        sk.lastQuestTs=Date.now();
+        sk.history.push({ts:Date.now(),type:"qualify",level:spec.level});
+        if(!S.pathXP) S.pathXP={}; S.pathXP.academic=(S.pathXP.academic||0)+15;
+        advancedSkills.push({skillName:spec.name,fromLevel:before,toLevel:spec.level});
+      } else {
+        advancedSkills.push({skillName:spec.name,fromLevel:before,toLevel:before});
+      }
+    });
+    if(!S.qualifications) S.qualifications=[];
+    const entry={id:id(),key,date:dateVal,skills:advancedSkills};
+    if(expiresVal) entry.expires=expiresVal;
+    S.qualifications.push(entry);
+    save(); render();
+    const adv=advancedSkills.filter(s=>s.toLevel>s.fromLevel);
+    if(adv.length) toast(`🎗️ ${esc(cat.fullName.split("—")[0].trim())} logged · ${adv.map(s=>`${esc(s.skillName)} Lv ${s.toLevel}`).join(", ")}`);
+    else toast(`🎗️ ${esc(cat.fullName.split("—")[0].trim())} logged`);
+    clearForm();
+  };
+}
+
 /* ---------------- Weight mirror + Awards handlers ---------------- */
 document.body.addEventListener("click",e=>{
   const daw=e.target.closest("[data-daw]");
   if(daw){if(confirm("Remove this from the wall?")){S.awards=S.awards.filter(a=>a.id!==daw.dataset.daw);save();render();}return;}
+  const qualdel=e.target.closest("[data-qualdel]");
+  if(qualdel){if(confirm("Remove this qualification log entry?")){S.qualifications=(S.qualifications||[]).filter(q=>q.id!==qualdel.dataset.qualdel);save();render();}return;}
   const pta=e.target.closest("[data-pta]");
   if(pta){ if(!_ptSel)_ptSel=new Set(); const k=pta.dataset.pta;
     const onByText=_ptTextAreas.has(k), onByManual=_ptSel.has(k);
@@ -104,7 +380,15 @@ document.body.addEventListener("click",e=>{
   const skreach=e.target.closest("[data-skreach]"); if(skreach){
     const skId=skreach.dataset.skreach, lvl=+skreach.dataset.skreachlvl;
     const sk=S.lifeSkills.find(x=>x.id===skId);
-    if(sk){ const ab=sk.levels[lvl-1]; if(confirm(`Mark Level ${lvl} reached for "${sk.name}"?\n\nL${lvl}: ${ab?ab.ability:''}`)) skReachLevel(skId, lvl); }
+    if(sk){
+      const ab=sk.levels[lvl-1];
+      if(confirm(`Mark Level ${lvl} reached for "${sk.name}"?\n\nL${lvl}: ${ab?ab.ability:''}`)){
+        const noteEl=document.querySelector(`[data-sknote="${skId}"]`);
+        const note=noteEl?noteEl.value:"";
+        skReachLevel(skId, lvl, note);
+        if(noteEl) noteEl.value="";
+      }
+    }
     return;
   }
   const skskip=e.target.closest("[data-skskip]"); if(skskip){ skSkip(skskip.dataset.skskip); return; }
@@ -119,6 +403,7 @@ document.body.addEventListener("click",e=>{
   const hbstart=e.target.closest("[data-hbstart]"); if(hbstart){ const st=HABIT_STARTERS.find(x=>x.name===hbstart.dataset.hbstart); if(st && !S.habits.some(h=>h.name===st.name)){ S.habits.push({id:id(),name:st.name,linkedSkill:st.skill,streak:0,bestStreak:0,lastDone:null,graceUsed:false,history:[]}); save(); render(); toast("📋 Added: "+st.name); } return; }
   const hbview=e.target.closest("[data-hbview]"); if(hbview){ const hid=hbview.dataset.hbview; if(typeof _hbView!=="undefined"){ _hbView[hid]=(_hbView[hid]==='month')?'strip':'month'; if(typeof renderHabits==="function")renderHabits(); } return; }
   const teststart=e.target.closest("[data-teststart]"); if(teststart){ const tid=teststart.dataset.teststart; if(tid==="reaction")startReaction(); else if(tid==="digitspan")startDigitSpan(); else if(tid==="typing")startTyping(); else if(tid==="nback")startNback(); else if(tid==="gonogo")startGoNoGo(); else if(tid==="procspeed")startProcSpeed(); else if(tid==="mathsprint")startMathSprint(); return; }
+  const rdstart=e.target.closest("[data-rdstart]"); if(rdstart){ if(typeof startReading==="function") startReading(); return; }
   const srsReview=e.target.closest("[data-srsreview]"); if(srsReview){ startSrsReview(srsReview.dataset.srsreview); return; }
   const srsGradeBtn=e.target.closest("[data-srsgrade]"); if(srsGradeBtn){ srsGrade(parseInt(srsGradeBtn.dataset.srsgrade)); return; }
   const srsAdd=e.target.closest("[data-srsadd]"); if(srsAdd){ const d=S.srsDecks.find(x=>x.id===srsAdd.dataset.srsadd); if(d){ const front=(prompt("Front of card (question/prompt):")||"").trim(); if(!front)return; const back=(prompt("Back of card (answer):")||"").trim(); if(!back)return; d.cards.push({id:id(),front,back,due:0,interval:0,ease:2.5,reps:0}); save(); render(); } return; }
@@ -143,4 +428,8 @@ document.body.addEventListener("click",e=>{
   const skedit=e.target.closest("[data-skedit]"); if(skedit){ skEdit(skedit.dataset.skedit); return; }
   const skjump=e.target.closest("[data-skjump]"); if(skjump){ const t=document.getElementById("skcat-"+skjump.dataset.skjump); if(t){ const hdr=t.querySelector('.sk-deck-header'),body=t.querySelector('.sk-deck-body'); if(hdr&&!hdr.classList.contains('open')){ hdr.classList.add('open'); if(body) body.classList.add('open'); } t.scrollIntoView({behavior:"smooth",block:"start"}); } return; }
   const aftstd=e.target.closest("[data-aftstd]"); if(aftstd){ S.aftStandard=aftstd.dataset.aftstd; save(); render(); return; }
+});
+document.addEventListener("change",e=>{
+  const k=e.target.dataset&&e.target.dataset.sktgtlv;
+  if(k){const sk=S.lifeSkills.find(x=>x.id===k);if(sk){sk.targetLevel=parseInt(e.target.value)||null;save();if(typeof renderSkillsTab==="function")renderSkillsTab();}}
 });

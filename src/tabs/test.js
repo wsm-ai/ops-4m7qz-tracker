@@ -425,6 +425,82 @@ function startMathSprint(){
   }
 }
 
+// ===== Reading speed test =====
+const READING_PASSAGES=[
+  {title:"FM 6-0 Excerpt",words:284,text:"Mission command is the exercise of authority and direction by the commander using mission orders to enable disciplined initiative within the commander's intent to empower agile and adaptive leaders in the conduct of unified land operations. Mission command rests on the principle that subordinate leaders must be able to act and make decisions rapidly and on their own initiative to exploit fleeting opportunities. The key to success in mission command is trust — trust developed through shared understanding and the exercise of disciplined initiative. Leaders at all levels must understand the commander's intent two levels up. This understanding allows them to act in the absence of orders and to adapt their actions to the changing situation. The commander creates a shared understanding by clearly expressing his intent, providing mission-type orders, and creating an environment that fosters initiative. Subordinate leaders are empowered to make decisions within the framework established by the commander. They must not wait for orders when the situation changes rapidly. Instead, they must act boldly and decisively to accomplish the mission. The Army's doctrine of mission command has its roots in the 19th-century Prussian military model of Auftragstaktik, which emphasized decentralized decision-making and trust in subordinate judgment. This model proved decisive in numerous campaigns and remains the foundation of Army leadership today."},
+  {title:"Army Writing Passage",words:296,text:"Clear writing is a military skill. Officers and NCOs who write clearly save time, reduce friction, and drive results. Poor writing wastes effort: a vague order requires clarification; an unclear report forces a follow-up; an ambiguous policy breeds inconsistent action. The Army's standard for writing is the BLUF — Bottom Line Up Front. State the purpose in the first sentence. Follow with supporting detail. Close with required actions, deadlines, and who is responsible. This structure mirrors how busy leaders consume information — they read the first sentence, decide if they need the rest, and act. Military writing strips filler: no passive voice when active is available, no jargon when plain English works, no long preamble before the point. Every word must earn its place. Good writers revise. A first draft is thinking on paper; the revision is the actual writing. Before sending, ask: Would someone who knows nothing about this understand what to do, by when, and why? If not, revise. The Army invests in writing skills for a reason: when words fail, missions fail. An incomplete OPORD, a poorly drafted counseling statement, or a vague message to higher can cascade into real consequences in the field. Writing is not a soft skill; it is a force multiplier. Treat it like a weapon and maintain it like one."},
+  {title:"Leadership Story",words:278,text:"The squad leader had twelve seconds to decide. His team was pinned on the left flank, the platoon sergeant unreachable, and the enemy crew-served weapon was repositioning. He had trained for exactly this — not because anyone had told him this scenario would happen, but because the Army trains leaders to think under pressure, not just to follow scripts. He checked his sectors, assessed his casualties — one walking wounded, the others still effective — and made the call. The squad would bound right, using the creek bed for cover, and suppress from a position of advantage while the weapons squad shifted fire. It was not the perfect plan. The creek bed was shallow and the right flank had unknown threats. But a good plan now beats a perfect plan too late. He signaled his team leaders and they moved. Within ninety seconds the crew-served weapon was silenced and the platoon was able to maneuver. After the action, his platoon leader asked how he had made the call so quickly. He did not have a clever answer. He had drilled the fundamentals — cover and concealment, bounding overwatch, fire and movement — until they were instinct. When the moment came, he did not think. He acted on what he knew. That is what training builds: not answers to specific questions, but the capacity to find answers to questions no one anticipated."},
+  {title:"Sleep & Recovery",words:271,text:"Sleep is not passive recovery. During sleep, the brain consolidates memories, clears metabolic waste, and restores the cognitive capacity degraded by a day of sustained attention and decision-making. For a soldier or officer operating in a demanding environment, sleep is as important as ammunition: you can fight for a while without it, but performance degrades fast, and the degradation compounds. Research on sleep deprivation shows that after 17 to 19 hours without sleep, cognitive performance drops to the equivalent of a blood alcohol level of 0.05 percent. After 24 hours, it reaches 0.10 percent — legally impaired in every U.S. state. What makes sleep deprivation particularly dangerous is that the impaired person rarely notices the impairment. Confidence stays high while judgment erodes. Leaders who operate on chronic sleep debt make worse decisions while believing they are sharp. The Army acknowledges this: Performance Triad doctrine lists sleep alongside nutrition and physical activity as the three pillars of physical and cognitive readiness. The prescription is seven to nine hours for most adults. The challenge is building the conditions and culture that make that possible — consistent sleep schedules, protected sleep windows before operations, and leaders who model recovery rather than treating sleeplessness as a badge of toughness. Sleep is a weapon system. Maintain it accordingly."},
+];
+const READING_SCORE_MAP=wpm=>wpm>=1000?10:wpm>=700?9:wpm>=500?8:wpm>=400?7:wpm>=300?6:wpm>=250?5:wpm>=200?4:wpm>=150?3:wpm>=100?2:wpm>=50?1:0;
+
+let _rdState=null;
+function renderReadingTest(){
+  const el=document.getElementById("readingTest"); if(!el) return;
+  const best=(S.tests||[]).filter(x=>x.type==="reading").reduce((b,x)=>(!b||x.raw>b.raw)?x:b,null);
+  const sk=S.lifeSkills.find(s=>s.name==="Reading speed");
+  const lvl=sk?skEffectiveLevel(sk):0;
+  el.innerHTML=`<div class="test-card" id="test-reading">
+    <div class="test-head">
+      <div class="test-title">Reading speed <span class="test-dur">⏱ ~1 min</span></div>
+      <span class="test-lvl">${sk?'Lv '+lvl:''}</span>
+    </div>
+    <div class="test-stats">Best: <b>${best?best.raw+' WPM':'—'}</b> · feeds <b>Reading speed</b></div>
+    <div class="test-stage" id="stage-reading"></div>
+    <button class="btn-add test-start" data-rdstart="1">Start (pick a passage)</button>
+  </div>`;
+}
+function startReading(){
+  const stage=document.getElementById("stage-reading"); if(!stage) return;
+  const p=READING_PASSAGES[Math.floor(Math.random()*READING_PASSAGES.length)];
+  _rdState={passage:p, t0:null, running:false};
+  stage.className="test-stage rd";
+  stage.innerHTML=`<div class="rd-title">${esc(p.title)}</div>
+    <div class="rd-passage">${esc(p.text)}</div>
+    <div class="rd-instructions">Read the passage above at your natural pace. When you finish, tap <b>Done reading</b> — then answer the comprehension check honestly.</div>
+    <button class="btn-add" id="rdBegin">Begin reading (starts timer)</button>`;
+  document.getElementById("rdBegin").onclick=()=>{
+    _rdState.t0=performance.now(); _rdState.running=true;
+    document.getElementById("rdBegin").remove();
+    const done=document.createElement("button"); done.className="btn-add"; done.textContent="Done reading"; done.style.marginTop="10px";
+    stage.appendChild(done);
+    done.onclick=()=>rdDone();
+  };
+}
+function rdDone(){
+  if(!_rdState||!_rdState.t0) return;
+  const secs=(performance.now()-_rdState.t0)/1000;
+  const wpm=Math.round(_rdState.passage.words/(secs/60));
+  const stage=document.getElementById("stage-reading"); if(!stage) return;
+  stage.innerHTML=`<div class="rd-comprehension">
+    <div class="rd-result-wpm">${wpm} WPM</div>
+    <div style="font-size:12.5px;color:var(--ink-dim);margin-bottom:10px">Comprehension check — be honest. Speed without understanding doesn't count.</div>
+    <div class="rd-comp-q">Did you understand the main point well enough to summarize it?</div>
+    <div class="rd-comp-btns">
+      <button class="hb-starter-btn" data-rdcomp="yes">Yes — I understood it</button>
+      <button class="hb-starter-btn" data-rdcomp="partial">Partially</button>
+      <button class="hb-starter-btn" data-rdcomp="no">No — I skimmed</button>
+    </div>
+  </div>`;
+  stage.querySelectorAll("[data-rdcomp]").forEach(btn=>btn.onclick=()=>{
+    const comp=btn.dataset.rdcomp;
+    const adjWpm=comp==="yes"?wpm:comp==="partial"?Math.round(wpm*0.7):Math.round(wpm*0.4);
+    const lvl=READING_SCORE_MAP(adjWpm);
+    S.tests.push({id:id(),type:"reading",date:new Date().toISOString(),raw:adjWpm,score:lvl,rawWpm:wpm,comprehension:comp,linkedSkill:"Reading speed"});
+    const sk=S.lifeSkills.find(s=>s.name==="Reading speed");
+    let leveled=false;
+    if(sk){
+      const capped=Math.min(lvl,sk.levels.length);
+      if(capped>sk.currentLevel){sk.currentLevel=capped;skUpdatePeak(sk);sk.history.push({ts:Date.now(),type:"auto-test",level:capped});leveled=true;}
+      else{sk.lastQuestTs=Date.now();}
+    }
+    save();
+    const sugg=adjWpm>=500?"Excellent pace with comprehension — that's proficient speed-reading territory. Maintain with regular varied reading.":adjWpm>=300?"Solid pace. Push further with regression-elimination (force yourself not to re-read) and chunking 2–3 words at a time.":adjWpm>=200?"Average reading speed. Try pacing with a finger or pointer to reduce fixation time, and minimize re-reading.":"Focus on comprehension first — speed follows. Read daily on varied material and don't skim to inflate the number.";
+    stage.innerHTML=`<div class="test-result"><div class="big">${adjWpm} WPM</div><div>${wpm} raw · ${comp==="yes"?"full":"partial"} comprehension applied</div>${leveled&&sk?`<div class="leveled">⬆️ Reading speed → Level ${sk.currentLevel}</div>`:''}<div class="sugg">${sugg}</div></div>`;
+    _rdState=null; render();
+  });
+}
+
 // ===== Memory Track: Spaced Repetition (SM-2-lite) + Memory Palace =====
 function srsDue(deck){ const now=Date.now(); return deck.cards.filter(c=>!c.due || c.due<=now); }
 function srsTotalDue(){ return (S.srsDecks||[]).reduce((n,d)=>n+srsDue(d).length,0); }

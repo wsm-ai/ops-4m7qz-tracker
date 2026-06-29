@@ -1,10 +1,13 @@
   <section class="view" id="view-awards">
-    <div class="sec-h"><h2>The Wall</h2><span class="hint">your record</span></div>
+    <div class="sec-h"><h2>The Wall</h2><span class="hint">your record</span><button id="wallResumeBtn" class="wall-resume-btn" title="Copy all Wall data as plain-text résumé">📋 Copy résumé</button></div>
     <div class="wall-subnav">
       <button class="wsub on" data-wsub="awards">🏆 Awards</button>
+      <button class="wsub" data-wsub="academic">📚 Academic</button>
       <button class="wsub" data-wsub="memberships">🎟️ Memberships</button>
       <button class="wsub" data-wsub="events">📅 Events</button>
       <button class="wsub" data-wsub="volunteer">🫙 Volunteer</button>
+      <button class="wsub" data-wsub="rotc">⭐ ROTC</button>
+      <button class="wsub" data-wsub="quals">🎗️ Quals</button>
     </div>
 
     <!-- AWARDS sub-section -->
@@ -27,6 +30,12 @@
         </div>
         <input id="awNote" placeholder="Note / story (optional)" maxlength="140" style="margin-top:9px">
         <button class="btn-add" id="awAdd">Add to the Wall</button>
+      </div>
+      <button class="wall-bulk-toggle" data-bulktoggle="awBulk">Bulk add…</button>
+      <div class="wall-bulk-panel-wrap" id="awBulk" style="display:none">
+        <textarea class="wall-bulk-panel" id="awBulkText" placeholder="One per line: Title | Org | Year | Note&#10;Example: Air Assault Badge | Ft. Campbell | 2025 | Completed course"></textarea>
+        <div class="wall-bulk-preview" id="awBulkPreview"></div>
+        <div class="row" style="gap:8px;margin-top:8px"><button class="wall-bulk-preview-btn" id="awBulkPreviewBtn">Preview</button><button class="wall-bulk-commit" id="awBulkCommit" style="display:none">Commit</button></div>
       </div>
       <div id="awallGrid"></div>
     </div>
@@ -52,6 +61,17 @@
         <input id="mbNote" placeholder="Note (optional)" maxlength="140" style="margin-top:9px">
         <button class="btn-add" id="mbSave" style="margin-top:10px">Add membership</button>
       </div>
+      <button class="wall-bulk-toggle" data-bulktoggle="mbBulk">Bulk add…</button>
+      <div class="wall-bulk-panel-wrap" id="mbBulk" style="display:none">
+        <textarea class="wall-bulk-panel" id="mbBulkText" placeholder="One per line: Org | StartYear | EndYear | MemberType | Note&#10;Example: Cyber Club | 2025 | | regular | VP"></textarea>
+        <div class="wall-bulk-preview" id="mbBulkPreview"></div>
+        <div class="row" style="gap:8px;margin-top:8px"><button class="wall-bulk-preview-btn" id="mbBulkPreviewBtn">Preview</button><button class="wall-bulk-commit" id="mbBulkCommit" style="display:none">Commit</button></div>
+      </div>
+      <div class="mb-filter-bar">
+        <button class="mb-filter on" data-mbfilter="all">All</button>
+        <button class="mb-filter" data-mbfilter="active">Active</button>
+        <button class="mb-filter" data-mbfilter="past">Past</button>
+      </div>
       <div id="mbList"></div>
     </div>
 
@@ -67,7 +87,113 @@
         <input id="evNote" placeholder="Note / result (optional)" maxlength="140" style="margin-top:9px">
         <button class="btn-add" id="evSave">Add event</button>
       </div>
+      <button class="wall-bulk-toggle" data-bulktoggle="evBulk">Bulk add…</button>
+      <div class="wall-bulk-panel-wrap" id="evBulk" style="display:none">
+        <textarea class="wall-bulk-panel" id="evBulkText" placeholder="One per line: Title | Org | Year | Role | Note&#10;Example: Ranger Challenge | 3rd BDE | 2025 | Competitor | 2nd of 12 teams"></textarea>
+        <div class="wall-bulk-preview" id="evBulkPreview"></div>
+        <div class="row" style="gap:8px;margin-top:8px"><button class="wall-bulk-preview-btn" id="evBulkPreviewBtn">Preview</button><button class="wall-bulk-commit" id="evBulkCommit" style="display:none">Commit</button></div>
+      </div>
       <div id="evList"></div>
+    </div>
+
+    <!-- ACADEMIC HONORS sub-section -->
+    <div class="wall-sec" id="wsec-academic">
+      <div class="adder">
+        <input id="ahTitle" placeholder="Honor — e.g. Dean's List, Merit Scholarship" maxlength="80">
+        <div class="row" style="gap:9px;margin-top:9px">
+          <input id="ahYear" type="number" placeholder="Year" min="1990" max="2100" style="flex:0 0 30%">
+          <input id="ahOrg" placeholder="Institution" maxlength="60" style="flex:1">
+        </div>
+        <input id="ahNote" placeholder="Note — e.g. Spring 2026, 3.83 semester GPA (optional)" maxlength="140" style="margin-top:9px">
+        <button class="btn-add" id="ahAdd">Add academic honor</button>
+      </div>
+      <button class="wall-bulk-toggle" data-bulktoggle="ahBulk">Bulk add…</button>
+      <div class="wall-bulk-panel-wrap" id="ahBulk" style="display:none">
+        <textarea class="wall-bulk-panel" id="ahBulkText" placeholder="One per line: Title | Org | Year | Note&#10;Example: Dean's List | Wake Forest University | 2026 | Spring semester"></textarea>
+        <div class="wall-bulk-preview" id="ahBulkPreview"></div>
+        <div class="row" style="gap:8px;margin-top:8px"><button class="wall-bulk-preview-btn" id="ahBulkPreviewBtn">Preview</button><button class="wall-bulk-commit" id="ahBulkCommit" style="display:none">Commit</button></div>
+      </div>
+      <div id="ahGrid"></div>
+    </div>
+
+    <!-- ROTC RECORD sub-section -->
+    <div class="wall-sec" id="wsec-rotc">
+      <details class="rotc-sub" open>
+        <summary class="rotc-sub-hd">Positions held</summary>
+        <div class="adder" style="border-top:none;border-radius:0 0 10px 10px">
+          <div class="row" style="gap:9px">
+            <input id="rpTitle" placeholder="Position — e.g. S1 Personnel Officer" maxlength="70" style="flex:1">
+          </div>
+          <div class="row" style="gap:9px;margin-top:9px">
+            <input id="rpStart" placeholder="Start — e.g. FA2025" maxlength="10" style="flex:1">
+            <input id="rpEnd" placeholder="End — e.g. SP2026" maxlength="10" style="flex:1">
+          </div>
+          <input id="rpNote" placeholder="Note (optional)" maxlength="120" style="margin-top:9px">
+          <button class="btn-add" id="rpSave" style="margin-top:9px">Add position</button>
+        </div>
+        <div id="rpList"></div>
+      </details>
+
+      <details class="rotc-sub" style="margin-top:10px">
+        <summary class="rotc-sub-hd">Competitions &amp; exercises</summary>
+        <div class="adder" style="border-top:none;border-radius:0 0 10px 10px">
+          <input id="rcName" placeholder="Competition — e.g. Ranger Challenge" maxlength="70">
+          <div class="row" style="gap:9px;margin-top:9px">
+            <input id="rcYear" type="number" placeholder="Year" min="1990" max="2100" style="flex:0 0 30%">
+            <input id="rcPlacement" placeholder="Placement / result" maxlength="60" style="flex:1">
+          </div>
+          <input id="rcNote" placeholder="Note (optional)" maxlength="120" style="margin-top:9px">
+          <button class="btn-add" id="rcSave" style="margin-top:9px">Add competition</button>
+        </div>
+        <div id="rcList"></div>
+      </details>
+
+      <details class="rotc-sub" style="margin-top:10px">
+        <summary class="rotc-sub-hd">Camp &amp; evaluations</summary>
+        <div class="adder" style="border-top:none;border-radius:0 0 10px 10px">
+          <input id="campName" placeholder="Camp — e.g. LDAC / STP" maxlength="60">
+          <div class="row" style="gap:9px;margin-top:9px">
+            <input id="campYear" type="number" placeholder="Year" min="1990" max="2100" style="flex:0 0 30%">
+            <input id="campRating" placeholder="Rating / result" maxlength="60" style="flex:1">
+          </div>
+          <input id="campNote" placeholder="Note (optional)" maxlength="120" style="margin-top:9px">
+          <button class="btn-add" id="campSave" style="margin-top:9px">Add camp result</button>
+        </div>
+        <div id="campList"></div>
+      </details>
+    </div>
+
+    <!-- QUALIFICATIONS sub-section -->
+    <div class="wall-sec" id="wsec-quals">
+      <div class="adder">
+        <label class="lg-label">Log a qualification</label>
+        <select id="qualKey">
+          <option value="">— select qualification —</option>
+          <option value="cwst">CWST — Combat Water Survival Test</option>
+          <option value="brm_mks">BRM — Marksman</option>
+          <option value="brm_shp">BRM — Sharpshooter</option>
+          <option value="brm_exp">BRM — Expert</option>
+          <option value="cls">CLS — Combat Lifesaver</option>
+          <option value="tccc">TCCC</option>
+          <option value="sere">SERE</option>
+          <option value="landnav_d">Day land nav (pass)</option>
+          <option value="landnav_n">Night land nav (pass)</option>
+          <option value="landnav_r">Land nav — Ranger standard</option>
+          <option value="airborne">Airborne School</option>
+          <option value="air_assault">Air Assault School</option>
+          <option value="wlc">WLC — Warrior Leaders Course</option>
+          <option value="blc">BLC — Basic Leader Course</option>
+          <option value="ruck">Ruck march — 12 mi in &lt;3h</option>
+          <option value="custom">✏️ Custom / civilian cert</option>
+        </select>
+        <input id="qualCustomName" placeholder="Certification name" maxlength="80" style="margin-top:8px;display:none">
+        <div id="qualPreview" class="qual-preview"></div>
+        <input id="qualDate" type="date" style="margin-top:9px" placeholder="Date earned">
+        <label class="lg-label" style="margin-top:8px">Expiry date (optional — for certs that lapse)</label>
+        <input id="qualExpires" type="date" style="margin-top:4px">
+        <button class="btn-add" id="qualSave" style="margin-top:9px">Log qualification</button>
+      </div>
+      <div id="qualsList"></div>
     </div>
 
     <!-- VOLUNTEER sub-section -->
@@ -80,6 +206,12 @@
           <input id="volOrg" placeholder="Where / what" maxlength="50" style="flex:1">
         </div>
         <button class="btn-add" id="volSave" style="margin-top:9px">Add hours</button>
+      </div>
+      <button class="wall-bulk-toggle" data-bulktoggle="volBulk">Bulk add…</button>
+      <div class="wall-bulk-panel-wrap" id="volBulk" style="display:none">
+        <textarea class="wall-bulk-panel" id="volBulkText" placeholder="One per line: Org | Year | Hours | Note&#10;Example: Habitat for Humanity | 2024 | 8 | Trail cleanup"></textarea>
+        <div class="wall-bulk-preview" id="volBulkPreview"></div>
+        <div class="row" style="gap:8px;margin-top:8px"><button class="wall-bulk-preview-btn" id="volBulkPreviewBtn">Preview</button><button class="wall-bulk-commit" id="volBulkCommit" style="display:none">Commit</button></div>
       </div>
       <div class="volunteer-jars" id="volJars"></div>
       <div id="volLog"></div>

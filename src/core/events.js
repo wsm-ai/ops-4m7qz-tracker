@@ -40,9 +40,14 @@ document.getElementById("qAdd").onclick=()=>{
   const n=document.getElementById("qName").value.trim();if(!n)return;
   const path=document.getElementById("qPath").value||"tactical";
   const due=document.getElementById("qDue").value||null;
-  S.quests.unshift({id:id(),name:n,diff:document.getElementById("qDiff").value,path:path,done:false,due,createdDate:localYMD()});
+  const notes=(document.getElementById("qNotes")||{}).value||"";
+  const stepsRaw=parseInt((document.getElementById("qSteps")||{}).value)||0;
+  const steps=stepsRaw>=2?stepsRaw:null;
+  S.quests.unshift({id:id(),name:n,diff:document.getElementById("qDiff").value,path:path,done:false,due,notes:notes.trim(),createdDate:localYMD(),steps,progress:0});
   document.getElementById("qName").value="";
   document.getElementById("qDue").value="";
+  const qNotesEl=document.getElementById("qNotes"); if(qNotesEl) qNotesEl.value="";
+  const qStepsEl=document.getElementById("qSteps"); if(qStepsEl) qStepsEl.value="";
   save();render();
 };
 document.getElementById("dAdd").onclick=()=>{
@@ -53,9 +58,15 @@ document.getElementById("dAdd").onclick=()=>{
 };
 document.getElementById("bAdd").onclick=()=>{
   const n=document.getElementById("bName").value.trim();if(!n)return;
-  const hp=Math.max(2,Math.min(200,parseInt(document.getElementById("bHp").value)||10));
-  S.bosses.unshift({id:id(),name:n,hp:hp,maxhp:hp});
-  document.getElementById("bName").value="";save();render();
+  const checksRaw=(document.getElementById("bChecks")||{}).value||"";
+  const checkpoints=checksRaw.split("\n").map(l=>l.trim()).filter(Boolean).map(l=>({name:l,done:false}));
+  const maxhp=checkpoints.length+1;
+  const targetDate=(document.getElementById("bDue")||{}).value||null;
+  S.bosses.unshift({id:id(),name:n,hp:maxhp,maxhp,checkpoints,cpDriven:true,targetDate});
+  document.getElementById("bName").value="";
+  const bChecksEl=document.getElementById("bChecks"); if(bChecksEl) bChecksEl.value="";
+  const bDueEl=document.getElementById("bDue"); if(bDueEl) bDueEl.value="";
+  save();render();
 };
 document.getElementById("rAdd").onclick=()=>{
   const n=document.getElementById("rName").value.trim();if(!n)return;
@@ -80,10 +91,57 @@ document.body.addEventListener("click",e=>{
     }
     return;
   }
+  // quest progress step (+1)
+  if(t.dataset.qprogress){
+    const q=S.quests.find(x=>x.id===t.dataset.qprogress);
+    if(q&&!q.done&&q.steps){
+      q.progress=(q.progress||0)+1;
+      if(q.progress>=q.steps){
+        q.done=true;
+        if(!S.questArchive) S.questArchive=[];
+        S.questArchive.unshift({...q,completedDate:new Date().toLocaleDateString()});
+        if(S.questArchive.length>200) S.questArchive=S.questArchive.slice(0,200);
+        const v=VALUES.quest[q.diff];
+        grant(v.xp,v.g,"Mission complete",q.path||"tactical");
+        setTimeout(()=>{S.quests=S.quests.filter(x=>x.id!==q.id||!x.done);save();render();},900);
+      } else { save();renderQuests(); }
+    }
+    return;
+  }
   // complete daily
-  if(t.dataset.d){const d=S.dailies.find(x=>x.id===t.dataset.d);if(d&&!d.done){d.done=true;const v=VALUES.daily[d.diff];grant(v.xp,v.g,"Order executed",d.path||"tactical");const allNow=S.dailies.every(x=>x.done);if(allNow){onPerfectDay();}}else if(d&&d.done){d.done=false;save();render();}return}
+  if(t.dataset.d){const d=S.dailies.find(x=>x.id===t.dataset.d);if(d&&!d.done){d.done=true;d.doneTs=Date.now();const v=VALUES.daily[d.diff];grant(v.xp,v.g,"Order executed",d.path||"tactical");const allNow=S.dailies.filter(x=>!x.paused).every(x=>x.done);if(allNow){onPerfectDay();}}else if(d&&d.done){d.done=false;save();render();}return}
+  // pause / resume daily order
+  if(t.dataset.dpause){const d=S.dailies.find(x=>x.id===t.dataset.dpause);if(d){d.paused=!!parseInt(t.dataset.dpausestate);save();renderDailies();}return}
+  // boss checkpoint tick
+  if(t.dataset.bcheck){
+    const b=S.bosses.find(x=>x.id===t.dataset.bcheck);
+    const idx=parseInt(t.dataset.bchkidx);
+    if(b&&!isNaN(idx)&&b.checkpoints&&b.checkpoints[idx]&&!b.checkpoints[idx].done){
+      b.checkpoints[idx].done=true;
+      if(b.hp>0){b.hp--;grant(8,4,"Checkpoint reached",b.path||"tactical");}
+      if(b.hp<=0){b.completedAt=localYMD();setTimeout(()=>{toast(`<span class="t-xp">✅ ${esc(b.name)} secured! Bonus awarded</span>`);S.gold+=b.maxhp*2;save();render();},400);}
+      else{save();render();}
+    }
+    return;
+  }
+  // add checkpoint to existing boss
+  if(t.dataset.baddcheckbtn){
+    const b=S.bosses.find(x=>x.id===t.dataset.baddcheckbtn);
+    const inp=document.querySelector(`[data-baddcheck="${t.dataset.baddcheckbtn}"]`);
+    const name=inp&&inp.value.trim();
+    if(b&&name){b.checkpoints=b.checkpoints||[];b.checkpoints.push({name,done:false});if(b.cpDriven){b.hp++;b.maxhp++;}inp.value="";save();renderBosses();}
+    return;
+  }
+  // boss sprint commitment
+  if(t.dataset.bsprintset){
+    const b=S.bosses.find(x=>x.id===t.dataset.bsprintset);
+    const inp=document.getElementById(`bsprint-${t.dataset.bsprintset}`);
+    const hp=parseInt(inp&&inp.value)||0;
+    if(b&&hp>0&&hp<=b.hp){ b.todayCommit={date:localYMD(),hp,startHp:b.hp}; save(); renderBosses(); toast(`⚔️ Sprint set: ${hp} step${hp!==1?"s":""} today`); }
+    return;
+  }
   // boss hit
-  if(t.dataset.hit){const b=S.bosses.find(x=>x.id===t.dataset.hit);if(b&&b.hp>0){b.hp--;grant(8,4,"Progress logged",b.path||"tactical");if(b.hp<=0){setTimeout(()=>{toast(`<span class="t-xp">✅ ${esc(b.name)} secured! Bonus awarded</span>`);S.gold+=b.maxhp*2;save();render();},400);}}return}
+  if(t.dataset.hit){const b=S.bosses.find(x=>x.id===t.dataset.hit);if(b&&b.hp>0){b.hp--;grant(8,4,"Progress logged",b.path||"tactical");if(b.hp<=0){b.completedAt=localYMD();setTimeout(()=>{toast(`<span class="t-xp">✅ ${esc(b.name)} secured! Bonus awarded</span>`);S.gold+=b.maxhp*2;save();render();},400);}}return}
   // buy reward
   if(t.dataset.buy){const r=S.rewards.find(x=>x.id===t.dataset.buy);if(r&&S.gold>=r.cost){S.gold-=r.cost;save();render();toast(`🍺 Rest claimed: ${esc(r.name)} — you earned this. Take it fully.`);}return}
   // snooze quest +3 days
@@ -95,6 +153,14 @@ document.body.addEventListener("click",e=>{
     q.snoozeCount=(q.snoozeCount||0)+1;
     save();render();
     toast(`Oath postponed to ${q.due}`);
+    return;
+  }
+  // log dispatch to oath
+  if(t.dataset.qupdateadd){
+    const q=S.quests.find(x=>x.id===t.dataset.qupdateadd);
+    const inp=document.querySelector(`[data-qupdateid="${t.dataset.qupdateadd}"]`);
+    const text=inp&&inp.value.trim();
+    if(q&&text){q.updates=q.updates||[];q.updates.push({ts:Date.now(),text});inp.value="";save();renderQuests();}
     return;
   }
   // deletes
@@ -133,8 +199,12 @@ document.body.addEventListener("click",e=>{
     } else { toast("Clipboard not available in this browser"); }
     return;
   }
+  // mark skill as practiced — resets fade timer without level change
+  if(t.dataset.skpractice){ if(typeof skPractice==="function") skPractice(t.dataset.skpractice); return; }
   // copy daily brief
   if(t.dataset.copybriefbtn){ if(typeof copyDailyBrief==="function") copyDailyBrief(); return; }
+  // copy skills summary
+  if(t.dataset.copyskillssummary){ if(typeof copySkillsSummary==="function") copySkillsSummary(); return; }
   // global tab navigation — any button with data-gototab anywhere in the app
   const goBtn=t.closest("[data-gototab]");
   if(goBtn){
@@ -163,6 +233,20 @@ document.getElementById("editRankBtn").onclick=()=>{
 
 // Enter-to-submit
 ["qName","dName"].forEach(idn=>document.getElementById(idn).addEventListener("keydown",e=>{if(e.key==="Enter")document.getElementById(idn==="qName"?"qAdd":"dAdd").click();}));
+
+// oath archive search — filter the completed oaths details on keystroke
+document.body.addEventListener("input",e=>{
+  if(!e.target.classList.contains('q-arch-search')) return;
+  const term=e.target.value.toLowerCase();
+  const arch=S.questArchive||[];
+  const filtered=term?arch.filter(q=>q.name.toLowerCase().includes(term)):arch.slice(0,40);
+  const det=e.target.nextElementSibling;
+  if(!det) return;
+  det.innerHTML=`<summary>✓ Completed oaths (${arch.length})</summary>${filtered.map(q=>{
+    const timingStr=(q.createdDate&&q.completedDate)?` · ${dayDiff(q.createdDate,q.completedDate)} day${dayDiff(q.createdDate,q.completedDate)!==1?'s':''}`:'' ;
+    return `<div class="q-arch-item"><span class="q-arch-check">✓</span><div class="q-arch-body"><div class="q-arch-name">${esc(q.name)}</div><div class="q-arch-meta">${typeof pathTag==="function"?pathTag(q.path):''}<span class="q-arch-date">Completed ${esc(q.completedDate||'')}</span><span class="quest-archive-timing">${timingStr}</span></div></div></div>`;
+  }).join("")}`;
+});
 
 /* ---------------- Toast & skill-up ---------------- */
 let toastT;

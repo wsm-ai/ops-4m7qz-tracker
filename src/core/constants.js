@@ -15,6 +15,25 @@ const PATH_META = {
   hearth:        {name:"Path of the Hearth",   idol:"Heartstone of Ásgarðr",  lore:"Even Odin's hall has its fire. The people you tend are the roots that anchor the World Tree.",                                 icon:"🔥",  color:"var(--ember)"},
   roots:         {name:"Path of Roots",        idol:"Well of Urðr",           lore:"The Well of Fate, tended by the Norns. They water Yggdrasil with its clay. Your past shapes what grows.",                     icon:"🌳",  color:"var(--jade)"},
 };
+/* ── Military qualifications catalog ─────────────────────────────────────── */
+const QUAL_CATALOG = {
+  cwst:      {fullName:"CWST — Combat Water Survival Test", cat:"physical",   skills:[{name:"Swimming",level:5}]},
+  brm_mks:   {fullName:"BRM — Marksman",                   cat:"tactical",   skills:[{name:"Marksmanship (M4)",level:4}]},
+  brm_shp:   {fullName:"BRM — Sharpshooter",               cat:"tactical",   skills:[{name:"Marksmanship (M4)",level:5}]},
+  brm_exp:   {fullName:"BRM — Expert",                     cat:"tactical",   skills:[{name:"Marksmanship (M4)",level:6}]},
+  cls:       {fullName:"CLS — Combat Lifesaver",           cat:"tactical",   skills:[{name:"First aid",level:7}]},
+  tccc:      {fullName:"TCCC",                             cat:"tactical",   skills:[{name:"First aid",level:5}]},
+  sere:      {fullName:"SERE",                             cat:"tactical",   skills:[{name:"Fieldcraft & survival",level:10}]},
+  landnav_d: {fullName:"Day land nav (pass)",              cat:"tactical",   skills:[{name:"Land navigation",level:4}]},
+  landnav_n: {fullName:"Night land nav (pass)",            cat:"tactical",   skills:[{name:"Land navigation",level:5}]},
+  landnav_r: {fullName:"Land nav — Ranger standard",       cat:"tactical",   skills:[{name:"Land navigation",level:10}]},
+  airborne:  {fullName:"Airborne School",                  cat:"tactical",   skills:[{name:"Parachute operations",level:8}]},
+  air_assault:{fullName:"Air Assault School",              cat:"tactical",   skills:[{name:"Air assault operations",level:7}]},
+  wlc:       {fullName:"WLC — Warrior Leaders Course",     cat:"leadership", skills:[{name:"Small unit leadership",level:7}]},
+  blc:       {fullName:"BLC — Basic Leader Course",        cat:"leadership", skills:[{name:"Small unit leadership",level:6}]},
+  ruck:      {fullName:"Ruck march — 12 mi in <3h",        cat:"physical",   skills:[{name:"Rucking",level:8}]},
+};
+
 /* ── Track → Path migration map (old save field) ─────────────────────────── */
 const TRACK_TO_PATH = {fitness:"physical", tactics:"tactical", knowledge:"academic", discipline:"personal"};
 
@@ -34,16 +53,21 @@ const DEFAULT = {
   weightAppUrl:"https://wsm-ai.github.io/tw-9f3kx-ledger/",   // hosted URL of the standalone Weight app (portal link)
   lastMirrorUpdate:null,   // toDateString() of the last mirror refresh, for the daily nudge
   awards:[],         // Wall awards: {id, ts, date, kind, title, org, year, note}
+  academicHonors:[], // {id, ts, date, title, org, year, note}
+  rotcRecord:{positions:[],competitions:[],campResults:[]}, // ROTC history
   memberships:[],    // {id, org, startYear, endYear|null, memberType, roles:[{title,startYear,endYear|null}], note}
   events:[],         // event participation: {id, title, org, year, role, note}
   volunteer:[],      // {id, year, org, hours, note}  (aggregated into per-year jars)
+  qualifications:[], // logged military qualifications: {id, key, date, skills:[{skillName, fromLevel, toLevel}]}
   lifeSkills:[],     // {id, name, cat, fadeDays, currentLevel, lastQuestTs, levels:[{n, ability}], history:[]}
   ptLog:[],          // cadre PT sessions: {id, ts, date, areas:[...], intensity}
   navLabels:true,    // side rail shows labels (true) or icons only (false)
   navExpanded:false, // whether the "More" nav section is open
   missedTraining:[], // [{date:"YYYY-MM-DD", session:"s1"}] — auto-tracked missed sessions, last 28 days
-  profile:{ birthdate:null, heightIn:null, heightDate:null, weightLb:null, weightDate:null, sex:null, bloodType:null, units:"imperial", notes:"", commissionDate:null, gpa:null },
+  gpaHistory:[],   // [{id, term, gpa, hours, standing, note}] — semester-by-semester record
+  profile:{ birthdate:null, heightIn:null, heightDate:null, weightLb:null, weightDate:null, sex:null, bloodType:null, units:"imperial", notes:"", commissionDate:null, gpa:null, weightGoal:null, gpaGoal:null, languages:[], clearance:{level:null,grantedDate:null,notes:""} },
   lifts:{ deadliftLb:null, squatLb:null, benchLb:null, liftDate:null },  // best lifts for bodyweight-relative skills
+  aftEventTargets:{hrp:null,sdc:null,run:null,dl:null,plank:null},
   aftStandard:"general",  // "general" (sex+age normed, 300 min) or "combat" (sex-neutral, 350 min)
   hasGym:false,           // equipment mode: false = no-equipment (bodyweight) plans, true = gym versions
   weather:"clear",        // manual weather: clear|rain|snow|heat|cold|wind|air|dark — bad conditions swap outdoor work indoors
@@ -91,8 +115,8 @@ const DEFAULT = {
     {id:id(), name:"💧 Hydrate + 7+ hrs sleep target", diff:"easy", path:"physiological", done:false, best:0},
   ],
   bosses:[
-    {id:id(), name:"Hit 450+ AFT (raise DL & SDC)", hp:20, maxhp:20, path:"physical"},
-    {id:id(), name:"Pass all 16 officer-knowledge quizzes", hp:16, maxhp:16, path:"academic", auto:"quizzes"},
+    {id:id(), name:"Hit 450+ AFT (raise DL & SDC)", hp:20, maxhp:20, path:"physical", checkpoints:[]},
+    {id:id(), name:"Pass all 16 officer-knowledge quizzes", hp:16, maxhp:16, path:"academic", auto:"quizzes", checkpoints:[]},
   ],
   rewards:[
     {id:id(), name:"Read 1 chapter of your book", cost:15},
@@ -105,6 +129,7 @@ const DEFAULT = {
   questArchive: [],
   streakLog: [],    // [{date, pct}] — daily order completion rate, last 90 days
   streakBrokenDate: null, // YYYY-MM-DD when streak last broke (cleared after 3 recovery days)
+  dailyHistory: [], // YYYY-MM-DD strings — days when ALL (non-paused) orders were completed
 };
 const VALUES = {
   quest:{easy:{xp:15,g:5},med:{xp:35,g:12},hard:{xp:70,g:28}},

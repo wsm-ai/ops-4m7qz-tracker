@@ -5,7 +5,24 @@
 
     <div class="sec-h" style="margin-top:20px"><h2>Counseling Log</h2><span class="hint">leadership events (4856-style)</span></div>
     <div class="plan-intro">A private running record of counselings received and given — real fuel for OML/branch boards and self-reflection. Stays on your device.</div>
+    <div class="cn-filter-wrap">
+      <div class="mb-filter-bar" id="cnFilterBar">
+        <button class="mb-filter on" data-cnfilter="all">All</button>
+        <button class="mb-filter" data-cnfilter="event">Event</button>
+        <button class="mb-filter" data-cnfilter="monthly">Monthly</button>
+        <button class="mb-filter" data-cnfilter="developmental">Developmental</button>
+        <button class="mb-filter" data-cnfilter="received">Received</button>
+        <button class="mb-filter" data-cnfilter="given">Given</button>
+      </div>
+      <input id="cnSearch" class="cn-search-input" placeholder="Search by summary or people…" autocomplete="off">
+    </div>
     <div id="counselArea"></div>
+    <button class="wall-bulk-toggle" data-bulktoggle="cnBulk">Bulk add counselings…</button>
+    <div class="wall-bulk-panel-wrap" id="cnBulk" style="display:none">
+      <textarea class="wall-bulk-panel" id="cnBulkText" placeholder="One per line: Date | Type | Summary | Plan | FollowUp&#10;Example: 2025-11-15 | Initial | Reviewed semester plan | Focus on GPA |"></textarea>
+      <div class="wall-bulk-preview" id="cnBulkPreview"></div>
+      <div class="row" style="gap:8px;margin-top:8px"><button class="wall-bulk-preview-btn" id="cnBulkPreviewBtn">Preview</button><button class="wall-bulk-commit" id="cnBulkCommit" style="display:none">Commit</button></div>
+    </div>
     <details class="habit-add-wrap"><summary>+ Log a counseling/event</summary>
       <div class="adder" style="margin-top:10px">
         <input id="cnDate" type="date">

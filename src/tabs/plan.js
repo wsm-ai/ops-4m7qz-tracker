@@ -1,3 +1,77 @@
+// Weekly volume recommendation from AFT score gap + countdown to test date
+function renderPlanRec(){
+  const el=document.getElementById("planRec"); if(!el) return;
+  const lastAft=(S.aft||[])[S.aft.length-1];
+  const testDate=S.aftTestDate;
+  if(!lastAft||!testDate){el.innerHTML="";return;}
+  const weeksLeft=Math.max(1,Math.round((new Date(testDate+"T12:00:00")-Date.now())/(7*864e5)));
+  const gap=380-lastAft.total;
+  const rec=gap>60?"5 sessions/week":gap>30?"4 sessions/week":gap>10?"3 sessions/week":"2–3 sessions/week (maintenance)";
+  el.innerHTML=`<div class="plan-rec">🎯 ${weeksLeft} week${weeksLeft!==1?'s':''} to AFT · gap: ${gap>0?'+'+gap+' pts needed':'on target'} · Recommendation: <b>${rec}</b></div>`;
+}
+
+// Beginner starting prescriptions — sets/reps/weight/rest for each session
+// Bodyweight (bw) and gym variants match SESSIONS s1-s4
+const BEGINNER_RX = {
+  s1: {
+    bw: [
+      {name:"Reverse lunge",          sets:3, reps:"8/leg",  rest:"90s"},
+      {name:"Single-leg glute bridge", sets:3, reps:"10/leg", rest:"60s"},
+      {name:"Hand-release push-ups",  sets:3, reps:"6–8",    rest:"90s"},
+      {name:"Pike push-ups",          sets:2, reps:"6–8",    rest:"90s"},
+      {name:"Hollow-body hold",       sets:3, reps:"20s",    rest:"45s"},
+    ],
+    gym: [
+      {name:"Trap-bar deadlift",  sets:3, reps:"5",  weight:"65 lbs",        rest:"3 min"},
+      {name:"Goblet squat",       sets:3, reps:"10", weight:"15 lbs",        rest:"90s"},
+      {name:"DB bench press",     sets:3, reps:"10", weight:"15 lbs/hand",   rest:"90s"},
+      {name:"Overhead press",     sets:3, reps:"10", weight:"10 lbs/hand",   rest:"90s"},
+    ],
+  },
+  s2: {
+    bw: [
+      {name:"Intervals",     sets:"4×", reps:"400m hard",                          rest:"90s walk"},
+      {name:"Tempo run",     sets:1,    reps:"15 min at only-a-few-words pace",     rest:"—"},
+      {name:"Long easy run", sets:1,    reps:"25 min conversational",               rest:"—"},
+    ],
+    gym: [
+      {name:"Treadmill intervals", sets:"4×", reps:"400m, 1% incline", rest:"90s"},
+      {name:"Rower intervals",     sets:"4×", reps:"250m all-out",     rest:"90s"},
+    ],
+  },
+  s3: {
+    bw: [
+      {name:"Doorway/towel rows",  sets:3, reps:"8–10",        rest:"90s"},
+      {name:"Decline push-ups",   sets:3, reps:"6–8",          rest:"90s"},
+      {name:"Plank",              sets:3, reps:"20–30s",        rest:"45s"},
+      {name:"Side plank",         sets:2, reps:"15–20s/side",  rest:"45s"},
+      {name:"Superman",           sets:3, reps:"10",            rest:"45s"},
+      {name:"Grip squeeze",       sets:3, reps:"30s",           rest:"30s"},
+    ],
+    gym: [
+      {name:"Lat pulldown",     sets:3, reps:"10", weight:"40 lbs",        rest:"90s"},
+      {name:"Seated cable row", sets:3, reps:"10", weight:"35 lbs",        rest:"90s"},
+      {name:"Incline DB press", sets:3, reps:"10", weight:"15 lbs/hand",   rest:"90s"},
+      {name:"Farmer's carry",   sets:3, reps:"40 ft", weight:"25 lbs/hand", rest:"90s"},
+    ],
+  },
+  s4: {
+    bw: [
+      {name:"Shuttle sprints",       sets:"3 rounds", reps:"4 lengths ~25m",     rest:"2 min between rounds"},
+      {name:"Hand-release push-ups", sets:"3 rounds", reps:"10 (first day: 5)",  rest:""},
+      {name:"Squat jumps",           sets:"3 rounds", reps:"8",                   rest:""},
+      {name:"Plank",                 sets:"3 rounds", reps:"30s",                 rest:""},
+      {name:"200m run / jog",        sets:"3 rounds", reps:"1 lap",               rest:""},
+    ],
+    gym: [
+      {name:"Sled push + return", sets:"3 rounds", reps:"25m + 25m",  weight:"no extra load",    rest:"2 min"},
+      {name:"Loaded carry",       sets:"3 rounds", reps:"40 ft",      weight:"25 lbs/hand",       rest:""},
+      {name:"Box jumps",          sets:"3 rounds", reps:"6–8",        weight:"12\" box",           rest:""},
+      {name:"Rower 200m sprint",  sets:"3 rounds", reps:"all-out",                                rest:""},
+    ],
+  },
+};
+
 // Compact session card for the Dawn tab — exercise names only (no descriptions).
 // Returns an HTML string; Dawn embeds it directly in the guided flow.
 function dawnSessionHtml(){
@@ -201,7 +275,7 @@ function renderSessionLists(){
     if(S.hasGym) wsub.textContent="Gym mode — weather doesn't matter (you're indoors)";
     else wsub.textContent = weatherBad() ? `${WEATHER[cur].icon} ${WEATHER[cur].label} — outdoor work swapped to indoor` : "Clear — outdoor runs as planned";
   }
-  // fill each session's exercise container
+  // fill each session's exercise container and inject beginner prescriptions
   document.querySelectorAll(".sess-ex").forEach(div=>{
     const skey=div.getAttribute("data-sess");
     const list=sessionEx(skey);
@@ -209,6 +283,20 @@ function renderSessionLists(){
     const pickOne = SESSIONS[skey] && SESSIONS[skey].pickOne;
     const pickNote = pickOne ? `<div class="pickone-note">Pick <b>one</b> per run day — the plan rotates these for you.</div>` : "";
     div.innerHTML = `<div class="sess-ex-tag">${S.hasGym?"🏋️ Gym version":(swapped?`${WEATHER[(S.weather)||"clear"].icon} No-equipment · indoor (weather)`:"🤸 No-equipment version")}</div>${pickNote}<ul class="gl">${list.map(e=>`<li>${esc(e.n)}${e.w?' <span class="sess-eq">· equipment</span>':''}${e._swapped?` <span class="sess-swap">· indoors for weather</span>`:''}</li>`).join("")}</ul>`;
+    // remove any previous rx-card for this session, then inject fresh
+    const prevRx=div.nextElementSibling;
+    if(prevRx&&prevRx.classList.contains('rx-card')) prevRx.remove();
+    const rx=BEGINNER_RX[skey];
+    if(rx){
+      const exList=S.hasGym?rx.gym:rx.bw;
+      const rows=exList.map(e=>`<tr><td>${esc(e.name)}</td><td>${esc(String(e.sets))}</td><td>${esc(String(e.reps))}</td>${(S.hasGym&&e.weight)?`<td>${esc(e.weight)}</td>`:'<td></td>'}<td>${esc(e.rest||'')}</td></tr>`).join('');
+      div.insertAdjacentHTML('afterend',
+        `<div class="rx-card"><p class="rx-note">New to this? Start here. Add reps when all sets feel easy — not before.</p>
+        <table class="rx-table"><thead><tr><th>Exercise</th><th>Sets</th><th>Reps</th>${S.hasGym?'<th>Start weight</th>':'<th></th>'}<th>Rest</th></tr></thead>
+        <tbody>${rows}</tbody></table>
+        <p class="rx-effort">Stop each set when you could still do 2 clean reps. That margin is what makes this sustainable for months.</p></div>`
+      );
+    }
   });
 }
 

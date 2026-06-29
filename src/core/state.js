@@ -34,6 +34,11 @@ function load(){
     merged.weightAppUrl=r.weightAppUrl||"https://wsm-ai.github.io/tw-9f3kx-ledger/";
     merged.lastMirrorUpdate=r.lastMirrorUpdate||null;
     merged.awards=r.awards||[];
+    merged.academicHonors=r.academicHonors||[];
+    merged.rotcRecord=Object.assign({positions:[],competitions:[],campResults:[]}, r.rotcRecord||{});
+    if(!merged.rotcRecord.positions) merged.rotcRecord.positions=[];
+    if(!merged.rotcRecord.competitions) merged.rotcRecord.competitions=[];
+    if(!merged.rotcRecord.campResults) merged.rotcRecord.campResults=[];
     merged.ptLog=r.ptLog||[];
     merged.memberships=r.memberships||[];
     merged.events=r.events||[];
@@ -47,12 +52,28 @@ function load(){
     }
     // backfill peakLevel (all-time high) for any skill missing it
     merged.lifeSkills.forEach(s=>{ s.peakLevel=Math.max(s.peakLevel||0, s.currentLevel||0); });
+    // backfill auto flag on Reading speed — now tested in-app (v117)
+    const _rdSkill=merged.lifeSkills.find(s=>s.name==="Reading speed");
+    if(_rdSkill&&!_rdSkill.auto) _rdSkill.auto="test:reading";
+    // backfill checkpoints on bosses created before v112
+    (merged.bosses||[]).forEach(b=>{
+      if(!b.checkpoints) b.checkpoints=[];
+      if(b.cpDriven===undefined && b.checkpoints.length>0){
+        const expectedHp=b.checkpoints.filter(c=>!c.done).length+1;
+        if(b.hp<=expectedHp){b.cpDriven=true;b.maxhp=b.checkpoints.length+1;b.hp=expectedHp;}
+      }
+      // backfill completedAt for boss archive (v117)
+      if(b.completedAt===undefined) b.completedAt=null;
+    });
     merged.navLabels=r.navLabels!==undefined?r.navLabels:true;
     merged.navExpanded=r.navExpanded!==undefined?r.navExpanded:false;
     merged.missedTraining=r.missedTraining||[];
-    merged.profile=Object.assign({birthdate:null,heightIn:null,heightDate:null,weightLb:null,weightDate:null,sex:null,bloodType:null,units:"imperial",notes:"",commissionDate:null,gpa:null}, r.profile||{});
+    merged.profile=Object.assign({birthdate:null,heightIn:null,heightDate:null,weightLb:null,weightDate:null,sex:null,bloodType:null,units:"imperial",notes:"",commissionDate:null,gpa:null,weightGoal:null,languages:[],clearance:{level:null,grantedDate:null,notes:""}}, r.profile||{});
+    merged.profile.languages=r.profile?.languages||[];
+    merged.profile.clearance=Object.assign({level:null,grantedDate:null,notes:""}, r.profile?.clearance||{});
     merged.lifts=Object.assign({deadliftLb:null,squatLb:null,benchLb:null,liftDate:null}, r.lifts||{});
     merged.aftStandard=r.aftStandard||"general";
+    merged.aftEventTargets=Object.assign({hrp:null,sdc:null,run:null,dl:null,plank:null}, r.aftEventTargets||{});
     merged.donations=r.donations||[];
     merged.weightLog=r.weightLog||[];
     merged.vitals=r.vitals||[];
@@ -64,6 +85,7 @@ function load(){
     merged.studyPlans=r.studyPlans||[];
     merged.counseling=r.counseling||[];
     merged.checklists=r.checklists||[];
+    merged.gpaHistory=r.gpaHistory||[];
     merged.questArchive=r.questArchive||[];
     merged.streakLog=r.streakLog||[];
     merged.streakBrokenDate=r.streakBrokenDate||null;
@@ -134,6 +156,9 @@ function onPerfectDay(){
   if(S.lastPerfect===t) return; // only once per day
   S.lastPerfect=t;
   S.perfectDays=(S.perfectDays||0)+1;
+  // log to daily history for streak calendar
+  if(!S.dailyHistory) S.dailyHistory=[];
+  if(!S.dailyHistory.includes(t)){ S.dailyHistory.push(t); if(S.dailyHistory.length>365) S.dailyHistory=S.dailyHistory.slice(-365); }
   // tomorrow's reset will bump the streak; the *pending* streak is streak+1
   const pending=S.streak+1;
   // bonus merit scales with streak (loss aversion: the longer the streak, the more you'd lose)
@@ -191,6 +216,7 @@ function render(){
   if(typeof renderVitals==="function") renderVitals();
   if(typeof renderHabits==="function") renderHabits();
   if(typeof renderTests==="function") renderTests();
+  if(typeof renderReadingTest==="function") renderReadingTest();
   if(typeof renderSRS==="function") renderSRS();
   if(typeof renderPalace==="function") renderPalace();
   if(typeof renderStudy==="function") renderStudy();
@@ -200,6 +226,7 @@ function render(){
   if(typeof renderChecklists==="function") renderChecklists();
   if(typeof renderSectionPicker==="function") renderSectionPicker();
   if(typeof renderPT==="function") renderPT();
+  if(typeof renderPlanRec==="function") renderPlanRec();
   if(typeof renderSkillBalance==="function") renderSkillBalance();
   if(typeof renderRecoveryAdvisory==="function") renderRecoveryAdvisory();
   if(typeof renderSessionLists==="function") renderSessionLists();
@@ -210,6 +237,10 @@ function render(){
   if(typeof renderBoard==="function") renderBoard();
   if(typeof renderWeight==="function") renderWeight();
   if(typeof renderAwards==="function") renderAwards();
+  if(typeof renderQuals==="function") renderQuals();
+  if(typeof renderAcademicHonors==="function") renderAcademicHonors();
+  if(typeof renderRotcRecord==="function") renderRotcRecord();
+  if(typeof renderLanguages==="function") renderLanguages();
   if(typeof renderGarden==="function") renderGarden();
   if(typeof renderTrophies==="function") renderTrophies();
 }
@@ -246,14 +277,30 @@ function renderQuests(){
       const snoozeCount=q.snoozeCount||0;
       const snoozeWarn=(!q.done&&snoozeCount>=2)?`<span class="oath-postpone-warn">postponed ${snoozeCount}×</span>`:'';
       const snoozeBtn=(!q.done&&q.due)?`<button class="q-snooze" data-qsnooze="${q.id}" title="Postpone 3 days">+3d</button>${snoozeWarn}`:'';
+      const updatesHtml=(q.updates&&q.updates.length)?`<div class="q-updates">${q.updates.slice().reverse().map(u=>`<div class="q-update-item"><span class="q-update-ts">${new Date(u.ts).toLocaleDateString()}</span>${esc(u.text)}</div>`).join("")}</div>`:"";
+      const updateForm=`<div class="q-update-form"><input class="q-update-input" data-qupdateid="${q.id}" placeholder="Log a dispatch…" maxlength="120"><button class="q-update-add" data-qupdateadd="${q.id}">→</button></div>`;
+      const stepsProg=q.steps>=2&&!q.done?`<div class="q-steps-row"><div class="q-steps-bar"><div class="q-steps-fill" style="width:${Math.round((q.progress||0)/q.steps*100)}%"></div></div><span class="q-steps-count">${q.progress||0}/${q.steps}</span><button class="q-step-btn" data-qprogress="${q.id}">+1 step</button></div>`:'';
       return `<li class="card ${q.done?'done':''}${overdue?' overdue':''}">
         <div class="check" data-q="${q.id}">${q.done?'✓':''}</div>
         <div class="c-body"><div class="c-name">${esc(q.name)}</div>
-          <div class="c-meta">${diffTag('quest',q.diff)}${pathTag(q.path)}${dueTag}${ageTag}</div></div>
+          ${q.notes?`<div class="q-notes">${esc(q.notes)}</div>`:''}
+          <div class="c-meta">${diffTag('quest',q.diff)}${pathTag(q.path)}${dueTag}${ageTag}</div>
+          ${stepsProg}${updatesHtml}${updateForm}</div>
         ${snoozeBtn}
         <button class="del" data-dq="${q.id}">✕</button>
       </li>`;
     }).join("");
+    // path distribution breakdown: shows balance of active oaths across paths
+    const _oldDist=document.querySelector('.q-path-dist');
+    if(_oldDist) _oldDist.remove();
+    const _active=S.quests.filter(q=>!q.done);
+    const _byPath={};
+    _active.forEach(q=>{ _byPath[q.path||"tactical"]=(_byPath[q.path||"tactical"]||0)+1; });
+    const _pathRow=Object.entries(_byPath).sort((a,b)=>b[1]-a[1]).map(([p,n])=>{
+      const pm=PATH_META[p]||{icon:"•",name:p,color:"var(--ink-faint)"};
+      return `<span class="q-path-chip" style="color:${pm.color}">${pm.icon} ${n}</span>`;
+    }).join("");
+    if(_pathRow) el.insertAdjacentHTML("beforebegin",`<div class="q-path-dist">${_pathRow}</div>`);
   }
   // Update overdue oath count badge on the nav button
   const _overdueC=(S.quests||[]).filter(q=>!q.done&&q.due&&q.due<localYMD()).length;
@@ -261,52 +308,98 @@ function renderQuests(){
   if(_qdot) _qdot.textContent=_overdueC>0?String(_overdueC):'';
   const archEl=document.getElementById("qArchive");
   if(!archEl) return;
-  const arch=(S.questArchive||[]).slice(0,20);
-  if(!arch.length){archEl.innerHTML="";return;}
-  archEl.innerHTML=`<details class="q-archive">
-    <summary>✓ Completed oaths (${arch.length})</summary>
-    ${arch.map(q=>{
-      const timingStr=(q.createdDate&&q.completedDate)?` · ${dayDiff(q.createdDate,q.completedDate)} day${dayDiff(q.createdDate,q.completedDate)!==1?'s':''}`:'' ;
-      return `<div class="q-arch-item">
-        <span class="q-arch-check">✓</span>
-        <div class="q-arch-body">
-          <div class="q-arch-name">${esc(q.name)}</div>
-          <div class="q-arch-meta">${pathTag(q.path)}<span class="q-arch-date">Completed ${esc(q.completedDate||'')}</span><span class="quest-archive-timing">${timingStr}</span></div>
-        </div>
-      </div>`;
-    }).join("")}
+  const fullArch=(S.questArchive||[]);
+  if(!fullArch.length){archEl.innerHTML="";return;}
+  const _archItemHtml=items=>items.map(q=>{
+    const timingStr=(q.createdDate&&q.completedDate)?` · ${dayDiff(q.createdDate,q.completedDate)} day${dayDiff(q.createdDate,q.completedDate)!==1?'s':''}`:'' ;
+    const archUpdates=(q.updates&&q.updates.length)?`<div class="q-updates">${q.updates.slice().reverse().map(u=>`<div class="q-update-item"><span class="q-update-ts">${new Date(u.ts).toLocaleDateString()}</span>${esc(u.text)}</div>`).join("")}</div>`:"";
+    return `<div class="q-arch-item"><span class="q-arch-check">✓</span><div class="q-arch-body"><div class="q-arch-name">${esc(q.name)}</div>${q.notes?`<div class="q-notes">${esc(q.notes)}</div>`:''}${archUpdates}<div class="q-arch-meta">${pathTag(q.path)}<span class="q-arch-date">Completed ${esc(q.completedDate||'')}</span><span class="quest-archive-timing">${timingStr}</span></div></div></div>`;
+  }).join("");
+  archEl.innerHTML=`<input class="q-arch-search" placeholder="Search completed oaths…">
+  <details class="q-archive">
+    <summary>✓ Completed oaths (${fullArch.length})</summary>
+    ${_archItemHtml(fullArch.slice(0,40))}
   </details>`;
 }
 function renderDailies(){
   const el=document.getElementById("dList");
   if(!S.dailies.length){el.innerHTML=`<div class="empty"><span class="big">📋</span>No orders standing. Lay your daily oaths — executed at dawn, every dawn.</div>`;return}
-  el.innerHTML=S.dailies.map(d=>`
-    <li class="card ${d.done?'done':''}">
+  const activeLogDays=(S.streakLog||[]).filter(e=>e.pct>0).length;
+  const isStale=d=>{
+    if(d.paused) return false;
+    if(!d.doneTs) return activeLogDays>=7;
+    return (Date.now()-d.doneTs)/864e5>7;
+  };
+  el.innerHTML=S.dailies.map(d=>{
+    const pausedHtml=d.paused?`<span class="order-paused">⏸ paused</span><button class="order-pause-btn" data-dpause="${d.id}" data-dpausestate="0" title="Resume">Resume</button>`:`<button class="order-pause-btn" data-dpause="${d.id}" data-dpausestate="1" title="Pause">⏸</button>`;
+    return `<li class="card ${d.done?'done':''}${d.paused?' paused':''}">
       <div class="check" data-d="${d.id}">${d.done?'✓':''}</div>
       <div class="c-body"><div class="c-name">${esc(d.name)}</div>
-        <div class="c-meta">${diffTag('daily',d.diff)}${pathTag(d.path)}${d.best?`<span class="tag streakt">🔥 best ${d.best}</span>`:''}</div></div>
+        <div class="c-meta">${diffTag('daily',d.diff)}${pathTag(d.path)}${d.best?`<span class="tag streakt">🔥 best ${d.best}</span>`:''}${isStale(d)?`<span class="order-stale" title="Not done in 7+ days — consider revising">⚠ stale</span>`:''}</div></div>
+      ${pausedHtml}
       <button class="del" data-dd="${d.id}">✕</button>
-    </li>`).join("");
+    </li>`;
+  }).join("");
+  if(typeof setupDailyCalToggle==="function") setupDailyCalToggle();
 }
 function renderBosses(){
   const el=document.getElementById("bList");
+  const active=(S.bosses||[]).filter(b=>!b.completedAt);
+  const archived=(S.bosses||[]).filter(b=>b.completedAt);
   if(!S.bosses.length){el.innerHTML=`<div class="empty"><span class="big">⚔️</span>No trials set. Name what you must endure and begin the reckoning.</div>`;return}
-  el.innerHTML=S.bosses.map(b=>{
+  const bossCard=b=>{
     const pct=Math.max(0,b.hp/b.maxhp*100);
-    const dead=b.hp<=0;
+    const checks=(b.checkpoints||[]);
+    const checksHtml=checks.length?`<div class="boss-checks">${checks.map((c,i)=>`<div class="boss-check-item${c.done?' done':''}"><button class="boss-check-btn" data-bcheck="${b.id}" data-bchkidx="${i}">${c.done?'✓':'○'}</button><span>${esc(c.name)}</span></div>`).join("")}</div>`:"";
+    const doneChecks=checks.filter(c=>c.done).length;
+    const checksMeta=checks.length?` · ${doneChecks}/${checks.length} checkpoints`:"";
     return `<li class="card boss">
       <div class="boss-top">
-        <div class="boss-skull">${dead?'🏆':'⚔️'}</div>
-        <div class="boss-name">${esc(b.name)}${dead?' — Conquered.':''}</div>
+        <div class="boss-skull">⚔️</div>
+        <div class="boss-name">${esc(b.name)}</div>
         <button class="del" data-db="${b.id}">✕</button>
       </div>
-      ${dead?'':`
       <div class="hpbar"><div class="hpfill" style="width:${pct}%"></div></div>
-      <div class="hp-meta"><span>${b.hp} / ${b.maxhp} steps remaining</span><span>+${b.maxhp*8} XP · ${b.maxhp*4} pts when conquered</span></div>
+      <div class="hp-meta"><span>${b.hp} / ${b.maxhp} steps remaining${checksMeta}</span><span>+${b.maxhp*8} XP · ${b.maxhp*4} pts when conquered</span></div>
+      ${(()=>{if(!b.targetDate||b.hp<=0)return "";const daysLeft=Math.ceil((new Date(b.targetDate+"T12:00:00")-Date.now())/864e5);if(daysLeft<=0)return `<div class="boss-pace overdue">⚠ Target date passed — ${b.hp} steps remain</div>`;const needed=(b.hp/daysLeft).toFixed(1);const onPace=parseFloat(needed)<=1;return `<div class="boss-pace${onPace?' on-pace':''}">${onPace?"✓":"⚠"} ${needed} steps/day to finish by ${b.targetDate} · ${daysLeft}d left</div>`;})()}
+      ${checksHtml}
+      <div class="boss-add-check">
+        <input class="boss-check-input" data-baddcheck="${b.id}" placeholder="Add a milestone…" maxlength="80">
+        <button class="boss-check-add-btn" data-baddcheckbtn="${b.id}">+</button>
+      </div>
+      ${(()=>{
+        const tc=b.todayCommit; const td=typeof localYMD==="function"?localYMD():"";
+        if(tc&&tc.date===td){
+          const hit=(tc.startHp||b.maxhp)-b.hp;
+          const met=hit>=tc.hp;
+          const pct=Math.min(100,Math.round(hit/tc.hp*100));
+          if(met) return `<div class="boss-sprint done">✓ Sprint complete — ${tc.hp} step${tc.hp!==1?"s":""} hit today</div>`;
+          return `<div class="boss-sprint"><div class="boss-sprint-label">Sprint: ${hit}/${tc.hp} steps today <span style="color:var(--ink-faint);font-size:10px">${pct}%</span></div><div class="boss-sprint-bar"><div class="boss-sprint-fill" style="width:${pct}%"></div></div></div>`;
+        } else if(tc&&tc.date<td){
+          const missed=(tc.startHp||b.maxhp)-b.hp < tc.hp;
+          return missed?`<div class="boss-sprint missed">⚠ Yesterday's sprint (${tc.hp} step${tc.hp!==1?"s":""}) was not completed</div>`:``;
+        }
+        return `<div class="boss-sprint-setter"><span class="boss-sprint-lbl">Today's commitment:</span><input class="boss-sprint-input" type="number" min="1" max="${b.hp}" step="1" placeholder="steps" id="bsprint-${b.id}"><button class="boss-sprint-btn" data-bsprintset="${b.id}">Set</button></div>`;
+      })()}
       <div class="boss-actions">
-        <button class="hit" data-hit="${b.id}">⚔️ Strike it</button>
-      </div>`}
-    </li>`}).join("");
+        ${b.cpDriven&&b.hp===1?`<button class="hit conquer" data-hit="${b.id}">🏆 Conquer the Trial</button>`:b.cpDriven&&b.hp>1?`<div class="boss-no-strike">Complete a milestone to make progress</div>`:`<button class="hit" data-hit="${b.id}">⚔️ Strike it</button>`}
+      </div>
+    </li>`;
+  };
+  const archiveHtml=archived.length?`<details class="boss-archive">
+    <summary>🏆 Conquered (${archived.length})</summary>
+    ${archived.map(b=>`<div class="boss-archive-item">
+      <span class="boss-archive-icon">🏆</span>
+      <div class="boss-archive-body">
+        <div class="boss-archive-name">${esc(b.name)}</div>
+        <div class="boss-conquered-date">Conquered ${esc(b.completedAt)} · ${b.maxhp} steps total</div>
+      </div>
+      <button class="del" data-db="${b.id}" title="Remove">✕</button>
+    </div>`).join("")}
+  </details>`:"";
+  el.innerHTML=(active.length?active.map(bossCard).join(""):
+    `<div class="empty" style="margin-bottom:12px"><span class="big">⚔️</span>No active trials. Name what you must endure and begin the reckoning.</div>`
+  )+archiveHtml;
 }
 function renderShop(){
   const el=document.getElementById("rList");

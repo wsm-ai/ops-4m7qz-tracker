@@ -335,6 +335,59 @@ const skEmblemSvg = (function(){
   };
 })();
 
+let _skSearchTerm = "";
+let _skHeatmapVisible = false;
+
+function renderHeatmap(){
+  const el=document.getElementById("skHeatmap"); if(!el) return;
+  // build date → count map for past 91 days
+  const now=Date.now();
+  const day91=91;
+  const counts={};
+  (S.lifeSkills||[]).filter(s=>!s.group).forEach(s=>{
+    (s.history||[]).forEach(h=>{
+      const d=Math.round((now-h.ts)/864e5);
+      if(d>=0&&d<day91){
+        const dt=localYMD(new Date(h.ts));
+        counts[dt]=(counts[dt]||0)+1;
+      }
+    });
+  });
+  // build 13 cols × 7 rows grid (oldest first, top-left)
+  const cols=13, rows=7;
+  const startMs=now-(day91-1)*864e5;
+  const cells=[];
+  for(let i=0;i<day91;i++){
+    const d=new Date(startMs+i*864e5);
+    const dt=localYMD(d);
+    const cnt=counts[dt]||0;
+    const lv=cnt===0?0:cnt<=2?1:cnt<=5?2:3;
+    cells.push(`<div class="hm-day lv${lv}" title="${dt}: ${cnt} skill event${cnt!==1?'s':''}"></div>`);
+  }
+  // label row: month initials at column boundaries
+  const labels=[];
+  for(let c=0;c<cols;c++){
+    const d=new Date(startMs+c*7*864e5);
+    labels.push(`<div class="hm-label">${d.toLocaleDateString(undefined,{month:'short'})}</div>`);
+  }
+  el.innerHTML=`<div class="hm-header"><span class="hm-title">90-day skill activity</span><span class="hm-legend"><span class="hm-day lv0"></span><span class="hm-day lv1"></span><span class="hm-day lv2"></span><span class="hm-day lv3"></span></span></div><div class="hm-month-row">${labels.join('')}</div><div class="hm-grid">${cells.join('')}</div>`;
+}
+
+function _filterSkillDecks(){
+  const q = _skSearchTerm.toLowerCase().trim();
+  document.querySelectorAll("#skList .sk-deck").forEach(deck=>{
+    if(!q){ deck.hidden=false; return; }
+    const cards = deck.querySelectorAll(".sk-card-name");
+    const match = [...cards].some(n=>n.textContent.toLowerCase().includes(q));
+    deck.hidden = !match;
+    if(match){
+      const body=deck.querySelector(".sk-deck-body");
+      const hdr=deck.querySelector(".sk-deck-header");
+      if(body&&!body.classList.contains("open")){ body.classList.add("open"); hdr&&hdr.classList.add("open"); }
+    }
+  });
+}
+
 function renderSkillsTab(){
   const listEl=document.getElementById("skList"); if(!listEl) return;
   if(syncSkillsFromActivity()) save();
@@ -363,6 +416,23 @@ function renderSkillsTab(){
     } else {
       aEl.innerHTML="";
     }
+  }
+  // Mastery summary bar — at-a-glance health of the whole tree
+  const sbEl=document.getElementById("skSummaryBar");
+  if(sbEl){
+    const allLeaves=S.lifeSkills.filter(s=>!s.group&&s.levels&&s.levels.length);
+    const started=allLeaves.filter(s=>s.currentLevel>0);
+    const decayed=started.filter(s=>skEffectiveLevel(s)<s.currentLevel);
+    const atRisk=started.filter(s=>!decayed.includes(s)&&skFadeState(s)==="at-risk");
+    const maxed=started.filter(s=>s.currentLevel>=s.levels.length);
+    if(started.length){
+      sbEl.innerHTML=`<div class="sk-summary-bar">
+        <span class="sk-summary-stat">${started.length} active</span>
+        ${maxed.length?`<span class="sk-summary-stat maxed">⭐ ${maxed.length} maxed</span>`:''}
+        ${atRisk.length?`<span class="sk-summary-stat atrisk">🔶 ${atRisk.length} at risk</span>`:''}
+        ${decayed.length?`<span class="sk-summary-stat decayed">🍂 ${decayed.length} decayed</span>`:''}
+      </div>`;
+    } else { sbEl.innerHTML=""; }
   }
   // skill list — category → top-level skill (group shows subs) → leaf
   if(!S.lifeSkills.length){ listEl.innerHTML=`<div class="aw-empty"><span class="big">🧠</span>No skills yet. Add one above to start tracking levels.</div>`; return; }
@@ -460,6 +530,19 @@ function skProgressBlock(sk, eff){
       else if(days!==null && days<=Math.ceil((sk.fadeDays||30)*0.34)) fadeFoot=`<span class="sk-fade-foot warn">🍂 ${days}d left</span>`;
       else if(days!==null) fadeFoot=`<span class="sk-fade-foot">🍂 ${days}d</span>`;
     }
+    const pracDays=sk.lastQuestTs&&sk.currentLevel>0?Math.round((Date.now()-sk.lastQuestTs)/864e5):null;
+    const pracFoot=pracDays!==null?(pracDays===0?"practiced today":`practiced ${pracDays}d ago`):"";
+
+    // Target level tick + footer
+    const tgt=sk.targetLevel&&sk.targetLevel>0&&sk.targetLevel<=maxLv?sk.targetLevel:null;
+    const tgtPct=tgt?Math.round(tgt/maxLv*100):null;
+    const tgtFoot=tgt&&eff<tgt?`<span class="sk-tgt-foot">${tgt-eff} to L${tgt} target</span>`:(tgt&&eff>=tgt?`<span class="sk-tgt-foot reached">L${tgt} target reached</span>`:"");
+    // Next-stage target dim tick
+    const _stageOrder=["MS1","MS2","MS3","LDAC","MS4","commission","O1"];
+    const _curIdx=typeof careerStage==="function"?_stageOrder.indexOf(careerStage()):-1;
+    const _nextStage=_curIdx>=0&&_curIdx<_stageOrder.length-1?_stageOrder[_curIdx+1]:null;
+    const _nextTgt=(sk.targets&&_nextStage&&sk.targets[_nextStage]!=null&&sk.targets[_nextStage]!==tgt&&sk.targets[_nextStage]<=maxLv)?sk.targets[_nextStage]:null;
+    const _nextPct=_nextTgt?Math.round(_nextTgt/maxLv*100):null;
 
     // Level / max badge in header
     const lvBadge=maxed ? `Lv ${eff} / ${maxLv} <span class="sk-max-badge">MAX</span>` : (peak>eff&&peak>0 ? `Lv ${eff} / ${maxLv} <span class="sk-peak-badge">peak L${peak}</span>` : `Lv ${eff} / ${maxLv}`);
@@ -477,10 +560,14 @@ function skProgressBlock(sk, eff){
       </div>
       <div class="sk-card-name">${esc(sk.name)}${sk.auto?' <span class="sk-auto">auto</span>':''}</div>
       <div class="sk-card-tier">${esc(tierLabel)}</div>
-      <div class="sk-level-bar"><div class="sk-level-fill" style="background:${leafCol}"></div></div>
+      <div class="sk-level-bar"><div class="sk-level-fill" style="background:${leafCol}"></div>${tgtPct?`<div class="sk-tgt-tick" style="left:${tgtPct}%"></div>`:''}${_nextPct?`<div class="sk-tgt-tick-next" style="left:${_nextPct}%" title="${_nextStage} target: L${_nextTgt}"></div>`:''}</div>
+      ${(()=>{const noted=(sk.history||[]).filter(h=>h.note).slice(-3).reverse();return noted.length?`<div class="sk-log-recent">${noted.map(h=>`<div class="sk-log-entry"><span class="sk-log-entry-ts">${new Date(h.ts).toLocaleDateString()}</span> ${esc(h.note.slice(0,80))}</div>`).join('')}</div>`:'';})()}
       <div class="sk-card-footer">
-        <div class="sk-card-footer-left">${fadeFoot}</div>
-        <button class="sk-copy-btn" data-skcopy="${sk.id}" title="Copy skill card">⧉ copy</button>
+        <div class="sk-card-footer-left">${fadeFoot}${pracFoot?`<span class="sk-prac-foot">${pracFoot}</span>`:''}${tgtFoot}</div>
+        <div class="sk-footer-actions">
+          ${!sk.auto && sk.currentLevel>0 ? `<button class="sk-practice-btn" data-skpractice="${esc(sk.id)}" title="Reset fade timer — mark as practiced outside the app">practiced</button>` : ''}
+          <button class="sk-copy-btn" data-skcopy="${sk.id}" title="Copy skill card">⧉ copy</button>
+        </div>
       </div>
       <details class="sk-card-detail">
         <summary>▸ Ladder &amp; history</summary>
@@ -551,6 +638,22 @@ function skProgressBlock(sk, eff){
     </div>`;
   });
   listEl.innerHTML=html;
+  // wire search input — persist term across re-renders, filter immediately
+  const srchEl=document.getElementById("skSearch");
+  if(srchEl){
+    srchEl.value=_skSearchTerm;
+    srchEl.oninput=e=>{ _skSearchTerm=e.target.value; _filterSkillDecks(); };
+  }
+  if(_skSearchTerm) _filterSkillDecks();
+  // heat-map toggle
+  const hmBtn=document.getElementById("skHeatmapToggle");
+  const hmEl=document.getElementById("skHeatmap");
+  if(hmBtn){
+    hmBtn.classList.toggle("active",_skHeatmapVisible);
+    hmEl&&(hmEl.style.display=_skHeatmapVisible?"block":"none");
+    if(_skHeatmapVisible) renderHeatmap();
+    hmBtn.onclick=()=>{ _skHeatmapVisible=!_skHeatmapVisible; hmBtn.classList.toggle("active",_skHeatmapVisible); if(hmEl){hmEl.style.display=_skHeatmapVisible?"block":"none"; if(_skHeatmapVisible)renderHeatmap();} };
+  }
   // populate the right-side category jump bar (only cats that have skills)
   const jb=document.getElementById("skJumpbar");
   if(jb){
@@ -558,4 +661,19 @@ function skProgressBlock(sk, eff){
     jb.innerHTML=SK_CAT_ORDER.filter(c=>skTopLevelInCat(c).length).map(c=>
       `<button data-skjump="${c}">${icons[c]||"•"}<span class="jb-tip">${SK_CAT[c]}</span></button>`).join("");
   }
+}
+function copySkillsSummary(){
+  const started=(S.lifeSkills||[]).filter(s=>!s.group&&s.currentLevel>0);
+  if(!started.length){ toast("No started skills to export"); return; }
+  const byPath={};
+  started.forEach(s=>{ const p=s.cat||"personal"; (byPath[p]=byPath[p]||[]).push(s); });
+  const text=SK_CAT_ORDER.filter(p=>byPath[p]).map(p=>{
+    const pm=PATH_META[p]||{name:p};
+    const lines=byPath[p].map(s=>{
+      const eff=skEffectiveLevel(s), t2=skTier(s,eff);
+      return `  ${s.name} — Level ${eff}${t2?` (${t2.label})`:''}`;
+    });
+    return `[${pm.name}]\n${lines.join("\n")}`;
+  }).join("\n\n");
+  navigator.clipboard.writeText(text).then(()=>toast("📋 Skills summary copied")).catch(()=>toast("Copy failed"));
 }

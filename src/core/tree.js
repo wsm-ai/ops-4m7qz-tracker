@@ -197,14 +197,17 @@ function renderSkillTree(){
         if(eff<=0) return;
         const days=skDaysLeft(sk);
         if(days===null) return;
+        const fadeState=typeof skFadeState==="function"?skFadeState(sk):"current";
         const threshold=sk.fadeDays?sk.fadeDays*0.5:15;
-        if(days>=threshold) return;
-        const frac=Math.max(0,days/threshold);
+        // show ring when below threshold OR in at-risk grace period
+        if(days>=threshold && fadeState!=="at-risk") return;
+        const frac=fadeState==="at-risk"?1:Math.max(0,days/threshold);
         const rr=baseRad+2.8;
         const circ=2*Math.PI*rr;
         const dash=(circ*frac).toFixed(1);
         const offset=(circ*0.25).toFixed(1); // start at 12 o'clock
-        const col=days<=Math.ceil((sk.fadeDays||30)*0.34)?"var(--ember)":"var(--gold)";
+        // at-risk = amber ring; urgent = ember; normal fade = gold
+        const col=fadeState==="at-risk"?"rgb(204,138,45)":days<=Math.ceil((sk.fadeDays||30)*0.34)?"var(--ember)":"var(--gold)";
         leaves.push(`<circle cx="${cx}" cy="${cy}" r="${rr.toFixed(1)}" fill="none" stroke="${col}" stroke-width="2.5" stroke-dasharray="${dash} ${circ.toFixed(1)}" stroke-dashoffset="${offset}" opacity=".8" pointer-events="none"/>`);
       }
       if(node.group){
@@ -222,14 +225,14 @@ function renderSkillTree(){
           parts.push(`<line x1="${tx.toFixed(1)}" y1="${ty.toFixed(1)}" x2="${lx.toFixed(1)}" y2="${ly.toFixed(1)}" stroke="${barkLite}" stroke-width="1.1" opacity=".5"/>`);
           const eff=skEffectiveLevel(leaf), peak=leaf.peakLevel||0, max=leaf.levels.length;
           const rad = 4 + Math.min(5,(peak/max)*5);
-          leaves.push(`<circle cx="${lx.toFixed(1)}" cy="${ly.toFixed(1)}" r="${rad.toFixed(1)}" fill="${skLeafColor(eff,max)}" stroke="rgba(0,0,0,.4)" stroke-width=".7" data-skid="${esc(leaf.id)}" style="cursor:pointer"><title>${esc(leaf.name)} — ${eff>0?'Lv '+eff:'unproven'}${peak>eff?' · peak '+peak:''}</title></circle>`);
+          leaves.push(`<circle cx="${lx.toFixed(1)}" cy="${ly.toFixed(1)}" r="${rad.toFixed(1)}" fill="${skLeafColor(eff,max,leaf)}" stroke="rgba(0,0,0,.4)" stroke-width=".7" data-skid="${esc(leaf.id)}" style="cursor:pointer"><title>${esc(leaf.name)} — ${eff>0?'Lv '+eff:'unproven'}${peak>eff?' · peak '+peak:''}</title></circle>`);
           pushFadeRing(lx.toFixed(1), ly.toFixed(1), rad, leaf);
         });
       } else {
         const eff=skEffectiveLevel(node), peak=node.peakLevel||0, max=node.levels.length;
         const rad = 4.5 + Math.min(5.2,(peak/max)*5.2);
         const lblAnchor = Math.cos(a)<-0.2?"end":(Math.cos(a)>0.2?"start":"middle");
-        leaves.push(`<circle cx="${tx.toFixed(1)}" cy="${ty.toFixed(1)}" r="${rad.toFixed(1)}" fill="${skLeafColor(eff,max)}" stroke="rgba(0,0,0,.4)" stroke-width=".7" data-skid="${esc(node.id)}" style="cursor:pointer"><title>${esc(node.name)} — ${eff>0?'Lv '+eff:'unproven'}${peak>eff?' · peak '+peak:''}</title></circle>`);
+        leaves.push(`<circle cx="${tx.toFixed(1)}" cy="${ty.toFixed(1)}" r="${rad.toFixed(1)}" fill="${skLeafColor(eff,max,node)}" stroke="rgba(0,0,0,.4)" stroke-width=".7" data-skid="${esc(node.id)}" style="cursor:pointer"><title>${esc(node.name)} — ${eff>0?'Lv '+eff:'unproven'}${peak>eff?' · peak '+peak:''}</title></circle>`);
         pushFadeRing(tx.toFixed(1), ty.toFixed(1), rad, node);
         leaves.push(`<text x="${(tx+Math.cos(a)*11).toFixed(0)}" y="${(ty+Math.sin(a)*11+3).toFixed(0)}" text-anchor="${lblAnchor}" font-size="10.5" fill="var(--ink-faint)" style="text-shadow:0 1px 3px #000,0 0 2px #000">${esc(node.name)}</text>`);
       }

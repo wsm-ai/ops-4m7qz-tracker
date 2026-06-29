@@ -69,10 +69,13 @@ function disciplineLogHtml(){
     const col=e.pct>=100?"var(--jade)":e.pct>=50?"var(--gold)":e.pct>0?"var(--ember)":"var(--line)";
     return `<div class="disc-cell" title="${e.pct}% on ${e.date}" style="height:${h}px;background:${col}"></div>`;
   }).join('');
+  const doneHours=(S.dailies||[]).filter(d=>d.done&&d.doneTs).map(d=>new Date(d.doneTs).getHours());
+  const medHr=doneHours.length?doneHours.slice().sort((a,b)=>a-b)[Math.floor(doneHours.length/2)]:null;
+  const medLine=medHr!==null?` · avg done by ${medHr}:00`:'';
   return `<div class="td-card fn-card">
     <div class="td-h fn-h">7-Day Discipline <span class="disc-avg">${avg}% avg</span></div>
     <div class="disc-log">${cells}</div>
-    <div class="disc-legend">Orders completed per day — green=100%, gold≥50%, ember&gt;0%, grey=0%</div>
+    <div class="disc-legend">Orders completed per day — green=100%, gold≥50%, ember&gt;0%, grey=0%${medLine}</div>
   </div>`;
 }
 
@@ -284,7 +287,67 @@ function renderToday(){
   if(S.aftTestDate){const _aftD=Math.ceil((new Date(S.aftTestDate+"T12:00:00")-Date.now())/864e5);if(_aftD>=0&&_aftD<=60)notes.push(`<div class="fn-row"><span class="fn-dot">⏳</span><span>AFT in ${_aftD===0?"today":_aftD+" day"+(_aftD!==1?"s":"")} · <span style="color:${_aftD<=14?"var(--ember)":"var(--ink-dim)"}">stay on plan</span></span><button class="td-go-sm" data-gototab="aft">→</button></div>`);}
   const overdueCount=(S.quests||[]).filter(q=>!q.done&&q.due&&q.due<localYMD()).length;
   if(overdueCount>1) notes.push(`<div class="fn-row"><span class="fn-dot">⚠️</span><span>${overdueCount} overdue oaths</span><button class="td-go-sm" data-gototab="quests">→</button></div>`);
+  // fading-soon digest: show all skills within 20% of their fade window, not just the worst one
+  const fadingSoon=(S.lifeSkills||[]).filter(s=>!s.group&&s.currentLevel>0)
+    .map(s=>({s,days:typeof skDaysLeft==="function"?skDaysLeft(s):null}))
+    .filter(x=>x.days!==null&&x.days<=Math.ceil((x.s.fadeDays||30)*0.2))
+    .sort((a,b)=>a.days-b.days);
+  if(fadingSoon.length>1) notes.push(
+    `<div class="fn-row"><span class="fn-dot">🍂</span><span>${fadingSoon.length} skills fading: ${fadingSoon.slice(0,4).map(x=>esc(x.s.name)).join(' · ')}</span><button class="td-go-sm" data-gototab="skills">→</button></div>`
+  );
+  // baseline test due nudge: monthly max-effort test drives adaptive targets
+  const lastBL=(S.baselines||[]).sort((a,b)=>b.ts-a.ts)[0];
+  const daysSinceBL=lastBL?Math.round((Date.now()-lastBL.ts)/864e5):999;
+  if(daysSinceBL>28) notes.push(
+    `<div class="fn-row"><span class="fn-dot">📐</span><span>Baseline test ${lastBL?'last done '+daysSinceBL+'d ago':'not yet done'} — monthly max-effort test due</span><button class="td-go-sm" data-gototab="log">→</button></div>`
+  );
+  // weekly workout load: sessions logged, run distance, total reps — from S.workouts[]
+  {
+    const _now=new Date();
+    const _dFromMon=(_now.getDay()+6)%7;
+    const _monStart=new Date(_now); _monStart.setDate(_now.getDate()-_dFromMon); _monStart.setHours(0,0,0,0);
+    const _weekW=(S.workouts||[]).filter(w=>w.ts?w.ts>=_monStart.getTime():(()=>{const d=new Date(w.date);return !isNaN(d)&&d>=_monStart;})());
+    if(_weekW.length){
+      let _reps=0, _dist=0;
+      _weekW.forEach(w=>(w.exercises||[]).forEach(ex=>(ex.sets||[]).forEach(st=>{
+        if(ex.t==="reps"||ex.type==="reps") _reps+=(parseInt(st.reps)||0);
+        if(ex.t==="dist"||ex.type==="dist") _dist+=(parseFloat(st.dist)||0);
+      })));
+      const _parts=[`${_weekW.length} session${_weekW.length!==1?"s":""}`];
+      if(_dist>0.01) _parts.push(`${_dist.toFixed(1)} mi`);
+      if(_reps>0) _parts.push(`${_reps} reps`);
+      notes.push(`<div class="fn-row"><span class="fn-dot">🏋️</span><span><b>This week:</b> ${_parts.join(' · ')} logged</span><button class="td-go-sm" data-gototab="log">Log →</button></div>`);
+    }
+  }
+  // skill of the day — deterministic daily focal skill (soonest-to-fade first, then cycled by day)
+  const _skElig=(S.lifeSkills||[]).filter(s=>!s.group&&s.currentLevel>0&&!s.auto);
+  if(_skElig.length>0){
+    const _dayIdx=Math.floor(Date.now()/864e5);
+    const _sortedElig=_skElig.slice().sort((a,b)=>(typeof skDaysLeft==="function"?skDaysLeft(a)||999:999)-(typeof skDaysLeft==="function"?skDaysLeft(b)||999:999));
+    const _focal=_sortedElig[_dayIdx%_sortedElig.length];
+    if(_focal){
+      const _eff=typeof skEffectiveLevel==="function"?skEffectiveLevel(_focal):_focal.currentLevel;
+      const _dl=typeof skDaysLeft==="function"?skDaysLeft(_focal):null;
+      const _dlStr=_dl!==null?`, ${_dl}d until fade`:'';
+      notes.push(`<div class="fn-row"><span class="fn-dot">🎯</span><span><b>Skill of the day:</b> ${esc(_focal.name)} — L${_eff}${_dlStr} · Practice it, then tap 'practiced' on its card.</span><button class="td-go-sm" data-gototab="skills">→</button></div>`);
+    }
+  }
   const notesHtml=notes.length?`<div class="td-card fn-card"><div class="td-h fn-h">Field Notes</div>${notes.join("")}</div>`:"";
+
+  // ── Academic snapshot (only if GPA data exists)
+  let academicHtml="";
+  {
+    const gh=(S.gpaHistory||[]).slice().sort((a,b)=>b.term>a.term?1:-1);
+    const cum=S.profile&&S.profile.gpa;
+    if(cum||gh.length){
+      const last=gh.length?gh[0]:null;
+      const dl=last&&last.standing&&/dean/i.test(last.standing);
+      let stats="";
+      if(cum) stats+=`<div class="acad-stat"><span>Cumulative GPA</span><b>${cum}</b></div>`;
+      if(last) stats+=`<div class="acad-stat"><span>${esc(last.term||"Latest")}</span><b>${last.gpa}${dl?` <span class="dl-badge">Dean's List</span>`:""}</b></div>`;
+      if(stats) academicHtml=`<div class="td-card fn-card"><div class="td-h fn-h">Academic Standing</div><div class="acad-strip">${stats}</div></div>`;
+    }
+  }
 
   // ── FM Advisory (only if recovery data exists)
   let fmHtml="";
@@ -298,6 +361,63 @@ function renderToday(){
     if(fl) body+=`<div class="fn-row"><span>${esc(fl)}</span></div>`;
     if(vo2) body+=`<div class="fn-row"><span>🫁 ${esc(vo2.line)}</span></div>`;
     fmHtml=`<div class="td-card fn-card"><div class="td-h fn-h">FM Advisory</div>${body}<button class="td-go" data-gototab="plan">Open FM plan →</button></div>`;
+  }
+
+  // ── OML readiness snapshot — raw inputs for Order of Merit List (GPA, AFT, MS eval)
+  let omlHtml="";
+  {
+    const cum=S.profile&&S.profile.gpa?parseFloat(S.profile.gpa):null;
+    const bestAft=(S.aft||[]).reduce((best,a)=>(!best||a.total>best.total)?a:best, null);
+    const campRes=(S.rotcRecord&&S.rotcRecord.campResults&&S.rotcRecord.campResults.length)?S.rotcRecord.campResults[0]:null;
+    if(cum||bestAft||campRes){
+      const rows=[];
+      if(cum) rows.push(`<div class="oml-row"><span class="oml-label">Cumulative GPA</span><span class="oml-val">${cum.toFixed(2)}</span></div>`);
+      if(bestAft) rows.push(`<div class="oml-row"><span class="oml-label">Best AFT total</span><span class="oml-val">${bestAft.total} pts <span class="oml-sub">(${bestAft.date})</span></span></div>`);
+      if(campRes) rows.push(`<div class="oml-row"><span class="oml-label">MS Eval</span><span class="oml-val">${esc(campRes.result||campRes.name||"Recorded")}</span></div>`);
+      omlHtml=`<div class="td-card fn-card oml-panel"><div class="td-h fn-h">OML Inputs <span class="oml-note">raw data — not a score</span></div>${rows.join("")}<button class="td-go-sm" data-gototab="profile">Profile →</button></div>`;
+    }
+  }
+
+  // ── Counseling follow-up alert — any follow-up date within 7 days or past due
+  let cnAlertHtml="";
+  {
+    const today2=localYMD();
+    const upcoming=(S.counseling||[]).filter(c=>{
+      if(!c.followUp||!c.followUp.match(/^\d{4}-\d{2}-\d{2}$/)) return false;
+      const diff=Math.ceil((new Date(c.followUp+"T12:00:00")-Date.now())/864e5);
+      return diff<=7;
+    }).sort((a,b)=>a.followUp<b.followUp?-1:1);
+    if(upcoming.length){
+      const rows=upcoming.map(c=>{
+        const diff=Math.ceil((new Date(c.followUp+"T12:00:00")-Date.now())/864e5);
+        const when=diff<0?`${Math.abs(diff)}d overdue`:diff===0?"today":`in ${diff}d`;
+        return `<div class="cn-alert-row"><span class="cn-alert-date">${c.followUp} (${when})</span> — ${esc((c.summary||"").slice(0,60))}</div>`;
+      }).join("");
+      cnAlertHtml=`<div class="cn-alert"><div class="td-h fn-h">⚠️ Counseling Follow-Up Due</div>${rows}<button class="td-go-sm" data-gototab="records">Records →</button></div>`;
+    }
+  }
+
+  // ── Qualification expiry alerts — expired or expiring within 60 days
+  let qualAlertHtml="";
+  {
+    const today2=localYMD();
+    const pastExp=(S.qualifications||[]).filter(q=>q.expires&&q.expires<=today2);
+    const soonExp=(S.qualifications||[]).filter(q=>q.expires&&q.expires>today2&&dayDiff(today2,q.expires)<=60);
+    if(pastExp.length||soonExp.length){
+      const rows=[
+        ...pastExp.map(q=>{
+          const cat=typeof QUAL_CATALOG!=="undefined"&&QUAL_CATALOG[q.key]?QUAL_CATALOG[q.key]:null;
+          const name=q.key==="custom"?(q.label||q.key):cat?cat.fullName:q.key;
+          return `<div class="qual-alert-row overdue">⚠️ <b>${esc(name)}</b> expired ${q.expires}</div>`;
+        }),
+        ...soonExp.map(q=>{
+          const cat=typeof QUAL_CATALOG!=="undefined"&&QUAL_CATALOG[q.key]?QUAL_CATALOG[q.key]:null;
+          const name=q.key==="custom"?(q.label||q.key):cat?cat.fullName:q.key;
+          return `<div class="qual-alert-row">🔔 <b>${esc(name)}</b> expires ${q.expires} (${dayDiff(today2,q.expires)}d)</div>`;
+        })
+      ].join("");
+      qualAlertHtml=`<div class="td-card fn-card qual-alert">${rows}<button class="td-go-sm" data-gototab="awards">Wall →</button></div>`;
+    }
   }
 
   // ── Getting started — shown only when the user has no data at all yet
@@ -365,7 +485,7 @@ function renderToday(){
   const briefBtnHtml=`<div class="brief-row"><button class="brief-btn" data-copybriefbtn="1">📋 Copy field brief</button></div>`;
 
   // ── Assemble — creed always first, then guided flow
-  const flow=[startHtml, sessHtml, weekCardHtml, ordersHtml, recoveryHtml, discHtml, bossHtml, streakHtml, commissionHtml, focusHtml, adaptHtml, neglectHtml, pathPips, notesHtml, fmHtml, briefBtnHtml, installHtml, notifPromptHtml].filter(Boolean).join("");
+  const flow=[startHtml, sessHtml, weekCardHtml, ordersHtml, recoveryHtml, discHtml, bossHtml, streakHtml, commissionHtml, focusHtml, adaptHtml, neglectHtml, pathPips, notesHtml, academicHtml, omlHtml, cnAlertHtml, qualAlertHtml, fmHtml, briefBtnHtml, installHtml, notifPromptHtml].filter(Boolean).join("");
 
   el.innerHTML=`<div class="td-creed">🌲 <span>${creed}</span></div>`+(
     flow

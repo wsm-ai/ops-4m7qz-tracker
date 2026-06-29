@@ -130,6 +130,28 @@ function habitMonthGrid(h){
   return `<div class="hb-month-header">${header}</div><div class="hb-month-grid">${cells.join('')}</div>`;
 }
 
+let _dailyCalVisible=false;
+function renderDailyCal(){
+  const el=document.getElementById("dailyCalWrap"); if(!el) return;
+  const doneSet=new Set(S.dailyHistory||[]);
+  const cells=[];
+  for(let i=59;i>=0;i--){
+    const d=new Date(); d.setDate(d.getDate()-i);
+    const ds=localYMD(d);
+    cells.push(`<div class="hm-day ${doneSet.has(ds)?'lv3':'lv0'}" title="${ds}"></div>`);
+  }
+  const doneCount=Array.from({length:60},(_,i)=>{const d=new Date();d.setDate(d.getDate()-59+i);return localYMD(d);}).filter(ds=>doneSet.has(ds)).length;
+  el.innerHTML=`<div class="daily-cal-label">60-day perfect-day record · <b>${doneCount}/60</b> <span style="color:var(--ink-faint);font-size:10px">(green = all orders complete)</span></div><div class="daily-cal-grid">${cells.join('')}</div>`;
+}
+function setupDailyCalToggle(){
+  const btn=document.getElementById("dailyCalToggle");
+  const wrap=document.getElementById("dailyCalWrap");
+  if(!btn||!wrap) return;
+  btn.classList.toggle("active",_dailyCalVisible);
+  wrap.style.display=_dailyCalVisible?"block":"none";
+  if(_dailyCalVisible) renderDailyCal();
+  btn.onclick=()=>{ _dailyCalVisible=!_dailyCalVisible; btn.classList.toggle("active",_dailyCalVisible); wrap.style.display=_dailyCalVisible?"block":"none"; if(_dailyCalVisible) renderDailyCal(); };
+}
 const _hbAdd=document.getElementById("hbAdd");
 if(_hbAdd) _hbAdd.onclick=()=>{
   const name=document.getElementById("hbName").value.trim(); if(!name){toast("Name the habit");return;}

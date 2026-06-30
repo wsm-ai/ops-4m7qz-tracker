@@ -619,3 +619,212 @@ New groups — **technical:** `Foundations` (Linux, Networking, Git, SQL, Cloud,
 New leaf skills: **Combatives (physical control)** (physical, parent:`Close-Quarters Combat`, 7L, MACP Level 1–2 ladder, fadeDays:90); **Obstacle leadership** (leadership, parent:`Operations & planning`, 6L, individual→platoon evaluation, fadeDays:90); **Second language retention** (cognitive, parent:`Memory`, 5L, passive recognition→6-month no-decay maintenance, fadeDays:30); **Wilderness medicine / CASEVAC** (tactical, parent:`Soldier tasks`, 7L, WFA→WFR→platoon CASEVAC lead, fadeDays:180).
 
 **Feature 6 — Tree layout audit:** `PAGEERRORS 0` confirmed; tree renders with updated hierarchy structure. Headless `--shot` screenshot has a pre-existing visibility limitation in the test runner.
+
+### v124 — 6 features + 3 utility skills + skill fixes
+**Files changed:** `src/tabs/profile.js`, `src/tabs/profile.html`, `src/tabs/skills.js`, `src/tabs/skills.html`, `src/tabs/quests.js`, `src/tabs/today.js`, `src/core/skills-core.js`, `src/core/skills-data.js`, `src/core/migration.js`, `src/styles/main.css`, `sw.js`
+
+`SKILL_LADDER_VER` bumped **94→95**. SW bumped to `operations-v124`. Total skills: **186**.
+
+**Feature 1 — Commissioning readiness dashboard:** `renderCommReadiness()` in `profile.js`. Six traffic-light indicators: AFT total score, GPA, skills at career target, qualifications current, ROTC record completeness, clearance status. Each indicator shows green/amber/red with specific gap text. Panel in `profile.html` after vitals. CSS `.comm-ready-wrap`, `.comm-indicator`, `.cr-green/.cr-amber/.cr-red`.
+
+**Feature 2 — Skill-linked oath completion:** Skill-link row on each active quest card. A `<select>` of started skills + a radio (practice / level-up). On quest completion the linked skill auto-practices or levels up. Fields: `q.linkedSkillId`, `q.linkedSkillType`. Wired in `quests.js`.
+
+**Feature 3 — Card table redesign of Skills tab:** Dark green felt `#view-skills` background. 10 path deck "cards" with embossed backs (sigil, path name, suit name, level corners). Decks open to a flex-wrap card grid. Rank corners on skill cards (Ace–King, importance-sorted). Group sub-skills render as 110px mini playing cards in `.sk-mini-grid`. Constants `SK_SUIT` and `CARD_RANKS` in `skills.js`.
+
+**Feature 4 — End-of-day training journal:** `S.dayLog[]` array. `renderDayLog()` in `today.js`. 3-field form (title/notes/mood). Last 3 days shown in collapsible panel on Dawn. Handler `data-daylogadd`/`data-daylogdel` in `events.js`.
+
+**Feature 5 — 30-day skill history sparkline in Work panel:** `skTrendSparkline(sk)` in `skills-core.js`. Produces a small SVG of level history over the last 30 days. Appended to `skWorkGuidance()` output.
+
+**Feature 6 — Fix 5 orphaned skills missing `parent:` field:** `Statistics & data analysis`, `Geopolitics & foreign policy`, `Philosophy & ethics`, `Economics fundamentals`, `Injury prevention & prehab` — all given correct parent assignments in `skills-data.js`.
+
+### v125 — Rarity system, sub-deck pages, Joker deck, foil shimmer
+**Files changed:** `src/core/skills-core.js`, `src/tabs/skills.js`, `src/tabs/skills.html`, `src/core/events.js`, `src/styles/main.css`, `sw.js`
+
+SW bumped to `operations-v125`. Total skills: **186**.
+
+**Rarity system:** `skRarity(sk)` in `skills-core.js` — Common (≤4L), Uncommon (5–7L), Rare (8–10L), Legendary (11–13L), Mythic (14+L), Joker (auto or tagged). Rarity badge shown on card tier line. `--rar-col` CSS variable drives border color per card.
+
+**Sub-deck pages:** Paths with >13 top-level skills split into sub-decks of 13 (I, II, III…). Each sub-deck gets its own embossed card back inside the opened path deck. Path card back shows "N decks" indicator.
+
+**Joker deck:** All `auto:true` and `joker:true` skills aggregated in a "Wildcards" deck (deep violet gradient) at the top of `#skList`. Jump-bar includes 🃏 Wildcards button. Joker toggle checkbox on skill add/edit form (`sk.joker=true`, wired in `skCreate()`/`skEdit()`).
+
+**Foil shimmer:** Legendary and Mythic cards get a `::after` CSS animation (`foilShimmer`, 4s linear infinite) — a diagonal gradient sweep on `.sk-card.rarity-legendary` and `.sk-card.rarity-mythic`.
+
+**Path completion badges:** `<span class="sk-path-badge discovered">All Collected</span>` and `<span class="sk-path-badge mastered">★ All Mastered</span>` appear in deck header when all leaves started or all maxed.
+
+**Skill synergy combos:** `SYNERGY_PAIRS` array (15 pairs) in `skills-core.js`. `skHasSynergy(sk)` checks if partner skill is at L4+. `⚡ Partner Name` shown in `.sk-synergy-foot` on card footer.
+
+**Side Deck:** Unstarted leaves render face-down in a collapsible `<details class="sk-side-deck">` section below each path's active cards. `faceDownCard()` renders card back with rarity pip, name hidden, synthesis set progress bar and Combine button if synthesis pending.
+
+### v126 — 6 card features + physical pyramid seeds + 3 utility skills + 4 utility improvements
+**Files changed:** `src/tabs/today.js`, `src/tabs/skills.js`, `src/core/skills-core.js`, `src/core/skills-data.js`, `src/core/events.js`, `src/tabs/aft.js`, `src/styles/main.css`, `sw.js`
+
+`SKILL_LADDER_VER` bumped **95→96**. SW bumped to `operations-v126`. Total skills: **220** (186 + 3 utility + 31 physical pyramid seeds).
+
+**Today's Hand:** 5 started skills drawn deterministically each day via `hashStr(dateKey)` + `seededShuffle()` in `today.js`. Horizontal card strip `.th-hand` on Dawn above Field Notes.
+
+**Collection stats chip:** `X/N collected` chip in `skSummaryBar` — started/total leaves per path, gold font.
+
+**Pyramid system (skills-core.js):** `skSeedOf(name,cat)`, `skSetMembers(setKey)`, `skSetMasteredCount(setKey)`, `skSetCanCombine(setKey)`, `skCombineSet(setKey)`. Combine button handler via `data-skcombine` in `events.js`.
+
+**Physical path pyramid seeds added to SEED_SKILLS:**
+- 1 Mythic: "Physical Mastery" (`synthesizedFrom:"phys_leg"`)
+- 5 Legendaries: one per cluster (Strength, Endurance, Composition, Combat, Movement), `setKey:"phys_leg"`, each `synthesizedFrom:"phys_r_[cluster]"`
+- 25 Rares: 5 per Legendary cluster, `setKey:"phys_r_[cluster]"`, each `synthesizedFrom:"phys_u_[cluster]_[subset]"`
+
+**3 utility skills:** Land navigation (tactical, 8L), 9-line MEDEVAC (tactical, 6L), Personal finance (personal, 7L).
+
+**4 utility improvements:** Quick PT Log (3-field form on Dawn, saves to `S.workouts[]`); AFT Goal (`S.aftGoal`, `renderAftGoal()`, progress bar in `#aftGoalWrap`); Urgency-first focal skill (≤3 days from fade shown first with `⚠ Nd left`); Skill history export ("📋 Copy skill history" in Records tab).
+
+### v127 — 25 Strength Uncommons + Synthesis Chain View + Synthesis-Ready Alert + pyramid reset migration
+**Files changed:** `src/core/skills-data.js`, `src/core/migration.js`, `src/tabs/skills.js`, `src/tabs/today.js`, `src/styles/main.css`, `sw.js`
+
+`SKILL_LADDER_VER` bumped **96→97**. SW bumped to `operations-v127`. Total skills: **245** (220 + 25 Strength Uncommons).
+
+**25 Physical Strength Uncommons:** Added to `SEED_SKILLS`. Five sets of 5, each feeding a Strength Rare:
+- `phys_u_strength_basics` (→ "Strength Foundation"): Hip Hinge Mastery, Squat Pattern, Push Pattern, Pull Pattern, Compound Integration
+- `phys_u_strength_power` (→ "Power Development"): Jump Training, Sprint Mechanics, Ballistic Power, Speed-Strength Training, Reactive Strength
+- `phys_u_strength_accessory` (→ "Accessory Work"): Shoulder Health Work, Posterior Chain Work, Grip Strength, Core Basics, Vertical Pull Pattern
+- `phys_u_strength_programming` (→ "Strength Periodization"): 1RM Testing, Percentage Training, Volume Prescription, Deload Protocol, Peaking Cycle
+- `phys_u_strength_recovery` (→ "Recovery Science"): Sleep Discipline, Nutrition Timing, Active Recovery, HRV Fundamentals, Stress Load Balance
+
+Each Uncommon: `cat:"physical"`, `rarity:"uncommon"`, `fadeDays:30`, 5-level honest-benchmark ladder, `why`/`howTo`/`safety`/`roadmap`/`advance`/`maintain`.
+
+**Pyramid reset migration:** `PYRAMID_RESET_VER=1` constant in `migration.js`. In `mergeNewSeedSkills()`, when `seed.setKey` is set and `live.pyramidResetApplied` is falsy: wipes `currentLevel→0`, `history→[]`, `lastQuestTs→null`, deletes `synthesisUnlocked`, sets `live.pyramidResetApplied=1`. User-authorized blank-slate rule. Fires once per skill.
+
+**Synthesis Chain View:** `renderSynthesisChain(cat)` in `skills.js` — walks seed data to display mythic→legendary→rare tree. Each Legendary is a collapsible `<details>`, each Rare shows Uncommon mastery count. Status icons: ✦ mythic, ★ maxed, ▶ started, ⚡ ready-to-combine, 🔒 locked. Toggle button `.sc-toggle[data-sctoggle]` on each path deck header; `btn.onclick` with `e.stopPropagation()` to prevent parent header toggle. Output goes in `.sc-wrap#sc-{cat}`. CSS: `.sc-toggle`, `.sc-wrap`, `.synth-chain`, `.sc-mythic`, `.sc-legend`, `.sc-rares`, `.sc-rare`, `.sc-{maxed|started|ready|locked}`.
+
+**Synthesis-Ready Alert on Dawn:** In `renderToday()`, after focal skill row. Iterates `SEED_SKILLS` for synthesis targets with `synthesizedFrom` set; checks `skSetCanCombine()` but not yet `synthesisUnlocked` on live skill. Shows gold-bordered `.sk-synth-ready-row` with `⚡ Synthesis ready: Name1, Name2 — open Skills to combine.` and a Skills → button.
+
+### v128 — 48 Physical Uncommons (Endurance + Composition clusters)
+**Files changed:** `src/core/skills-data.js`, `src/core/migration.js`, `sw.js`
+
+`SKILL_LADDER_VER` bumped **97→98**. SW bumped to `operations-v128`. Total skills: **293** (245 + 48 new seeds).
+
+**Existing skill modifications:** "Rucking technique" and "Cycling (cross-training)" each received `setKey` and `rarity:"uncommon"` fields to slot them into the Ruck Mastery and Durability Training Rare chains respectively. Their existing ladders are unchanged. Pyramid reset migration fires on these on next load (user-authorized blank-slate).
+
+**25 Physical Endurance Uncommons:** Added to `SEED_SKILLS`. Five sets feeding five Endurance Rares:
+- `phys_u_running_basics` (→ "Running Foundation"): Weekly Run Consistency, Easy Pace Discipline, Run Warm-Up Protocol, Run Mileage Tracking, Running Frequency Base
+- `phys_u_running_speed` (→ "Running Performance"): Tempo Running, Interval Training, Cadence Training, Running Drills, Race Pacing Protocol
+- `phys_u_endurance_aerobic` (→ "Aerobic Base"): Zone 2 Training, Cardiac Output Sessions, Aerobic Threshold Runs, Breathing Mechanics, Aerobic Baseline Testing
+- `phys_u_endurance_durability` (→ "Durability Training"): Cycling [existing], Progressive Volume Building, Back-to-Back Training Days, Long Effort Endurance, Training Load Management
+- `phys_u_rucking` (→ "Ruck Mastery"): Rucking technique [existing], Pack Fitting & Load Distribution, Ruck Pacing, Foot Care for Rucking, Load Progression
+
+**25 Physical Composition Uncommons:** Added to `SEED_SKILLS`. Five sets feeding five Composition Rares:
+- `phys_u_lean_mass` (→ "Lean Mass Building"): Progressive Overload Practice, Protein Intake Protocol, Caloric Surplus Management, Hypertrophy Training Block, Lean Mass Tracking
+- `phys_u_fat_loss` (→ "Fat Loss Protocol"): Caloric Deficit Execution, Protein Preservation During a Cut, Plateau Recognition and Response, Deficit Adherence Strategy, Body Composition Confirmation
+- `phys_u_nutrition` (→ "Nutrition System"): Macronutrient Understanding, Food Label Reading, Protein Priority at Every Meal, Meal Prep Discipline, Hydration Baseline
+- `phys_u_sleep` (→ "Sleep Mastery"): Sleep Duration Baseline, Consistent Wake Time, Pre-Sleep Hygiene Protocol, Sleep Environment Optimization, Sleep as Performance Input
+- `phys_u_prehab` (→ "Injury Resilience"): Daily Movement Prep, Bilateral Symmetry Work, Load Management Awareness, Mobility Maintenance Routine, Return-to-Training Protocol
+
+All Uncommons: `cat:"physical"`, `rarity:"uncommon"`, 5-level honest-benchmark ladders, `why`/`howTo`/`safety`/`roadmap`/`advance`/`maintain`. No UI changes this session — pure data.
+
+### v129 — 47 Physical Uncommons (Combat + Movement clusters)
+**Files changed:** `src/core/skills-data.js`, `src/core/migration.js`, `sw.js`
+
+`SKILL_LADDER_VER` bumped **98→99**. SW bumped to `operations-v129`. Total skills: **340** (293 + 47 new seeds). Physical pyramid Uncommon layer is now complete — all 5 Legendary chains fully fed.
+
+**Existing skill modifications:** "Combat water survival" → `setKey:"phys_u_swimming"`, "Combatives (physical control)" → `setKey:"phys_u_combatives"`, "Obstacle course" → `setKey:"phys_u_field"`. All three also received `rarity:"uncommon"`. Pyramid reset migration fires on next load (user-authorized blank-slate).
+
+**22 Physical Combat Uncommons:** Added to `SEED_SKILLS`. Five sets feeding five Combat Rares:
+- `phys_u_swimming` (→ "Combat Swim Cert"): Combat water survival [existing], Basic Water Confidence, Freestyle Stroke Mechanics, Uniform/Gear Swimming, Back Float and Survival Float
+- `phys_u_combatives` (→ "Combatives Level 2"): Combatives (physical control) [existing], Stand-Up Control and Takedowns, Guard Position and Sweeps, Escapes from Bad Positions, Safe Training Habits
+- `phys_u_field` (→ "Field Hardening"): Obstacle course [existing], Cold Weather Acclimatization, Field Sleep Discipline, Load Carry Fitness, Heat Management and Hydration
+- `phys_u_power_combat` (→ "Explosive Athleticism"): Box Jump Proficiency, Broad Jump Power, Lateral Quickness Drills, Explosive Hip Extension, Sprint Acceleration Mechanics
+- `phys_u_mentaltoughness` (→ "Stress Inoculation"): Discomfort Tolerance Training, Breathing Under Stress, Focus During Fatigue, Self-Talk and Reframing, Embracing the Grind
+
+**25 Physical Movement Uncommons:** Added to `SEED_SKILLS`. Five sets feeding five Movement Rares:
+- `phys_u_mobility` (→ "Joint Mobility"): Hip Mobility Baseline, Thoracic Spine Rotation, Ankle Dorsiflexion Work, Shoulder Mobility Assessment, Full-Body Mobility Flow
+- `phys_u_stability` (→ "Core Stability"): Plank Progressions, Anti-Rotation Training, Dead Bug Drill, Single-Leg Balance Progressions, Loaded Carry Stability
+- `phys_u_mechanics` (→ "Movement Literacy"): Hip Hinge Pattern, Squat Pattern Quality, Push Pattern Quality, Pull Pattern Quality, Carry Pattern Quality
+- `phys_u_flexibility` (→ "Soft Tissue Recovery"): Foam Rolling Protocol, Targeted Post-Run Stretching, Sleep Recovery Positioning, Contrast Therapy Basics, Active Recovery Sessions
+- `phys_u_locomotion` (→ "Athletic Locomotion"): Ground Contact Time Reduction, Hill Running Mechanics, Arm Carriage Mechanics, Stride Length Optimization, Variable Terrain Adaptation
+
+All Uncommons: `cat:"physical"`, `rarity:"uncommon"`, 5-level honest-benchmark ladders, `why`/`howTo`/`safety`/`roadmap`/`advance`/`maintain`. No UI changes this session — pure data.
+
+### v135 — Tactical Specialties Uncommons + Full Leadership Pyramid (168 new seeds)
+**Files changed:** `src/core/skills-data.js`, `src/core/migration.js`, `sw.js`
+
+`SKILL_LADDER_VER` bumped **103→104**. SW bumped to `operations-v135`. Total skills: **635** (467 + 168 new seeds).
+
+**Part 1 — Tactical Specialties Uncommons (23 new seeds):** Completed the 5th and final Tactical Uncommon cluster.
+- `tac_u_rappelling` ×4 new (Anchor System Rigging, Hasty Rappel Technique, Ascending Fundamentals, Tower NCO/Evaluator Duties; +1 existing "Rappelling & vertical movement" = 5 total)
+- `tac_u_combatives_tac` ×5 new (MACP Ground Position Fundamentals, Takedowns and Trips, Guard Sweeps and Escapes, Weapon Retention under Grapple, MACP Sparring Safety and Habits)
+- `tac_u_grenades` ×4 new (Grenade Types and Safety, Dry-Run Mechanics, Throw Accuracy, Employment Principles; +1 existing "Grenade employment" = 5 total)
+- `tac_u_urban` ×5 new (MOUT Fundamentals, Building Entry Techniques, Room Clearing Sequence, Multi-Room Structure Clearance, Outer Cordon Establishment)
+- `tac_u_convoy` ×5 new (Convoy Planning Basics, Vehicle Spacing and Communications, React to IED Drill, React to Vehicle Ambush, Convoy After-Action Report)
+
+**Part 2 — Full Leadership Pyramid (145 new + existing integrations):**
+- 1 Mythic: "Battlefield Commander" (14L, setKey:"lead_mythic")
+- 5 Legendaries: Command Presence, People Development, Operational Mastery, Communication Mastery, Character & Ethics (11L each, setKey:"lead_leg")
+- 25 Rares: 18 new 8L seeds + 7 existing skills with setKey added in-place. Rarities manually overridden where ladder depth differed from pyramid role.
+- 121 Uncommon seeds across 25 sets (5 per set, max 2 existing per set):
+  - Cluster 1 Command Presence: lead_u_dc ×4 new, lead_u_voice ×5, lead_u_bearing ×5, lead_u_authority ×5, lead_u_formation ×5 (+1 existing "Obstacle leadership")
+  - Cluster 2 People Development: lead_u_counsel ×5 new, lead_u_dev ×5, lead_u_cohesion ×5, lead_u_feedback ×5, lead_u_conflict ×5 (+1 existing "Counseling & mentorship" as the Rare)
+  - Cluster 3 Operational Mastery: lead_u_ops_mdmp ×5 new, lead_u_decision ×5, lead_u_risk ×5, lead_u_aar ×5, lead_u_pm ×5 (+2 existing as Rares)
+  - Cluster 4 Communication Mastery: lead_u_speaking ×4 new, lead_u_writing ×5, lead_u_negot ×5, lead_u_orders ×5, lead_u_orgcomms ×5 (+1 existing "Brief preparation & delivery")
+  - Cluster 5 Character & Ethics: lead_u_history ×5 new, lead_u_ethics_found ×4, lead_u_cross_cultural ×4, lead_u_identity ×5, lead_u_resilience ×5 (+2 existing "Ethics & moral reasoning", "Cross-cultural competence")
+- All Uncommons: 5-level honest-benchmark ladders, why/howTo/roadmap/advance/maintain, synthesizedFrom:"lead_c_*" for future Common layer.
+
+### v134 — Tactical pyramid Intelligence & Reporting Uncommons (24 new seeds)
+**Files changed:** `src/core/skills-data.js`, `src/core/migration.js`, `sw.js`
+
+`SKILL_LADDER_VER` bumped **102→103**. SW bumped to `operations-v134`. Total skills: **467** (443 + 24 new seeds).
+
+Added 24 new Intelligence & Reporting Uncommon seeds completing the 4th of 5 Tactical Uncommon clusters. Existing "SALUTE / spot reporting" already filled 1 slot in tac_u_salute from v131. Five sets complete:
+- `tac_u_salute` ×4 new (SPOTREP Form Completion, Voice SPOTREP on Radio, Patrol Debrief Compilation, Pattern-of-Life Analysis; +1 existing = 5 total)
+- `tac_u_terrain_analysis` ×5 new (OAKOC Framework, Terrain Overlay, Terrain Brief, Avenues of Approach Identification, Defensive Position Recommendation)
+- `tac_u_osint` ×5 new (OSINT Categories, OSINT Search Exercise, Source Verification, Credibility Rating, OSINT Collection Plan)
+- `tac_u_map_reading` ×5 new (Map Orientation, MGRS Grids, Declination and Azimuth, Terrain Features from Contour, Map-to-Ground Cross-Reference)
+- `tac_u_contact_report` ×5 new (SALUTE Under Contact, ACE Report, Relay Up Chain, Multi-Contact Debrief, Lead Element Through Contact)
+
+All seeds: 5-level honest-benchmark ladders, why/howTo/roadmap/advance/maintain. No UI changes this session — pure data.
+
+### v139 — Academic path pyramid (139 new seeds + 17 existing wired)
+**Files changed:** `src/core/skills-data.js`, `src/core/migration.js`, `sw.js`
+
+`SKILL_LADDER_VER` bumped **107→108**. SW bumped to `operations-v139`. Total skills: **1201**.
+
+Built the complete Academic path pyramid: 1 Mythic ("Scholar-Warrior", 14L, synthesizedFrom:"acad_leg"); 5 Legendaries (Scholar's Method, Clear Communicator, Critical Analyst, Polyglot Operator, Domain Scholar — all 11L, setKey:"acad_leg"); 25 Rares across 5 clusters (acad_r_study, acad_r_comm, acad_r_analysis, acad_r_lang, acad_r_domains — 22 new 8L seeds + 3 existing wired: Writing, Higher mathematics, Statistics & data analysis). 111 new Uncommon seeds across 25 sets (5L each) plus 14 existing Uncommons wired. Wired existing skills: Writing→acad_r_comm/acad_u_writing; Higher mathematics→acad_r_analysis/acad_u_math; Statistics→acad_r_analysis/acad_u_data_analysis; Military history→acad_u_military_sci; Study & retention→acad_u_study_arch; ROTC knowledge→acad_u_military_sci; Note-taking→acad_u_capture; Research skills→acad_u_writing; Geopolitics→acad_u_geopolitics; Spanish/French/Mandarin/Arabic/Russian/German all assigned rarity:"uncommon" to override 8L auto-Rare and placed in respective Lang Uncommon clusters. Philosophy & ethics→acad_u_philosophy; Economics fundamentals→acad_u_economics. All Uncommons have synthesizedFrom:"acad_c_*" placeholder for future Common layer.
+
+### v138 — Physiological path pyramid (146 new seeds + 7 existing wired)
+**Files changed:** `src/core/skills-data.js`, `src/core/migration.js`, `sw.js`
+
+`SKILL_LADDER_VER` bumped **106→107**. SW bumped to `operations-v138`. Total skills: **1062**.
+
+Built the complete Physiological path pyramid: 1 Mythic ("Vital Operator"); 5 Legendaries; 25 Rares across 5 clusters (phys2_r_nutrition, phys2_r_sleep, phys2_r_recovery, phys2_r_health, phys2_r_body). 125 Uncommon seeds across 25 sets. 7 existing physiological skills wired. All Uncommons have synthesizedFrom:"phys2_c_*".
+
+### v137 — Cognitive path pyramid (144 new seeds + 11 existing wired)
+**Files changed:** `src/core/skills-data.js`, `src/core/migration.js`, `sw.js`
+
+`SKILL_LADDER_VER` bumped **105→106**. SW bumped to `operations-v137`. Total skills: **915**.
+
+Built the complete Cognitive path pyramid: 1 Mythic ("Master of the Mind", 14L, synthesizedFrom:"cog_leg"); 5 Legendaries (Processing Speed, Memory Mastery, Attentional Command, Mental Operations, Cognitive Synthesis — all 11L, setKey:"cog_leg"); 25 Rares across 5 clusters (cog_r_speed, cog_r_memory, cog_r_attention, cog_r_operations, cog_r_synthesis — 15 new 8L seeds + 10 existing skills wired). 124 new Uncommon seeds across 25 sets (5L each) plus 2 existing Uncommons wired. Wired 11 existing Rares: Reaction speed (cog_r_speed/cog_u_reaction), Cognitive/processing speed (cog_r_speed/cog_u_proc_speed), Working memory n-back (cog_r_memory/cog_u_working_mem), Memory span (cog_r_memory/cog_u_mem_span), Attention/sustained focus (cog_r_attention/cog_u_attention), Reading speed (cog_r_attention/cog_u_reading), Mental math (cog_r_operations/cog_u_mental_math), Pattern recognition (cog_r_operations/cog_u_pattern), Critical thinking (cog_r_synthesis/cog_u_critical). Wired 2 existing Uncommons: Decision science (cog_u_spatial_ops), Spatial reasoning (cog_u_decision). Memory technique and Memory retention left standalone (no cog_r_reasoning cluster exists). Typing speed & accuracy and Second language retention left standalone. All Uncommons have synthesizedFrom:"cog_c_*" placeholder for future Common layer.
+
+### v133 — Tactical pyramid Leader's Tools Uncommons (25 new seeds)
+**Files changed:** `src/core/skills-data.js`, `src/core/migration.js`, `sw.js`
+
+`SKILL_LADDER_VER` bumped **101→102**. SW bumped to `operations-v133`. Total skills: **443** (418 + 25 new seeds).
+
+Added 25 new Leader's Tools Uncommon seeds completing the 3rd of 5 Tactical Uncommon clusters. Five sets complete: tac_u_mdmp ×5 (Mission Analysis Fundamentals, COA Development, COA Analysis and Wargaming, COA Comparison and Approval, MDMP Integration), tac_u_law ×5 (Law of War Foundations, ROE Application, LOAC Principles in Training, EPW Handling, Reporting Violations), tac_u_opord ×5 (OPORD Structure, Situation Paragraph, Mission Statement, Execution Concept, Service Support and C2), tac_u_tlp ×5 (TLP Steps 1-3, TLP Steps 4-5, Warning Order Execution, Map Reconnaissance and Tentative Plan, TLP Steps 6-8), tac_u_counseling ×5 (DA 4856 Form Proficiency, Initial Counseling, Event Counseling, Performance Counseling, Follow-Up Counseling). All seeds: 5-level honest-benchmark ladders, why/howTo/roadmap/advance/maintain.
+
+### v132 — Tactical pyramid Field Operator Uncommons (23 new seeds)
+**Files changed:** `src/core/skills-data.js`, `src/core/migration.js`, `sw.js`
+
+`SKILL_LADDER_VER` bumped to **101**. SW bumped to `operations-v132`. Total skills: **418**.
+
+Added 23 new Field Operator Uncommon seeds. All existing tactical skills checked for integration — Radio communications (8L) and Fieldcraft & survival (10L) are both Rare depth and remain standalone. Five sets complete: tac_u_landnav ×5 (Map Reading Basics, Compass Fundamentals, Dead Reckoning, Terrain Association, Night Navigation), tac_u_comms ×5 (NATO Phonetic Alphabet, Radio Check Procedure, Radio Operation, PACE Planning, Net Control Duties), tac_u_fieldcraft ×5 (Kit Management, Field Shelter, Water and Rations Management, Temperature Management, Extended Field Sustainment), tac_u_terrain ×5 (Individual Movement Techniques, Cover and Concealment Use, Squad Formations, Bounding Overwatch, Obstacle Crossing Fundamentals), tac_u_casevac ×3 new (LZ Selection and Marking, Litter Construction and Patient Carry, Mass Casualty Triage — the remaining 3 slots of the 5-slot set; the other 2 were filled in v131). All seeds follow established pattern: 5-level honest-benchmark ladders, why/howTo/safety/roadmap/advance/maintain.
+
+### v131 — Tactical pyramid (Mythic + 5 Legendaries + 25 Rares + Combat Soldier Uncommons)
+**Files changed:** `src/core/skills-data.js`, `src/core/migration.js`, `sw.js`
+
+`SKILL_LADDER_VER` bumped to **100**. SW bumped to `operations-v131`. Total skills: **395**.
+
+Added the full Tactical pyramid skeleton: 1 Mythic ("Tactical Mastery", synthesizedFrom:"tac_leg"); 5 Legendaries (Combat Soldier, Field Operator, Leader's Tools, Intelligence & Reporting, Tactical Specialties); 25 Rares across 5 clusters (tac_r_combat_soldier, tac_r_field_operator, tac_r_leader_tools, tac_r_intel, tac_r_specialties). Integrated 6 existing tactical skills as Uncommons by adding `rarity:"uncommon"` + `setKey`: Marksmanship M17 (tac_u_weapons), Grenade employment (tac_u_grenades), SALUTE/spot reporting (tac_u_salute), Rappelling (tac_u_rappelling), Wilderness medicine/CASEVAC (tac_u_casevac), 9-line MEDEVAC (tac_u_casevac). Added 24 new Combat Soldier Uncommon seeds: tac_u_weapons ×4 (Weapon Safety Fundamentals, Trigger Control Mechanics, Malfunction Clearance, Qualification Course Prep), tac_u_battle_drills ×5 (React to Contact Actions, Break Contact Execution, React to Indirect Fire, Bunker and Fortification Actions, Battle Drill Integration), tac_u_cbrn ×5 (CBRN Threat Identification, MOPP Gear Execution, Detection Equipment Use, Hasty Decontamination, CBRN Reporting), tac_u_tccc ×5 (Tourniquet Application, Wound Packing and Occlusion, Airway and Breathing Control, Circulation and Hypothermia Prevention, MARCH Protocol Execution), tac_u_swimming ×5 (Water Entry Under Load, Uniform Swimming Technique, Equipment Buoyancy Management, Buddy Tow Technique, Combat Water Exit). All seeds follow the established pattern with `why`, `howTo`, `safety`, `levels`, `roadmap`, `advance`, `maintain`.
+
+### v130 — synthesizedFrom backfill (all Physical Uncommons)
+**Files changed:** `src/core/skills-data.js`, `sw.js`
+
+SW bumped to `operations-v130`. No SKILL_LADDER_VER change (`synthesizedFrom` is a seed-only field, never synced to live skills).
+
+Added `synthesizedFrom:"phys_c_*"` to all 100 Physical Uncommons that were previously leaf cards (Endurance, Composition, Combat, Movement clusters — 95 new seeds + 5 existing integrated skills). The 25 Strength Uncommons already had `synthesizedFrom` from v127. Every Physical Uncommon now points to a unique `phys_c_*` Common set key, making the Physical pyramid a consistent 5-layer tree across all 5 clusters. No Common seeds exist yet — those are written after all path pyramids reach Uncommon. Design decision: build all paths to Mythic first, then add Commons to all paths in one dedicated batch.

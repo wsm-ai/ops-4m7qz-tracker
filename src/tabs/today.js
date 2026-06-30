@@ -453,7 +453,23 @@ function renderToday(){
       notes.push(`<div class="fn-row${_isUrgent?' sk-focal-urgent-row':''}"><span class="fn-dot">🎯</span><span>${_label} ${esc(_focal.name)} — L${_eff}${_dlStr}${_urgentBadge}</span><button class="td-go-sm" data-skpractice="${esc(_focal.id)}" title="Mark as practiced — resets fade timer">✓ practiced</button><button class="td-go-sm" data-gototab="skills">→</button></div>`);
     }
   }
+  // Synthesis-ready alert — any set with all members mastered but card not yet unlocked
+  if(typeof SEED_SKILLS!=="undefined" && typeof skSetCanCombine==="function"){
+    const synthReady=[];
+    const seenSets=new Set();
+    SEED_SKILLS.forEach(target=>{
+      if(!target.synthesizedFrom||seenSets.has(target.name)) return;
+      seenSets.add(target.name);
+      const live=(S.lifeSkills||[]).find(s=>s.name===target.name&&s.cat===target.cat);
+      if(live&&live.synthesisUnlocked) return;
+      if(skSetCanCombine(target.synthesizedFrom)) synthReady.push(target.name);
+    });
+    if(synthReady.length){
+      notes.push(`<div class="fn-row sk-synth-ready-row"><span class="fn-dot">⚡</span><span><b>Synthesis ready:</b> ${synthReady.slice(0,2).map(n=>esc(n)).join(', ')}${synthReady.length>2?` +${synthReady.length-2} more`:''} — open Skills to combine.</span><button class="td-go-sm" data-gototab="skills">Skills →</button></div>`);
+    }
+  }
   const notesHtml=notes.length?`<div class="td-card fn-card"><div class="td-h fn-h">Field Notes</div>${notes.join("")}</div>`:"";
+
 
   // ── Academic snapshot (only if GPA data exists)
   let academicHtml="";

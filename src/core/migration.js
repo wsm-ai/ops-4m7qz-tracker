@@ -1,4 +1,5 @@
-const SKILL_LADDER_VER=96;
+const SKILL_LADDER_VER=108;
+const PYRAMID_RESET_VER=1;
 // Returns the user's current ROTC/Army career stage based on S.rank.
 function careerStage(){
   const r=((S.profile&&S.profile.rank)||S.rank||"").toUpperCase();
@@ -131,6 +132,19 @@ function mergeNewSeedSkills(){
   S.lifeSkills.forEach(ex=>{
     const seed=seedByName[ex.name];
     if(seed && seed.parent && ex.parent!==seed.parent){ ex.parent=seed.parent; changed=true; }
+  });
+  // Pyramid reset — wipe progress on skills newly assigned to the pyramid (user-authorized)
+  const seedByName2={}; SEED_SKILLS.forEach(s=>{ seedByName2[s.name]=s; });
+  S.lifeSkills.forEach(live=>{
+    const seed=seedByName2[live.name];
+    if(seed && seed.setKey && !live.pyramidResetApplied){
+      live.currentLevel=0;
+      live.history=[];
+      live.lastQuestTs=null;
+      delete live.synthesisUnlocked;
+      live.pyramidResetApplied=PYRAMID_RESET_VER;
+      changed=true;
+    }
   });
   // stamp the current ladder version so the one-time forced resync doesn't repeat each load
   if((S._skillLadderVer||0)!==SKILL_LADDER_VER){ S._skillLadderVer=SKILL_LADDER_VER; changed=true; }
